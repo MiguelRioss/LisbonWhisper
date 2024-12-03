@@ -1,0 +1,59 @@
+    import React, { useState, useEffect } from 'react';
+    import { useNavigate } from 'react-router-dom';
+
+    export default function CardComp({ title, descriptions, videoSrc, backgroundImage  }) {
+        const [descriptionIndex, setDescriptionIndex] = useState(0);
+        const [isFadingOut, setIsFadingOut] = useState(false);
+        const navigate = useNavigate(); // Correctly use the navigate hook
+
+        useEffect(() => {
+            const interval = setInterval(() => {
+                setIsFadingOut(true); // Start fade-out animation
+
+                // Change description after fade-out duration
+                setTimeout(() => {
+                    setDescriptionIndex((prevIndex) => (prevIndex + 1) % descriptions.length);
+                    setIsFadingOut(false); // Reset to fade-in state
+                }, 2000); // Match this with the fade-out duration
+            }, 10000); // Change every 10 seconds
+
+            return () => clearInterval(interval);
+        }, [descriptions.length]);
+
+        const handleShowMore = () => {
+                navigate(`/tour/${title.replace(/\s+/g, '-').toLowerCase()}`, { state: { title, descriptions, videoSrc } });
+        };
+
+        return (
+            <div className="relative isolate overflow-hidden bg-gray-900 py-24 sm:py-32 flex flex-col md:flex-row">
+                <img
+                    alt=""
+                    src={backgroundImage}
+                    className="absolute inset-0 -z-10 h-full w-full object-cover object-right md:object-center"
+                />
+                <div className="flex-1 p-6 lg:p-8">
+                    <h2 className="text-5xl font-semibold tracking-tight text-white sm:text-6xl mt-8 text-center">
+                        {title}
+                    </h2>
+                    <div className="mx-auto mt-5 max-w-2xl text-center">
+                        <div className={`text-lg text-white leading-relaxed tracking-wide ${isFadingOut ? 'fade-out-left' : 'fade-in-right'}`}>
+                            <p>{descriptions[descriptionIndex]}</p>
+                        </div>
+                        {/* Show More Button */}
+
+                        <button type="button" 
+                        onClick={handleShowMore}
+                        className ="btn btn-light">
+                            Show More
+                        </button>
+                    </div>
+                </div>
+                {/* Video section with styling */}
+                <div className="PrincipalAtraticionsShower flex-1">
+                    <video autoPlay loop muted>
+                        <source src={videoSrc} type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+        );
+    }

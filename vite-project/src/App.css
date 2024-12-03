@@ -1,0 +1,422 @@
+
+
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Oswald:wght@700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+  .appContainer{
+    border: 2.5px solid #ffffff;  /* Border styling */
+  }
+
+  .mainContainer{
+    border: 2.5px solid #ffffff;  /* Border styling */
+  }
+  /* Navbar container */
+  /* Logo container */
+  .logo-container {
+    display: flex;
+    width: 60px;
+    height: 60px;
+    padding: 10px;
+  }
+  .hero-container {
+    height: 400px; /* Set your desired height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    align-items: center; /* Center content horizontally */
+}
+
+/*tAKE  a look here!*/
+.description-container {
+  border: 2.5px solid #ef0000;  /* Border styling */
+  /* Custom styles for the description section */
+  padding: 100px;
+}
+/*tAKE  a look here!*/
+.icons-container  {
+  border: 2.5px solid #1cef00;  /* Border styling */
+  /* Custom styles for the description section */
+  padding: 10px;
+}
+
+.tour-container {
+  border: 2.5px solid #ef0000;  /* Border styling */
+  /* Custom styles for the description section */
+  padding: 10px;
+}
+/*tAKE  a look here!*/
+.contactUs-container {
+  border: 2.5px solid #ef0000;  /* Border styling */
+  /* Custom styles for the description section */
+  padding: 200px;
+}
+  .logo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .navbar h1 {
+    color: #ffffff;
+    margin-left: 10px;
+  }
+
+  /* Navbar links */
+  .navbar-links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-right: 10vh;
+    transition: max-height 0.3s ease;
+  }
+
+  .a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    font-size: 16px;
+    transition: color 0.3s ease;
+  }
+
+  .navbar-links a:hover {
+    color: #ffffff;
+  }
+
+  /* Toggle button */
+  .navbar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 10px; /* Moves the toggle to the right of the navbar */
+  }
+
+
+
+
+
+
+  /* Reset any padding, margin, or box-sizing on all elements */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .backgroundVideo {
+    position: fixed;
+    border: 2.5px solid #ef0000;  /* Border styling */
+    min-width: 100%; /* Ensures the video covers the container */
+    min-height: 100%; /* Ensures the video covers the container */
+    z-index: 1;
+    transform: translate(-50%, -37.5%); /* Centers the video */
+    object-fit: cover; /* Ensures video covers without stretching */
+  }
+
+  .CardContent {
+    position: relative;
+    z-index: 2; /* Ensures content is above the video */
+    color: white;
+    padding: 2vh;
+    border: 2.5px solid #ef0000;  /* Border styling */
+
+  }
+
+
+  /* IntroContainer */
+
+  /*** AnimationWords***/
+  /* Animation styles for the words */
+  .animated-word {
+    font-size: 2.5rem; /* Increase font size */
+    display: inline-block; /* Ensure it's treated as a block for animations */
+    opacity: 0; /* Start with no visibility */
+    transform: translateY(-20px); /* Start from above */
+    animation-duration: 1s; /* Duration of the animation */
+    transition: opacity 0.5s ease; /* Smooth transition for opacity */
+  }
+
+  /* Fade in animation from the top */
+  .fade-in-down {
+    animation-name: fadeInDown; /* Change to downwards */
+    animation-fill-mode: forwards; /* Keep the end state */
+  }
+
+  /* Fade out animation from the top */
+  .fade-out-down {
+    animation-name: fadeOutDown; /* Change to downwards */
+    animation-fill-mode: forwards; /* Keep the end state */
+  }
+
+  /* Keyframes for fade in and down */
+  @keyframes fadeInDown {
+    0% {
+      opacity: 0; /* Fully invisible */
+      transform: translateY(-20px); /* Start above */
+    }
+    100% {
+      opacity: 1; /* Fully visible */
+      transform: translateY(0); /* End at normal position */
+    }
+  }
+
+  /* Keyframes for fade out and down */
+  @keyframes fadeOutDown {
+    0% {
+      opacity: 1; /* Fully visible */
+      transform: translateY(0); /* Normal position */
+    }
+    100% {
+      opacity: 0; /* Completely invisible */
+      transform: translateY(20px); /* Move down */
+    }
+  }
+  /*** AnimationWords***/
+
+
+  .introText {
+    display: flex;  /* Use Flexbox for layout */
+    justify-content: center;  /* Horizontally center text boxes */
+    align-items: center;  /* Vertically center content */
+    width: 100%;  /* Full width */
+    height: 35vh;  /* Set height */
+  }
+
+  /* Individual text boxes */
+  .textBox1,
+  .textBox2,
+  .textBox3 {
+    display: flex;  /* Use Flexbox for child elements */
+    align-items: center;  /* Center content vertically */
+    justify-content: center;  /* Center content horizontally */
+    margin: 0 4px;  /* Add horizontal margin for spacing */
+    padding: 10px;  /* Optional padding for better spacing inside the box */
+  }
+
+  /* Adjust text sizes and styles as needed */
+  .introText h1 {
+    font-size: 2rem;  /* Adjust font size to be responsive */
+    margin: 0;  /* Remove default margins */
+  }
+
+
+
+
+
+  /*****Mobile View******/
+  /* Media query for mobile */
+
+
+
+  /* Done Seeing */
+
+
+
+
+
+
+
+
+  /**Too See**/
+
+  .WhiteCardRound {
+    height: 70vh;
+    width: 100%;
+    display: flex;
+    align-items: center; /* Aligns children vertically */
+    justify-content: space-between; /* Spaces the children evenly */
+    border-radius: 15px;
+    border-top-left-radius: 20px;
+    padding: 20px;
+    margin-top: 55vh;
+    position: relative; /* This makes sure the ::before pseudo-element is positioned relative to this card */
+    font-size: 20px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.367); /* Text color for better contrast */
+    background-color: #d6d6d6a1; /* Base background color for the card itself */
+    z-index: 1; /* Ensure the card content is above the ::before background */
+  }
+
+  /* Create a larger background with the same shape */
+  .WhiteCardRound::before {
+    content: '';
+    position: absolute;
+    top: 15px; /* Adjust to move the background up */
+    left: 15px; /* Adjust to move the background left */
+    right: 15px; /* Adjust to move the background right */
+    bottom: 15px; /* Adjust to move the background down */
+    background-color: #284dc728; /* Solid background color */
+    border-radius: 7px;
+    z-index: 0; /* Ensure it's behind the main card */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Add shadow */
+
+  }
+
+
+  /* Left side: Title and Description container */
+  .TextContentContainer {
+    align-items: center; /* Aligns children vertically */
+    display: flex;
+    flex-direction: column; /* Stack title and description vertically */
+    flex: 1; /* Take up available space */
+    margin-right: 20px; /* Space between text and video */  
+  }
+
+  .TitleContainer {
+    align-items: center; /* Aligns children vertically */
+    display: flex;
+    flex-direction: column; /* Stack title and description vertically */
+    background-color: rgba(149, 203, 245, 0.111);
+    border: 2.5px solid #00000030;
+    width: fit-content;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: left;
+    box-shadow: 0 4px 35px rgba(0, 0, 0, 0.5); /* Add shadow */
+
+  }
+
+
+  /* Title styles */
+  .TitleContainer h2 {
+    font-family: 'Lato', sans-serif;
+    font-size: 40px;
+    color: #2C3E50;
+    letter-spacing: 3.8px;
+    line-height: 1.5;
+    text-align: center;
+    font-weight: 900; /* Bold weight */
+    text-transform: uppercase;
+    margin: 20px 0;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+  }
+
+
+  /* Fade-in effect from the right */
+  .fade-in-right {
+    animation: fadeInRight 2s ease-in-out forwards; /* 'forwards' retains the final state */
+  }
+
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(50px); /* Start from the right */
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0); /* End at the original position */
+    }
+  }
+
+  /* Fade-out effect from the right */
+  .fade-out-left {
+    animation: fadeOutLeft 2s ease-in-out forwards; /* 'forwards' retains the final state */
+  }
+
+  @keyframes fadeOutLeft {
+    from {
+      opacity: 1;
+      transform: translateX(0); /* Start from the original position */
+    }
+    to {
+      opacity: 0;
+      transform: translateX(-30px); /* Move slightly to the left while fading out */
+    }
+  }
+  /* Improve text readability */
+  .text-lg {
+    font-size: 1.125rem; /* 18px */
+  }
+
+  .leading-relaxed {
+    line-height: 1.625; /* More spacing between lines */
+  }
+
+  .tracking-wide {
+    letter-spacing: 0.05em; /* Increase letter spacing */
+  }
+
+  .DescriptionContainer {
+    background-color: rgba(255, 255, 255, 0.319);
+    border-radius: 10px;
+    border: 1.5px solid #00000015;
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.5); /* Add shadow */
+
+    margin: 10px; /* Add space between title and description */
+    margin-top: 20px;
+    height: 250px;
+    width: 650px;
+    z-index: 2;
+    text-align: left;
+  }
+
+  .DescriptionContainer p {
+    font-family: 'Lato', sans-serif;
+    font-size: 25px; 
+    padding: 15px;
+    color: #555; 
+    letter-spacing: 2.5px; 
+    text-align: justify; 
+    text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1); 
+    transition: color 0.3s ease; 
+  }
+
+  .DescriptionContainer p:hover {
+    color: #333; 
+  }
+
+  /* Right side: Video */
+  .PrincipalAtraticionsShower {
+    height: 350px; /* Keep the video height */
+    max-width: 300px; /* Set a fixed max width to control how wide the video is */
+    border-radius: 15px; /* Make it rounded, like a window */
+    border: 5px solid rgba(0, 0, 0, 0.821); /* Add a window-like border */
+    overflow: hidden; /* Ensures the video won't overflow the border */
+    display: flex; /* Align video */
+    justify-content: center; /* Center video horizontally */
+    align-items: center; /* Center video vertically */
+    margin: 0 auto; /* Center align the video container */
+    margin: 50px;
+  }
+
+  .PrincipalAtraticionsShower video {
+    height: 100%; /* Make the video take full height of the container */
+    width: 100%; /* Make the video take full width of the container */
+    object-fit: cover; /* Ensure the video covers the area without stretching */
+    margin: 0; /* Remove any default margin */
+    padding: 0; /* Remove any default padding */
+  }
+
+
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .animated-word {
+    font-size: inherit; /* Inherit the font-size from the h1 */
+    font-weight: inherit; /* Inherit the font-weight from the h1 */
+    position: relative;
+    opacity: 0;
+    
+    transform: translateY(-30px); /* Start by moving it up */
+    transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+  }
+
+  .fade-in-word {
+    opacity: 1;
+    transform: translateY(0); /* Fade in and move to normal position */
+  }
+
+  .fade-out-word {
+    opacity: 0;
+    transform: translateY(30px); /* Fade out and move downward */
+  }
+
+
