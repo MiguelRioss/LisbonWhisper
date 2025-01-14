@@ -1,0 +1,86 @@
+/* Weekly Grid Container */
+.weekly-grid {
+    display: flex;
+    flex-direction: column;
+    background-color: #121212;
+    color: white;
+    padding: 0; /* Remove padding around the grid */
+    border-radius: 8px;
+}
+
+/* Navigation Buttons */
+.grid-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px;
+}
+
+/* Grid Layout (Header + Body) */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 equal columns for days */
+    border: 2px solid #2c2c2c; /* Add a border around the entire grid */
+}
+
+/* Header Cells (Days of the Week) */
+.grid-header-cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 1px solid #2c2c2c; /* Add cell borders */
+    height: 100px; /* Fixed height for uniformity */
+}
+
+/* Day Labels */
+.grid-header-cell .day {
+    font-size: 1rem;
+}
+
+.grid-header-cell .date {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+/* Time Slot Cells */
+.time-slot-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    color: black;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    height: 100px; /* Same height as header cells for uniformity */
+    border: 1px solid #2c2c2c; /* Add cell borders */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.time-slot-cell.sold-out {
+    background-color: #b71c1c;
+    color: white;
+    cursor: not-allowed;
+}
+
+.time-slot-cell:hover {
+    background-color: #f0f0f0;
+}
+
+.time-slot-cell.sold-out:hover {
+    background-color: #b71c1c;
+    transform: none;
+}
+
+/* Remove Gaps Between Cells */
+.grid-container,
+.grid-header-cell,
+.time-slot-cell {
+    gap: 0; /* Remove all spacing */
+}
