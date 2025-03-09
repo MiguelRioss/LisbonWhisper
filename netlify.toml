@@ -1,0 +1,13 @@
+[build]
+  base = "frontend/vite-project"  # Set the frontend directory for monorepo
+  command = "npm run build"  # Your build command
+  publish = "frontend/vite-project/dist"  # Correct publish directory
+
+[build.environment]
+  NODE_VERSION = "18"  # Set Node.js version
+
+# Optional: Redirects (if needed)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
