@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import './WeeklyGrid.css';
 
 const timeSlots = [
-    "10:00", "11:30", "14:00", "15:30", "17:00", "18:30", "20:00", "21:30"
+    "10:00", "11:30", "14:00", "15:30", "17:30", "18:30", "20:00", "21:30"
 ];
 
-const WeeklyGrid = ({ availability, onSlotSelect }) => {
+const WeeklyGrid = ({ bookings, onSlotSelect }) => {
     const [currentMonday, setCurrentMonday] = useState(getMonday(new Date()));
 
     const generateWeekDates = (monday) => {
@@ -35,6 +35,22 @@ const WeeklyGrid = ({ availability, onSlotSelect }) => {
         setCurrentMonday(nextMonday);
     };
 
+    // Handle loading state if availability is null or undefined
+    if (!bookings) {
+        return (
+            <div className="weekly-grid-loading text-center">
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Handle empty availability (no data fetched or no slots available)
+    if (Object.keys(bookings).length === 0) {
+        return <div className="weekly-grid-empty text-center">No availability data found.</div>;
+    }
+
     return (
         <div className="weekly-grid">
             {/* Week Navigation */}
@@ -63,7 +79,12 @@ const WeeklyGrid = ({ availability, onSlotSelect }) => {
                 {/* Body (Time Slots) */}
                 {timeSlots.map((slot, slotIndex) =>
                     weekDates.map((date, dayIndex) => {
-                        const status = availability[date.date]?.[slot] || "Book Now";
+                        // Check if there is a booking that matches the current date and time slot
+                        const isBooked = bookings.some(
+                            (booking) => booking.Date === date.date && booking.time === slot
+                        );
+                        const status = isBooked ? "Sold Out" : "Book Now";
+
                         return (
                             <div
                                 key={`${slotIndex}-${dayIndex}`}
