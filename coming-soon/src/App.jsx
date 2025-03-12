@@ -1,11 +1,24 @@
-import React from 'react';
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/logo.png'
+import './App.css'
 
-const ComingSoon = () => {
+function App() {
+  const [count, setCount] = useState(0)
+
   return (
-    <div className='flex flex-col items-center justify-center h-screen bg-gray-100'>
-      <h1 className='text-3xl font-semibold text-gray-800'>Coming Soon</h1>
-    </div>
-  );
-};
+    <>
+      <div>
+        <a  target="">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+     
+      </div>
+      <h1>        Coming Soon       </h1>
+      <div className="card">
+      </div>
+    </>
+  )
+}
 
-export default ComingSoon;
+export default App
