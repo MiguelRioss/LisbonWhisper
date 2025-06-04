@@ -1,7 +1,7 @@
 // db.js
 import { MongoClient } from 'mongodb';
 
-const uri = 'mongodb+srv://devLisbonWhisper:Nnzcb2c8Xrqj49jJ@lisbonwhisper.mof1tjm.mongodb.net/?retryWrites=true&w=majority&appName=LisbonWhisper';
+const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 
 let bookingsCollection;
