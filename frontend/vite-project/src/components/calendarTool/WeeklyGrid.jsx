@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import './WeeklyGrid.css';
+import BookingCell from './BookingCell';
 
 const timeSlots = [
     "10:00", "11:30", "14:00", "15:30", "17:30", "18:30", "20:00", "21:30"
 ];
 
-const WeeklyGrid = ({ bookings, onSlotSelect }) => {
+
+
+const WeeklyGrid = ({createBookingHandler,tourData, bookings}) => {
+    const { title, descriptions } = tourData; // Destructure state
     const [currentMonday, setCurrentMonday] = useState(getMonday(new Date()));
+    const [expandedSlot, setExpandedSlot] = useState(null);
+
 
     const generateWeekDates = (monday) => {
         const weekDates = [];
@@ -34,9 +40,9 @@ const WeeklyGrid = ({ bookings, onSlotSelect }) => {
         nextMonday.setDate(currentMonday.getDate() + 7);
         setCurrentMonday(nextMonday);
     };
-
+    console.log("bookings: ", bookings);
     // Handle loading state if availability is null or undefined
-    if (!bookings) {
+    if (bookings == null ) {
         return (
             <div className="weekly-grid-loading text-center">
                 <div className="spinner-border" role="status">
@@ -46,24 +52,27 @@ const WeeklyGrid = ({ bookings, onSlotSelect }) => {
         );
     }
 
-    // Handle empty availability (no data fetched or no slots available)
-    if (Object.keys(bookings).length === 0) {
-        return <div className="weekly-grid-empty text-center">No availability data found.</div>;
-    }
-
+  
     return (
         <div className="weekly-grid">
             {/* Week Navigation */}
             <div className="grid-navigation">
-                <button className="btn btn-secondary" onClick={handlePreviousWeek}>
-                    ← Previous Week
-                </button>
+            <button className="px-4 py-2 font-medium text-white rounded-md
+  bg-gradient-to-b from-[#1a1a1a] to-[#2f2f3f] border border-gray-600
+  hover:from-[#2a2a2a] hover:to-[#3f3f4f] transition duration-200">
+  ← Previous Week
+</button>
+
+
                 <h3>
                     {weekDates[0].date} - {weekDates[6].date}
                 </h3>
-                <button className="btn btn-secondary" onClick={handleNextWeek}>
-                    Next Week →
+                <button className="px-4 py-2 font-medium text-white rounded-md
+                    bg-gradient-to-b from-[#1a1a1a] to-[#2f2f3f] border border-gray-600
+                    hover:from-[#2a2a2a] hover:to-[#3f3f4f] transition duration-200">
+                                        Next Week →
                 </button>
+
             </div>
 
             {/* Weekly Grid */}
@@ -79,24 +88,22 @@ const WeeklyGrid = ({ bookings, onSlotSelect }) => {
                 {/* Body (Time Slots) */}
                 {timeSlots.map((slot, slotIndex) =>
                     weekDates.map((date, dayIndex) => {
-                        // Check if there is a booking that matches the current date and time slot
-                        const isBooked = bookings.some(
-                            (booking) => booking.Date === date.date && booking.time === slot
-                        );
-                        const status = isBooked ? "Sold Out" : "Book Now";
-
+                      
                         return (
-                            <div
-                                key={`${slotIndex}-${dayIndex}`}
-                                className={`time-slot-cell ${status === "Sold Out" ? "sold-out" : ""}`}
-                                onClick={() => {
-                                    if (status !== "Sold Out") {
-                                        onSlotSelect(date.date, slot);
-                                    }
-                                }}
-                            >
-                                {status}
-                            </div>
+                           <BookingCell
+                            createBookingHandler={createBookingHandler}
+                            tourName={title}
+                            tourDescriptions={descriptions}
+                            key={`${slotIndex}-${dayIndex}`}
+                            date={date.date}
+                            time={slot}
+                            isBooked={bookings.some(
+                                (booking) => booking.date === date.date && booking.time === slot
+                            )}
+                            isExpanded={expandedSlot === `${date.date}-${slot}`}
+                            onSelect={() => setExpandedSlot(`${date.date}-${slot}`)}
+                            onCollapse={() => setExpandedSlot(null)}
+                            />
                         );
                     })
                 )}

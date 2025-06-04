@@ -14,10 +14,11 @@ export default function(data) {
     
         // If a comparator is provided, filter the bookings to match
         if (Object.keys(comparador).length > 0) {
-            const filteredBookings = bookings.filter(booking => {
-                return Object.keys(comparador).every(key => booking[key] === comparador[key]);
+           const filteredBookings = bookings.filter(booking => {
+                return Object.keys(comparador).every(key =>
+                    booking[key] != null && String(booking[key]) === String(comparador[key])
+                );
             });
-            console.log('Filtered bookings:', filteredBookings);
             return filteredBookings;
         }
     
@@ -27,6 +28,7 @@ export default function(data) {
     
     
     async function createBookingServices(bookingObject) {
+        
         return await data.createBooking(bookingObject);
     }
 }

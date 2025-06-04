@@ -32,6 +32,7 @@ export default function(WhisperServices) {
     
     async function createBookingAPI(req, rsp) {
         const booking = req.body.booking;
+        console.log("bookingObject:  " + booking)
         const createdBooking = await WhisperServices.createBookingServices(booking);
         return { // Return the success response
             statusCode: 200,
@@ -54,6 +55,7 @@ export default function(WhisperServices) {
     
     // Example `htttpErrors` function to transform errors
     function htttpErrors(error) {
+        console.error('Error:', error);
         return {
             status: error.status || 500,
             message: error.message || 'Internal Server Error',

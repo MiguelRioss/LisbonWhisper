@@ -29,30 +29,115 @@
     align-items: center; /* Center content horizontally */
 }
 
-/*tAKE  a look here!*/
-.description-container {
-  border: 2.5px solid #ef0000;  /* Border styling */
-  /* Custom styles for the description section */
-  padding: 100px;
-}
-/*tAKE  a look here!*/
-.icons-container  {
-  border: 2.5px solid #1cef00;  /* Border styling */
-  /* Custom styles for the description section */
-  padding: 10px;
+/*Single Tour Page*/
+.section-background {
+  background: linear-gradient(to top, #1a1a1a, #0d0d0d, #202137);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.05),
+    0 8px 30px rgba(0, 0, 0, 0.6);
 }
 
-.tour-container {
-  border: 2.5px solid #ef0000;  /* Border styling */
-  /* Custom styles for the description section */
-  padding: 10px;
+.section-title {
+  color: white;
+  font-size: 1.75rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 24px;
 }
+
+
+/*Single Tour Page container*/
 /*tAKE  a look here!*/
-.contactUs-container {
-  border: 2.5px solid #ef0000;  /* Border styling */
-  /* Custom styles for the description section */
-  padding: 200px;
+.description-container {
+  background: linear-gradient(to top, #352f2f84, #000000, #202137);
+  padding: 40px 60px;
+  border-radius: 15px;
+  position: relative;
+  box-shadow:
+    inset 0 0 0 4px rgba(114, 160, 204, 0.264),
+    0 8px 200px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
 }
+
+.icons-container {
+  background: transparent;
+  padding: 0;
+  margin: 0 0 30px 0; /* spacing below icons */
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+.description-text {
+  font-size: 1.7rem;           /* Much larger text (~24px) */
+  line-height: 2;              /* Loose spacing for readability */
+  margin-left: 2.5rem;          /* Right margin for spacing from container edge */
+  color: #f1f5f9;              /* Soft white */
+  font-weight: 300;
+  text-align: left;
+  letter-spacing: 0.02em;
+}
+
+.tour-page-background{
+  background: linear-gradient(to bottom, #202137, #0a0a0a, #000000);
+  min-height: 100vh;
+  color: #f1f5f9;
+}
+
+.tour-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  text-align: center;
+  color: rgb(215, 215, 215);
+  letter-spacing: 0.05em;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  margin-top: 1.5rem;
+}
+
+
+
+.tour-container {
+  /* Custom styles for the description section */
+}
+.contactUs-container {
+  background: linear-gradient(to top, #352f2f84, #000000, #202137);
+  padding: 80px 60px; /* MORE padding for breathing room */
+  border-radius: 15px;
+
+  /* 3D double-border style */
+  position: relative;
+  box-shadow:
+    inset 0 0 0 4px rgba(114, 160, 204, 0.264),  /* Inner edge */
+    0 8px 200px rgba(0, 0, 0, 0.6);             /* Outer depth */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.contactUs-container:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.1),
+    0 12px 30px rgba(0, 0, 0, 0.7);
+}
+
+/* Add spacing between elements inside */
+.contactUs-container h2 {
+  margin-bottom: 32px;
+}
+
+.contactUs-container p {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.contactUs-container button {
+  margin-top: 32px;
+}
+
+
+
+
   .logo {
     max-width: 100%;
     max-height: 100%;

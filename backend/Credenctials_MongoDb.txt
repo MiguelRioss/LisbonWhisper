@@ -1,0 +1,6 @@
+mongodb+srv://superLog:<db_password>@lisbonwhisper.mof1tjm.mongodb.net/?retryWrites=true&w=majority&appName=LisbonWhisper
+
+connectionString
+
+Username: devLisbonWhisper
+password: LisbonWhisper3069
