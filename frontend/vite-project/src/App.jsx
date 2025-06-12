@@ -15,8 +15,9 @@ import { fetchBookings, createBooking } from './services/bookingService';
 
 import ComingSoon from './pages/ComingSoon';
 
-const videoSrc = '/src/res/Free_videoLisbon_AI_GENERATED.mp4';
-const videoSrcDownTown = '/src/res/LisbonDownTown.mp4';
+const videoSrc = '/res/Free_videoLisbon_AI_GENERATED.mp4';
+const videoSrcDownTown = '/res/LisbonDownTown.mp4';
+
 
 const cardData = [
   {
