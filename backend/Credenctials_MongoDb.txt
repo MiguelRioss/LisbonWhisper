@@ -3,4 +3,4 @@ mongodb+srv://superLog:<db_password>@lisbonwhisper.mof1tjm.mongodb.net/?retryWri
 connectionString
 
 Username: devLisbonWhisper
-password: LisbonWhisper3069
+password: Nnzcb2c8Xrqj49jJ

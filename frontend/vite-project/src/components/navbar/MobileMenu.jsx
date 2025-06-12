@@ -1,5 +1,5 @@
-import { DisclosureButton } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { DisclosureButton } from '@headlessui/react';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function MobileMenu() {
   return (
@@ -12,5 +12,5 @@ export default function MobileMenu() {
         <XMarkIcon aria-hidden="true" className="hidden h-6 w-6 group-data-[open]:block" />
       </DisclosureButton>
     </div>
-  )
+  );
 }

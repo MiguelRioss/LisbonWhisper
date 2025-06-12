@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
 function IntroCardComponent() {
   const words = ['Corner', 'Castle', 'View', 'Food', 'Myth']; // Array of words

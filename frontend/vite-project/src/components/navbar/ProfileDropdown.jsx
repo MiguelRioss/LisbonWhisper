@@ -1,5 +1,5 @@
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { BellIcon } from '@heroicons/react/24/outline'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
+import { BellIcon } from '@heroicons/react/24/outline';
 
 export default function ProfileDropdown() {
   return (
@@ -48,5 +48,5 @@ export default function ProfileDropdown() {
         </MenuItems>
       </Menu>
     </div>
-  )
+  );
 }

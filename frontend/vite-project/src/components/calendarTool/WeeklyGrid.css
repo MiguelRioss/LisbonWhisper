@@ -1,250 +1,285 @@
-/* Weekly Grid Container */
 .weekly-grid {
-    display: flex;
-    flex-direction: column;
-    color: white;
-    padding: 0; /* Remove padding around the grid */
-    border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  padding: 0;
+  border-radius: 10px;
 }
 
-/* Navigation Buttons */
 .grid-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px;
 }
 
-/* Grid Layout (Header + Body) */
 .grid-container {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 equal columns for days */
-    border: 2px solid #29263c; /* Add a border around the entire grid */
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 2px solid #29263c;
 }
 
-/* Header Cells (Days of the Week) */
 .grid-header-cell {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: rgb(28, 25, 40);
-    color: white;
-    font-weight: bold;
-    text-transform: uppercase;
-    border: 1px solid #111111; /* Add cell borders */
-    height: 100px; /* Fixed height for uniformity */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(28, 25, 40);
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 1px solid #111111;
+  height: 100px;
 }
 
-/* Day Labels */
 .grid-header-cell .day {
-    font-size: 1rem;
+  font-size: 1rem;
 }
 
 .grid-header-cell .date {
-    font-size: 0.9rem;
-    color: #ccc;
+  font-size: 0.9rem;
+  color: #ccc;
 }
 
-/* Time Slot Cells */
 .time-slot-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: white;
-    color: black;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    font-weight: bold;
-    height: 100px; /* Same height as header cells for uniformity */
-    border: 1px solid #2c2c2c; /* Add cell borders */
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  color: black;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  height: 100px;
+  border: 1px solid #2c2c2c;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .time-slot-cell.sold-out {
-    background-color: #b71c1c;
-    color: white;
-    cursor: not-allowed;
+  background-color: #b71c1c;
+  color: white;
+  cursor: not-allowed;
 }
 
 .time-slot-cell:hover {
-    background-color: #f0f0f0;
+  background-color: #f0f0f0;
 }
 
 .time-slot-cell.sold-out:hover {
-    background-color: #b71c1c;
-    transform: none;
+  background-color: #b71c1c;
+  transform: none;
 }
 
-/* Remove Gaps Between Cells */
-.grid-container,
-.grid-header-cell,
-.time-slot-cell {
-    gap: 0; /* Remove all spacing */
+.grid-container, .grid-header-cell, .time-slot-cell {
+  gap: 0;
 }
-/* --- Modal Overlay --- */
+
 .booking-popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeOverlay 0.2s ease-out;
-  }
-  
-  /* --- Overlay Fade --- */
-  @keyframes fadeOverlay {
-    from {
-      background-color: rgba(0, 0, 0, 0);
-    }
-    to {
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-  }
-  
-  /* --- Popup Animation --- */
-  @keyframes fadeZoomIn {
-    0% {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  
-  /* --- Modal Container --- */
-  .booking-popup {
-    background: #1e1e1e;
-    padding: 2rem;
-    border-radius: 15px;
-    width: 500px;
-    max-width: 95%;
-    height: 90%;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    animation: fadeZoomIn 0.2s ease-out;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    position: relative;
-  }
-  
-  /* --- Title + Date --- */
-  .booking-popup h2,
-  .booking-slot-time {
-    color: #ffffff;
-    text-align: center;
-  }
-  
-  .booking-slot-time {
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin: -0.5rem 0 0.5rem;
-  }
-  
-  /* --- Close "X" Button --- */
-  .modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 1.5rem;
-    cursor: pointer;
-  }
-  
-  /* --- Form Fields --- */
-  .popup-form-fields {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    margin: 1.5rem 0;
-    flex-grow: 1;
-  }
-  
-  .booking-popup input,
-  .booking-popup textarea {
-    width: 100%;
-    background: #2c2c2c;
-    color: #fff;
-    padding: 1rem;
-    font-size: 1rem;
-    border: 1px solid #444;
-    border-radius: 8px;
-    box-sizing: border-box;
-  }
-  
-  .booking-popup input::placeholder,
-  .booking-popup textarea::placeholder {
-    color: #999;
-  }
-  
-  .booking-popup textarea {
-    resize: vertical;
-    min-height: 80px;
-  }
-  
-  /* --- Footer Buttons --- */
-  .popup-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: auto;
-  }
-  
-  .popup-actions button {
-    flex: 1;
-    padding: 0.75rem;
-    font-size: 1rem;
-    background: #4a4a4a;
-    border: none;
-    color: #fff;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s ease-in-out;
-  }
-  
-  .popup-actions button:hover {
-    background: #666;
-  }
-  
-  /* --- Responsive --- */
-  @media (max-width: 600px) {
-    .booking-popup {
-      width: 90%;
-      height: auto;
-      padding: 1.5rem;
-    }
-  }
-  
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeOverlay 0.2s ease-out;
+}
 
-  .tour-info {
-    margin-top: 1rem;
-    padding: 1rem;
-    background-color: #2a2a2a;
-    border-radius: 8px;
-    color: #eaeaea;
+@keyframes fadeOverlay {
+  from { background-color: rgba(0, 0, 0, 0); }
+  to { background-color: rgba(0, 0, 0, 0.5); }
+}
+
+.booking-popup {
+  background: #1e1e1e;
+  padding: 2rem;
+  border-radius: 15px;
+  width: 500px;
+  max-width: 95%;
+  /* REMOVE max-height: 90vh */
+  overflow-y: visible;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  animation: fadeZoomIn 0.2s ease-out;
+  position: relative;
+}
+
+
+@keyframes fadeZoomIn {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.booking-popup h2, .booking-slot-time {
+  color: #ffffff;
+  text-align: center;
+}
+
+.booking-slot-time {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: -0.5rem 0 0.5rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.popup-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.booking-popup input,
+.booking-popup textarea {
+  width: 100%;
+  background: #2c2c2c;
+  color: #fff;
+  padding: 1rem;
+  font-size: 1rem;
+  border: 1px solid #444;
+  border-radius: 8px;
+}
+
+.booking-popup input::placeholder,
+.booking-popup textarea::placeholder {
+  color: #999;
+}
+
+.booking-popup textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.popup-actions button {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 1rem;
+  background: #4a4a4a;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.popup-actions button:hover {
+  background: #666;
+}
+
+@media (max-width: 600px) {
+  .booking-popup {
+    width: 90%;
+    height: auto;
+    padding: 1.5rem;
   }
-  
-  .tour-info h3 {
-    margin-top: 0;
-    font-size: 1.2rem;
-    color: #fff;
-  }
-  
-  .tour-info p {
-    margin: 0.5rem 0 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: #ccc;
-  }
-  
+}
+
+.tour-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  color: #eaeaea;
+}
+
+.tour-info h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.tour-info p {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #ccc;
+}
+
+.slot-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.persons-counter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #fff;
+}
+
+.counter-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.counter-controls button {
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  background: #4a4a4a;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.counter-controls button:hover {
+  background: #666;
+}
+
+.counter-controls button:disabled {
+  background: #333;
+  cursor: not-allowed;
+}
+
+.counter-controls span {
+  font-size: 1.3rem;
+  min-width: 30px;
+  text-align: center;
+}
+.persons-contact {
+  margin-top: 1rem;
+  text-align: center;
+  color: #ddd;
+}
+
+.persons-contact p {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.contact-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background: #4a4a4a;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.contact-button:hover {
+  background: #666;
+}

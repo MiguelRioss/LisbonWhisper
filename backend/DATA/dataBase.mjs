@@ -8,20 +8,19 @@ export default function () {
     createBooking,
   };
 
- async function getBookings() {
-  const collection = getBookingsCollection();
-  const bookingsArray = await collection.find({}).toArray();
-  return { bookings: bookingsArray }; 
-}
-
+  async function getBookings() {
+    const collection = getBookingsCollection();
+    const bookingsArray = await collection.find({}).toArray();
+    return { bookings: bookingsArray };
+  }
 
   async function getFilteredBookings(comparador = {}) {
     const collection = getBookingsCollection();
     const allBookings = await collection.find({}).toArray();
 
-    const filteredBookings = allBookings.filter(booking => {
-      return Object.keys(comparador).every(key =>
-        booking[key] != null && String(booking[key]) === String(comparador[key])
+    const filteredBookings = allBookings.filter((booking) => {
+      return Object.keys(comparador).every(
+        (key) => booking[key] != null && String(booking[key]) === String(comparador[key])
       );
     });
 

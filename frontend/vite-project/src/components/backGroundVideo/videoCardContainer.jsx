@@ -1,6 +1,6 @@
-import IntroCardComponent from "../IntroCardComponent";
-const src = "https://www.youtube.com/watch?v=5DD5lNwc7ho"
-const localSrc = "../../res/FREE_LISBON_VIDEO.mp4"
+import IntroCardComponent from '../IntroCardComponent';
+const src = 'https://www.youtube.com/watch?v=5DD5lNwc7ho';
+const localSrc = '../../res/FREE_LISBON_VIDEO.mp4';
 function VideoCard() {
   return (
     <div className="relative w-full h-screen overflow-hidden ">
@@ -10,13 +10,7 @@ function VideoCard() {
       </div>
 
       {/* Background video */}
-      <video
-        className="w-full h-full object-cover "
-        autoPlay
-        loop
-        muted
-        src={localSrc}
-      />
+      <video className="w-full h-full object-cover " autoPlay loop muted src={localSrc} />
     </div>
   );
 }
