@@ -61,7 +61,7 @@ export default function CardComp({
       </div>
       {/* Video section with styling */}
       <div className="PrincipalAtraticionsShower flex-1">
-        <video autoPlay loop muted>
+        <video autoPlay loop muted playsInline preload="auto">
           <source src={videoSrc} type="video/mp4" />
         </video>
       </div>
