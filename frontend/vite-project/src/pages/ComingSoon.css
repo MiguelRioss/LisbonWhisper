@@ -3,41 +3,52 @@
   height: 100vh;
   justify-content: center;
   align-items: center;
-  background: #111;
-  color: #fff;
+  background: #fff; /* changed to white background */
+  color: #333;
 }
 
 .coming-soon-box {
-  background: #222;
-  padding: 2rem;
-  border-radius: 8px;
   text-align: center;
+  padding: 2rem;
+}
+
+.cs-logo {
+  width: 120px;
+  margin-bottom: 1rem;
+}
+
+.coming-soon-box h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
 }
 
 .coming-soon-box input {
   width: 100%;
   padding: 0.75rem;
-  margin: 0.75rem 0;
-  border: none;
+  margin: 0.5rem 0;
+  border: 1px solid #ccc;
   border-radius: 4px;
-
-  background: #eee;
+  background: #f9f9f9;
   color: #333;
 }
 
 .coming-soon-box input::placeholder {
-  color: #666;
+  color: #999;
 }
 
 .coming-soon-box button {
-  padding: 0.75rem 1.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
   border: none;
-  background: #4a4a4a;
+  background: #333;
   color: #fff;
   border-radius: 4px;
+  cursor: pointer;
 }
 
 .coming-soon-box .error {
-  color: #f88;
+  color: #f00;
   margin-top: 0.5rem;
 }

@@ -1,7 +1,9 @@
+// ComingSoon.jsx
 import React, { useState } from 'react';
 import './ComingSoon.css';
+import logo from '../res/logo.png';
 
-const PASSWORD = 'yourpassword123'; // Set your password
+const PASSWORD = 'yourpassword123';
 
 export default function ComingSoon({ onSuccess }) {
   const [pass, setPass] = useState('');
@@ -10,16 +12,18 @@ export default function ComingSoon({ onSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (pass === PASSWORD) {
+      localStorage.setItem('hasAccess', 'true'); // <-- remember
       onSuccess();
     } else {
-      setError('Incorrect password, try again.');
+      setError('Incorrect password. Try again.');
     }
   };
 
   return (
     <div className="coming-soon-container">
       <div className="coming-soon-box">
-        <h1>Protected Access</h1>
+        <img src={logo} alt="Lisbon Whisper logo" className="cs-logo" />
+        <h1>Coming Soon</h1>
         <form onSubmit={handleSubmit}>
           <input
             type="password"

@@ -47,7 +47,10 @@ const navigation = [
 ];
 
 function App() {
-  const [hasAccess, setHasAccess] = useState(false);
+  const [hasAccess, setHasAccess] = useState(
+  localStorage.getItem('hasAccess') === 'true'
+);
+
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -70,10 +73,14 @@ function App() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // If user hasn't passed the password, redirect everything to /coming-soon
-  if (!hasAccess) {
-    return <ComingSoon onSuccess={() => setHasAccess(true)} />;
-  }
+
+if (!hasAccess) {
+  return <ComingSoon onSuccess={() => {
+    localStorage.setItem('hasAccess', 'true');
+    setHasAccess(true);
+  }} />;
+}
+
 
   return (
     <>
