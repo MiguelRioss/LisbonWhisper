@@ -8,7 +8,7 @@ const timeSlots = [
 
 
 
-const WeeklyGrid = ({createBookingHandler,tourData, bookings}) => {
+const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
     const { title, descriptions } = tourData; // Destructure state
     const [currentMonday, setCurrentMonday] = useState(getMonday(new Date()));
     const [expandedSlot, setExpandedSlot] = useState(null);
@@ -29,20 +29,35 @@ const WeeklyGrid = ({createBookingHandler,tourData, bookings}) => {
 
     const weekDates = generateWeekDates(currentMonday);
 
-    const handlePreviousWeek = () => {
-        const previousMonday = new Date(currentMonday);
-        previousMonday.setDate(currentMonday.getDate() - 7);
-        setCurrentMonday(previousMonday);
-    };
+    const [fadeTransition, setFadeTransition] = useState(true);
 
-    const handleNextWeek = () => {
-        const nextMonday = new Date(currentMonday);
-        nextMonday.setDate(currentMonday.getDate() + 7);
-        setCurrentMonday(nextMonday);
-    };
+  const triggerFade = (callback) => {
+  setFadeTransition(false);
+  setTimeout(() => {
+    callback();
+    setFadeTransition(true);
+  }, 180); // Time must match the transition duration
+};
+
+const handlePreviousWeek = () => {
+  triggerFade(() => {
+    const previousMonday = new Date(currentMonday);
+    previousMonday.setDate(currentMonday.getDate() - 7);
+    setCurrentMonday(previousMonday);
+  });
+};
+
+const handleNextWeek = () => {
+  triggerFade(() => {
+    const nextMonday = new Date(currentMonday);
+    nextMonday.setDate(currentMonday.getDate() + 7);
+    setCurrentMonday(nextMonday);
+  });
+};
+
     console.log("bookings: ", bookings);
     // Handle loading state if availability is null or undefined
-    if (bookings == null ) {
+    if (bookings == null) {
         return (
             <div className="weekly-grid-loading text-center">
                 <div className="spinner-border" role="status">
@@ -52,31 +67,42 @@ const WeeklyGrid = ({createBookingHandler,tourData, bookings}) => {
         );
     }
 
-  
+
     return (
         <div className="weekly-grid">
             {/* Week Navigation */}
             <div className="grid-navigation">
-            <button className="px-4 py-2 font-medium text-white rounded-md
+                <button
+                    onClick={handlePreviousWeek}
+                    className="px-4 py-2 font-medium text-white rounded-md
   bg-gradient-to-b from-[#1a1a1a] to-[#2f2f3f] border border-gray-600
   hover:from-[#2a2a2a] hover:to-[#3f3f4f] transition duration-200">
-  ← Previous Week
-</button>
+                    ← Previous Week
+
+                </button>
 
 
                 <h3>
                     {weekDates[0].date} - {weekDates[6].date}
                 </h3>
-                <button className="px-4 py-2 font-medium text-white rounded-md
+                <button
+                    onClick={handleNextWeek}
+                    className="px-4 py-2 font-medium text-white rounded-md
                     bg-gradient-to-b from-[#1a1a1a] to-[#2f2f3f] border border-gray-600
                     hover:from-[#2a2a2a] hover:to-[#3f3f4f] transition duration-200">
-                                        Next Week →
+                    Next Week →
                 </button>
 
             </div>
 
             {/* Weekly Grid */}
-            <div className="grid-container">
+            <div
+className={`grid-container transform transition duration-1000 ease-in-out 
+  ${fadeTransition ? 'opacity-200 scale-200' : 'opacity-0 scale-100'}
+`}
+
+>
+
                 {/* Header (Days of the Week) */}
                 {weekDates.map((date, index) => (
                     <div key={index} className="grid-header-cell">
@@ -88,21 +114,21 @@ const WeeklyGrid = ({createBookingHandler,tourData, bookings}) => {
                 {/* Body (Time Slots) */}
                 {timeSlots.map((slot, slotIndex) =>
                     weekDates.map((date, dayIndex) => {
-                      
+
                         return (
-                           <BookingCell
-                            createBookingHandler={createBookingHandler}
-                            tourName={title}
-                            tourDescriptions={descriptions}
-                            key={`${slotIndex}-${dayIndex}`}
-                            date={date.date}
-                            time={slot}
-                            isBooked={bookings.some(
-                                (booking) => booking.date === date.date && booking.time === slot
-                            )}
-                            isExpanded={expandedSlot === `${date.date}-${slot}`}
-                            onSelect={() => setExpandedSlot(`${date.date}-${slot}`)}
-                            onCollapse={() => setExpandedSlot(null)}
+                            <BookingCell
+                                createBookingHandler={createBookingHandler}
+                                tourName={title}
+                                tourDescriptions={descriptions}
+                                key={`${slotIndex}-${dayIndex}`}
+                                date={date.date}
+                                time={slot}
+                                isBooked={bookings.some(
+                                    (booking) => booking.date === date.date && booking.time === slot
+                                )}
+                                isExpanded={expandedSlot === `${date.date}-${slot}`}
+                                onSelect={() => setExpandedSlot(`${date.date}-${slot}`)}
+                                onCollapse={() => setExpandedSlot(null)}
                             />
                         );
                     })

@@ -41,8 +41,13 @@ function TourPage({ bookings, loading, error, createBookingHandler,refetchBookin
 
       <TourInfoContainer tourData={tourData} />
 
- <div className="section-background p-10 ">
-    <h2 className="section-title pt-10">Select a Time Slot</h2>
+<div className="section-background pt-16 pb-10 py-10 px-4">
+  <h2 className="text-5xl font-bold text-white mb-10 text-center">
+    Select a Time Slot
+  </h2>
+
+
+
 
     {error ? (
       <div className="text-danger text-center">{error}</div>

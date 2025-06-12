@@ -78,20 +78,17 @@ function App() {
 
   return (
     <Router>
-      <div className="relative z-50">
         <Navbar navigation={navigation} logo={logo} />
-      </div>
-
       <ScrollToTop />
 
       <Routes>
         <Route
           path="/"
           element={
-            <>
+            <div className="section-background">
               <VideoCard />
               <Carrousel cardData={cardData} />
-            </>
+            </div>
           }
         />
 

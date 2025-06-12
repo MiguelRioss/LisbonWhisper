@@ -21,7 +21,7 @@ app.use(cors({
 // Add middleware to parse JSON request body
 app.use(express.json());
 
-const dataInit = data();
+const dataInit = onlineData();
 const WhisperServices = services(dataInit);
 const whispers_API = api(WhisperServices);
 

@@ -43,7 +43,7 @@ function TourInfoContainer({ tourData }) {
               </div>
 
               <div className="col flex flex-col items-center justify-center  p-4 mx-2">
-                <div className="w-[28px] h-[28px] flex items-center justify-center overflow-hidden mb-2">
+                <div className="w-[58px] h-[58px] flex items-center justify-center overflow-hidden mb-2">
                   <img src={MoneyLogo} alt="Price" className="w-full h-full object-contain" />
                 </div>
                 <p className="text-sm font-medium">Price</p>
@@ -59,7 +59,7 @@ function TourInfoContainer({ tourData }) {
 
           {/* Contact Us Column */}
           <div className="contactUs-container col-md-4 flex justify-center items-center">
-            <div className="w-full  max-w-sm bg-red-500 text-white p-8 text-center">
+            <div className="w-full  max-w-sm  text-white p-8 text-center">
               <h2 className="text-3xl font-bold  mb-10">Contact Us</h2>
 
               <p>

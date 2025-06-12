@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:1904';
+const API_BASE = 'https://lisbonwhisper.onrender.com';
 
 // GET: Fetch all bookings
 export const fetchBookings = async () => {

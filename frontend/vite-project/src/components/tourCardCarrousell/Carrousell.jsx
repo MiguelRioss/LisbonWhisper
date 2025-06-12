@@ -12,7 +12,7 @@ function Carrousel({ cardData }) {
     };
 
     return (
-        <div id="carouselExampleIndicators" className="carousel slide" data-bs-ride="carousel">
+        <div id="carouselExampleIndicators" className="carousel carousel-slide slide" data-bs-ride="carousel">
             <div className="carousel-indicators">
                 {cardData.map((_, index) => (
                     <button

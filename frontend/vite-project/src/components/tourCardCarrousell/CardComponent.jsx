@@ -25,25 +25,35 @@ export default function CardComp({ title, descriptions, videoSrc, backgroundImag
                 className="absolute inset-0 -z-10 h-full w-full object-cover object-right md:object-center"
             />
             <div className="flex-1 p-6 lg:p-8">
-                <h2 className="text-5xl font-semibold tracking-tight text-white sm:text-6xl mt-8 text-center">
+                <h2 className="text-6xl text-outline font-extrabold tracking-tight text-gray sm:text-6xl mt-8 text-center">
                     {title}
                 </h2>
-                <div className="mx-auto mt-5 max-w-2xl text-center">
+                <div className="mx-auto mt-5  text-center">
                     <div
-                        className={`text-lg text-white leading-relaxed tracking-wide ${
-                            isFadingOut ? 'fade-out-left' : 'fade-in-right'
-                        }`}
+                        className={` pb-4    tracking-wide ${isFadingOut ? 'fade-out-left' : 'fade-in-right'
+                            }`}
                     >
-                        <p>{descriptions[descriptionIndex]}</p>
+                        <h4 className='text-3xl description-outline '>{descriptions[descriptionIndex]}</h4>
                     </div>
                     {/* Use passed navigation logic */}
                     <button
-                        type="button"
                         onClick={() => handleShowMoreWithParams(title, descriptions, videoSrc)}
-                        className="btn btn-light"
+                        className="
+                            bg-gradient-to-b from-gray-100 to-gray-300 
+                            text-gray-800 font-semibold 
+                            px-8 py-2
+                            rounded-xl 
+                            shadow-lg 
+                            border border-gray-400 
+                            hover:from-gray-200 hover:to-gray-200 
+                            hover:shadow-xl 
+                            active:scale-95 
+                            transition duration-300 ease-in-out"
                     >
                         Show More
                     </button>
+
+
                 </div>
             </div>
             {/* Video section with styling */}
