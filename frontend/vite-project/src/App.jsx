@@ -28,7 +28,7 @@ const cardData = [
       'End your tour at Graça Miradouro...',
     ],
     videoSrc: videoSrc,
-    backgroundImage: './src/res/f03ef0dcb35a8e63d746cfa4741a4f96.jpg',
+    backgroundImage: './res/f03ef0dcb35a8e63d746cfa4741a4f96.jpg',
   },
   {
     title: 'Downtown Walking Tour',
@@ -38,7 +38,7 @@ const cardData = [
       'Wrap up at Rossio Square...',
     ],
     videoSrc: videoSrcDownTown,
-    backgroundImage: './src/res/9bfee964e2a50ec45dc449890ec9ed42.jpg',
+    backgroundImage: './res/9bfee964e2a50ec45dc449890ec9ed42.jpg',
   },
 ];
 
