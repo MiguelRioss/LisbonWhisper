@@ -93,15 +93,32 @@
 
 .booking-popup {
   background: #1e1e1e;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 15px;
-  width: 500px;
-  max-width: 95%;
-  /* REMOVE max-height: 90vh */
-  overflow-y: visible;
+  width: 400px;
+  max-width: 70%;
+  max-height: 90vh; /* limit height */
+  overflow-y: auto; /* add scroll if needed */
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
   animation: fadeZoomIn 0.2s ease-out;
   position: relative;
+}
+
+/* For WebKit browsers (Chrome, Edge, Safari) */
+.booking-popup::-webkit-scrollbar {
+  width: 10px;
+}
+
+.booking-popup::-webkit-scrollbar-track {
+  background: #c2baba;
+  border-radius: 10px;
+}
+
+.booking-popup::-webkit-scrollbar-thumb {
+  background-color: #171c30;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 
