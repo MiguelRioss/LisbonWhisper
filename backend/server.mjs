@@ -27,7 +27,7 @@ async function startServer() {
 
   const allowedOrigins = [
   'http://localhost:5173', 
-  'https://lisbonwhisper.com/src/res'
+  'https://lisbonwhisper.com'
 ];
 
   app.use(
