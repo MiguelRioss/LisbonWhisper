@@ -1,70 +1,107 @@
-import React, { useState, useEffect } from 'react';
+﻿import React from 'react';
 
-export default function CardComp({
-  title,
-  descriptions,
-  videoSrc,
-  backgroundImage,
-  handleShowMoreWithParams,
-}) {
-  const [descriptionIndex, setDescriptionIndex] = useState(0);
-  const [isFadingOut, setIsFadingOut] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsFadingOut(true); // Start fade-out animation
-
-      setTimeout(() => {
-        setDescriptionIndex((prevIndex) => (prevIndex + 1) % descriptions.length);
-        setIsFadingOut(false); // Reset to fade-in state
-      }, 2000); // Match fade-out duration
-    }, 10000); // Change every 10 seconds
-
-    return () => clearInterval(interval);
-  }, [descriptions.length]);
-
+function TourTile({ title, subtitle, videoSrc, onExplore, showOverlay = true }) {
   return (
-    <div className="relative isolate overflow-hidden bg-gray-900 py-24 sm:py-32 flex flex-col md:flex-row">
-      <img
-        alt=""
-        src={backgroundImage}
-        className="absolute inset-0 -z-10 h-full w-full object-cover object-right md:object-center"
-      />
-      <div className="flex-1 p-6 lg:p-8">
-        <h2 className="text-6xl text-outline font-extrabold tracking-tight text-gray sm:text-6xl mt-8 text-center">
-          {title}
-        </h2>
-        <div className="mx-auto mt-5  text-center">
-          <div
-            className={` pb-4    tracking-wide ${isFadingOut ? 'fade-out-left' : 'fade-in-right'}`}
-          >
-            <h4 className="text-3xl description-outline ">{descriptions[descriptionIndex]}</h4>
-          </div>
-          {/* Use passed navigation logic */}
-          <button
-            onClick={() => handleShowMoreWithParams(title, descriptions, videoSrc)}
-            className="
-                            bg-gradient-to-b from-gray-100 to-gray-300 
-                            text-gray-800 font-semibold 
-                            px-8 py-2
-                            rounded-xl 
-                            shadow-lg 
-                            border border-gray-400 
-                            hover:from-gray-200 hover:to-gray-200 
-                            hover:shadow-xl 
-                            active:scale-95 
-                            transition duration-300 ease-in-out"
-          >
-            Show More
-          </button>
-        </div>
-      </div>
-      {/* Video section with styling */}
-      <div className="PrincipalAtraticionsShower flex-1">
+    <div className="tour-tile">
+      <div className="tour-tile-media">
         <video autoPlay loop muted playsInline preload="auto">
           <source src={videoSrc} type="video/mp4" />
         </video>
       </div>
+
+      {showOverlay ? (
+        <div className="tour-tile-overlay">
+          <h3 className="tour-tile-title">{title}</h3>
+          {subtitle ? <p className="tour-tile-subtitle">{subtitle}</p> : null}
+        </div>
+      ) : null}
+
+      <button onClick={onExplore} className="tour-tile-cta tour-tile-cta--corner">
+        <span className="tour-cta-icon">→</span>
+        <span className="tour-cta-text">Explorar</span>
+      </button>
     </div>
   );
+}
+
+function DetailPanel({ descriptions, subtitle, title, onExplore, mode = 'default' }) {
+  if (mode === 'fullText') {
+    const match = title.match(/^The\s+(.*)$/i);
+    const prefix = match ? 'The' : '';
+    const mainTitle = match ? match[1] : title;
+    return (
+      <div className="tour-detail-panel">
+        <div className="tour-detail-box tour-detail-box--header">
+          <h3 className="tour-detail-title">
+            {prefix ? <span className="tour-detail-prefix">{prefix} </span> : null}
+            <span className="tour-detail-outline">{mainTitle}</span>
+          </h3>
+          {subtitle ? <p className="tour-detail-text">{subtitle}</p> : null}
+        </div>
+        <div className="tour-detail-box">
+          {descriptions[1] ? <p className="tour-detail-text">{descriptions[1]}</p> : null}
+          {descriptions[2] ? <p className="tour-detail-text">{descriptions[2]}</p> : null}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tour-detail-panel">
+      <div className="tour-detail-box">
+        <p className="tour-detail-text">{descriptions[1] ?? subtitle}</p>
+      </div>
+      <div className="tour-detail-box">
+        <p className="tour-detail-text">{descriptions[2] ?? ''}</p>
+      </div>
+    </div>
+  );
+}
+
+export function LeftMediaRow({ title, descriptions = [], videoSrc, handleShowMoreWithParams }) {
+  const subtitle = descriptions[0] ?? '';
+  return (
+    <div className="tour-row">
+      <TourTile
+        title={title}
+        subtitle={subtitle}
+        videoSrc={videoSrc}
+        onExplore={() => handleShowMoreWithParams(title, descriptions, videoSrc)}
+        showOverlay={false}
+      />
+      <DetailPanel
+        descriptions={descriptions}
+        subtitle={subtitle}
+        title={title}
+        onExplore={() => handleShowMoreWithParams(title, descriptions, videoSrc)}
+        mode="fullText"
+      />
+    </div>
+  );
+}
+
+export function RightMediaRow({ title, descriptions = [], videoSrc, handleShowMoreWithParams }) {
+  const subtitle = descriptions[0] ?? '';
+  return (
+    <div className="tour-row tour-row--reverse">
+      <TourTile
+        title={title}
+        subtitle={subtitle}
+        videoSrc={videoSrc}
+        onExplore={() => handleShowMoreWithParams(title, descriptions, videoSrc)}
+        showOverlay={false}
+      />
+      <DetailPanel
+        descriptions={descriptions}
+        subtitle={subtitle}
+        title={title}
+        onExplore={() => handleShowMoreWithParams(title, descriptions, videoSrc)}
+        mode="fullText"
+      />
+    </div>
+  );
+}
+
+export default function CardComp(props) {
+  return <LeftMediaRow {...props} />;
 }

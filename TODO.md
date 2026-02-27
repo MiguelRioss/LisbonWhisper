@@ -43,7 +43,7 @@ Alt-C shortcut
 
 ### FOOTER
 
-- [ ] ✅ Adicionar foto de selo com as letras do certificado
+- [ ] ✅ Adicionar foto de selo com as letras do certificado (RENAT 1242)
   - Procurar imagem apropriada (Ex: selo turístico, certificado oficial)
   - Inserir imagem no footer
 

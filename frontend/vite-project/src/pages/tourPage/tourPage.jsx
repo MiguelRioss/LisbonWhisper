@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import GenericCarousel from '../GenericCarrousel';
+import GenericCarousel from '../../components/GenericCarrousel';
 import TourInfoContainer from './TourInfoContainer';
-import WeeklyGrid from '../calendarTool/WeeklyGrid';
+import WeeklyGrid from '../../components/calendarTool/WeeklyGrid';
 
 import img1 from '../../res/pexels-hillaryfox-1615815.jpg';
 import img2 from '../../res/pexels-pixabay-461936.jpg';
@@ -30,9 +30,11 @@ function TourPage({ bookings, loading, error, createBookingHandler, refetchBooki
     }
   };
 
+  const tourName = tourData.title ?? tourData.name ?? '';
   return (
     <div className="section-background">
       <GenericCarousel
+      title = {tourName}
         items={[
           { text: 'First slide', imgSrc: img1 },
           { text: 'Second slide', imgSrc: img2 },

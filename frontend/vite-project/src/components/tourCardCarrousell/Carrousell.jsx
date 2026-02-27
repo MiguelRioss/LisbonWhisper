@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import CardComp from './CardComponent';
+import { LeftMediaRow, RightMediaRow } from './CardComponent';
 
 function Carrousel({ cardData }) {
   const navigate = useNavigate();
+  const sectionRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   const handleNavigateToTourPage = (title, descriptions, videoSrc) => {
     navigate(`/tour/${title.replace(/\s+/g, '-').toLowerCase()}`, {
@@ -13,60 +13,51 @@ function Carrousel({ cardData }) {
     });
   };
 
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div
-      id="carouselExampleIndicators"
-      className="carousel carousel-slide slide"
-      data-bs-ride="carousel"
-    >
-      <div className="carousel-indicators">
-        {cardData.map((_, index) => (
-          <button
-            key={index}
-            type="button"
-            data-bs-target="#carouselExampleIndicators"
-            data-bs-slide-to={index}
-            className={index === 0 ? 'active' : ''}
-            aria-current={index === 0 ? 'true' : undefined}
-            aria-label={`Slide ${index + 1}`}
-          ></button>
-        ))}
+    <div id="tours" className="tours-section" ref={sectionRef}>
+      <div className="tours-header">
+        <h2 className={`tours-header-title ${isVisible ? 'fade-left' : 'fade-left-init'}`}>
+          Our <span className="tours-header-outline">Walking Tours</span>
+        </h2>
+        <img
+          src="/tour-route.png"
+          alt="Tour route"
+          className={`tours-header-image ${isVisible ? 'fade-left' : 'fade-left-init'} fade-left-delay`}
+        />
       </div>
 
-      <div className="carousel-inner">
-        {cardData.map((data, index) => (
-          <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
-            {/* Pass navigation logic to CardComp */}
-            <CardComp
+      <div className="tours-grid">
+        {cardData.map((data, index) => {
+          const RowComponent = index % 2 === 0 ?   RightMediaRow: LeftMediaRow;
+          return (
+            <RowComponent
+              key={index}
               title={data.title}
               descriptions={data.descriptions}
               videoSrc={data.videoSrc}
-              backgroundImage={data.backgroundImage}
-              handleShowMoreWithParams={handleNavigateToTourPage} // Pass function
+              handleShowMoreWithParams={handleNavigateToTourPage}
             />
-          </div>
-        ))}
+          );
+        })}
       </div>
-
-      {/* Carousel controls */}
-      <button
-        className="carousel-control-prev"
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide="prev"
-      >
-        <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span className="visually-hidden">Previous</span>
-      </button>
-      <button
-        className="carousel-control-next"
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide="next"
-      >
-        <span className="carousel-control-next-icon" aria-hidden="true"></span>
-        <span className="visually-hidden">Next</span>
-      </button>
     </div>
   );
 }

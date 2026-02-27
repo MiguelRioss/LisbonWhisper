@@ -20,7 +20,7 @@ function TourInfoContainer({ tourData }) {
         {/* Title Row */}
         <div className="row mb-5 text-center">
           <div className="col">
-            <h1 className="tour-title">Miradouro's Walking Tour</h1>
+            <h1 className="tour-title">{title}</h1>
           </div>
         </div>
         {/* Description and Contact Us Row */}
