@@ -1,14 +1,37 @@
 import { Disclosure } from '@headlessui/react';
+import { useEffect, useState } from 'react';
 import MobileMenu from './MobileMenu';
 import Logo from './Logo';
 import NavigationLinks from './NavigationLinks';
 // import ProfileDropdown from './ProfileDropdown';
 
 export default function Navbar({ navigation, logo }) {
+  const [isCompact, setIsCompact] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setIsCompact(window.scrollY > 10);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <Disclosure as="nav" className="bg-gray-800 z-50">
-      <div className="mx-4 max-w-8xl px-10 py-2 sm:px-6 lg:px-8">
-        <div className="relative flex h-16 items-center justify-between">
+    <Disclosure
+      as="nav"
+      className="bg-gray-800/80 backdrop-blur-md z-50 fixed top-0 left-0 right-0 w-full"
+    >
+      <div
+        className={`mx-auto max-w-8xl px-6 sm:px-6 lg:px-8 transition-all duration-300 ${
+          isCompact ? 'py-1' : 'py-2'
+        }`}
+      >
+        <div
+          className={`relative flex items-center justify-between transition-all duration-300 ${
+            isCompact ? 'h-12' : 'h-16'
+          }`}
+        >
           {/* Mobile Menu */}
           <MobileMenu />
 

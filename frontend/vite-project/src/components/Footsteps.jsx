@@ -1,50 +1,81 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import LeftStepComponent from './LeftStepComponent';
 import RightStepComponent from './RightStepComponent';
 
 export default function Footsteps() {
   const startTop = 12;
-  const stepGap = 1.8;
-  const maxTop = 94;
+  const stepGap = 4.2;
+  const maxTop = 93;
   const sideYOffset = 0.6;
-  const curveAmplitude = 90;
+  const curveAmplitude = 0;
+  const baseCurve = 260;
   const curveFrequency = 0.22;
   const curvePhase = Math.PI / 2;
-  const rotateAmplitude = 34;
+  const leftBaseRotate = 0;
+  const rightBaseRotate = 0;
+  const curveAngleMultiplier = 0;
+  const angleSample = 0.45;
+  const containerRef = useRef(null);
+  const [containerHeight, setContainerHeight] = useState(0);
+  const [timeProgressMs, setTimeProgressMs] = useState(0);
   // Manual per-step overrides. Example:
-  // 1: { rotate: 28, offsetX: -10, offsetY: 6 },
-  // 2: { curve: 140, offsetX: 20 },
+  // 1: { rotate: 10, offsetX: -10, offsetY: 6 }, // rotate is an offset
+  // 2: { curve: 140, offsetX: 20 }, // curve is an offset from baseCurve
   const stepOverrides = {
-    15: { rotate: -30, curve: -10 },
-    16: { rotate: -30, curve: -10 },
-    17: { rotate: -30, curve: 40 },
-    18: { rotate: -30, curve: 40 },
-    19: { rotate: -45, curve: 110 },
-    20: { rotate: -45, curve: 110 },
-    21: { rotate: -55, curve: 160 },
-    22: { rotate: -50, curve: 180 },
-    23: { rotate: -5, curve: 240 },
-    24: { rotate: 29, curve: 200 },
-    25: { rotate: 39, curve: 240 },
-    26: { rotate: 39, curve: 175 },
-    27: { rotate: 39, curve: 195 },
-    28: { rotate: 39, curve: 145 },
-    29: { rotate: 28, curve: 120 },
-    30: { rotate: 18, curve: 90 },
-  };
-  const subSteps = 1;
+    16: { curve: -120, rotate: 50, offsetX: -70, offsetY: -50 },
+    17: { curve: -120, rotate: 50, offsetX: -110, offsetY: -100 },
+    18: { curve: -120, rotate: -10, offsetX: -290, offsetY: 320 },
+19:{curve: -120, rotate: -10, offsetX: -290, offsetY: 280 },
+20:{curve: -120, rotate: -10, offsetX: -290, offsetY: 420 },
 
-  const buildStep = (index, top, sequenceIndex, allowOverride) => {
-    const override = allowOverride ? stepOverrides[index] : null;
-    const curveBase = Math.sin(index * curveFrequency + curvePhase) * curveAmplitude;
-    const rotateBase = Math.cos(index * curveFrequency + curvePhase) * rotateAmplitude;
-    const curve = override?.curve ?? curveBase;
-    const rotate = override?.rotate ?? rotateBase;
+};
+  const subSteps = 0;
+
+  const getOverride = (index) => {
+    if (Number.isInteger(index)) {
+      return stepOverrides[index] ?? null;
+    }
+    const lowerIndex = Math.floor(index);
+    const upperIndex = Math.ceil(index);
+    if (lowerIndex === upperIndex) return null;
+    const lower = stepOverrides[lowerIndex];
+    const upper = stepOverrides[upperIndex];
+    if (!lower || !upper) return null;
+    const t = index - lowerIndex;
+    return {
+      curve: lower.curve + (upper.curve - lower.curve) * t,
+      rotate: lower.rotate + (upper.rotate - lower.rotate) * t,
+    };
+  };
+
+  const getCurveValue = (index) => {
+    const override = getOverride(index);
+    if (override && typeof override.curve === 'number') return baseCurve + override.curve;
+    return Math.sin(index * curveFrequency + curvePhase) * curveAmplitude;
+  };
+
+  const getCurveAngle = (index) => {
+    const prev = getCurveValue(index - angleSample);
+    const next = getCurveValue(index + angleSample);
+    const dx = next - prev;
+    const dy =
+      ((angleSample * 2 * stepGap) / 100) *
+      (containerHeight || containerRef.current?.getBoundingClientRect().height || 1);
+    return (Math.atan2(dx, dy) * 180) / Math.PI;
+  };
+
+  const buildStep = (index, top, sequenceIndex) => {
+    const override = getOverride(index);
+    const curve = baseCurve + (override?.curve ?? 0);
     const offsetX = override?.offsetX ?? 0;
     const offsetY = override?.offsetY ?? 0;
     const side = override?.side ?? (sequenceIndex % 2 === 0 ? 'left' : 'right');
+    const baseRotate = side === 'left' ? leftBaseRotate : rightBaseRotate;
+    const rotate =
+      baseRotate + (override?.rotate ?? 0) + getCurveAngle(index) * curveAngleMultiplier;
     const adjustedTop = top + (side === 'right' ? sideYOffset : 0);
     return {
+      id: sequenceIndex,
       side,
       top: adjustedTop,
       curve,
@@ -52,47 +83,110 @@ export default function Footsteps() {
       offsetX,
       offsetY,
       delay: sequenceIndex * 120,
+      showLabel: false,
+      label: 0,
     };
   };
 
-  const baseSteps = [];
-  for (let i = 0, top = startTop; top <= maxTop; i += 1, top = startTop + i * stepGap) {
-    baseSteps.push({ index: i, top });
-  }
-
   const steps = [];
-  let sequenceIndex = 0;
-  for (let i = 0; i < baseSteps.length; i += 1) {
-    const base = baseSteps[i];
-    steps.push(buildStep(base.index, base.top, sequenceIndex, true));
-    sequenceIndex += 1;
+  const stepCount = Math.floor((maxTop - startTop) / stepGap) + 1;
+  for (let i = 0; i < stepCount; i += 1) {
+    const stepNumber = i + 1;
+    const top = startTop + i * stepGap;
+    steps.push(buildStep(stepNumber, top, i));
 
-    if (i === baseSteps.length - 1) continue;
-    const nextTop = baseSteps[i + 1].top;
+    if (subSteps === 0 || i === stepCount - 1) continue;
+    const nextTop = startTop + (i + 1) * stepGap;
     for (let s = 1; s <= subSteps; s += 1) {
       const ratio = s / (subSteps + 1);
-      const t = base.index + ratio;
-      const top = base.top + (nextTop - base.top) * ratio;
-      steps.push(buildStep(t, top, sequenceIndex, false));
-      sequenceIndex += 1;
+      const t = stepNumber + ratio;
+      const topSub = top + (nextTop - top) * ratio;
+      steps.push(buildStep(t, topSub, steps.length));
     }
   }
 
+  const orderById = new Map();
+  [...steps]
+    .sort((a, b) => a.top - b.top || a.id - b.id)
+    .forEach((step, orderIndex) => {
+      orderById.set(step.id, orderIndex);
+    });
+
+  useEffect(() => {
+    let rafId = null;
+    const updateHeight = () => {
+      if (!containerRef.current) return;
+      setContainerHeight(containerRef.current.getBoundingClientRect().height);
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
+
+  useEffect(() => {
+    let rafId = null;
+    const start = performance.now();
+    const totalSteps = steps.length || 1;
+    const perStepDelay = 140;
+    const fadeInDuration = 420;
+    const visibleDuration = 1800;
+    const fadeOutDuration = 520;
+    const loopDuration =
+      totalSteps * perStepDelay + fadeInDuration + visibleDuration + fadeOutDuration + 800;
+
+    const tick = (now) => {
+      const elapsed = now - start;
+      setTimeProgressMs(elapsed % loopDuration);
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => {
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
   return (
-    <div className="center-steps" aria-hidden="true">
+    <div className="center-steps" aria-hidden="true" ref={containerRef}>
       {steps.map((step, index) => {
         const className = `center-step ${step.side === 'left' ? 'step-left' : 'step-right'}`;
+        const perStepDelay = 140;
+        const fadeInDuration = 420;
+        const visibleDuration = 1800;
+        const fadeOutDuration = 520;
+        const stepStart = index * perStepDelay;
+        const stepEnd = stepStart + fadeInDuration + visibleDuration + fadeOutDuration;
+        let stepOpacity = 0;
+        if (timeProgressMs <= stepStart) {
+          stepOpacity = 0;
+        } else if (timeProgressMs <= stepStart + fadeInDuration) {
+          stepOpacity = (timeProgressMs - stepStart) / fadeInDuration;
+        } else if (timeProgressMs <= stepStart + fadeInDuration + visibleDuration) {
+          stepOpacity = 1;
+        } else if (timeProgressMs <= stepEnd) {
+          stepOpacity = 1 - (timeProgressMs - (stepStart + fadeInDuration + visibleDuration)) / fadeOutDuration;
+        } else {
+          stepOpacity = 0;
+        }
         const style = {
           top: `${step.top}%`,
           '--step-curve': `${step.curve}px`,
           '--step-rotate': `${step.rotate}deg`,
           '--step-offset-x': `${step.offsetX}px`,
           '--step-offset-y': `${step.offsetY}px`,
+          opacity: stepOpacity,
+          transition: 'opacity 300ms ease',
         };
         const boxClass = `step-box ${step.side === 'left' ? 'box-left' : 'box-right'}`;
+        const labelClass = `step-label ${step.side === 'left' ? 'step-label-left' : 'step-label-right'}`;
         return (
           <React.Fragment key={index}>
             <div className={boxClass} style={style} />
+            {step.showLabel ? (
+              <span className={labelClass} style={style}>
+                {(orderById.get(step.id) ?? 0) + 1}
+              </span>
+            ) : null}
             {step.side === 'left' ? (
               <LeftStepComponent
                 className={className}

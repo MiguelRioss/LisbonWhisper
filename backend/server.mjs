@@ -49,6 +49,14 @@ async function startServer() {
   });
 
   app.get('/bookings', whispers_API.getBookings);
+  // app.get('/bookings/:id', whispers_API.getBookingById);
+
+  // app.get('/getStoryTeller', whispers_API.getStoryTellers);
+  // app.get('/getStoryTeller/:id', whispers_API.getStoryTellerById);
+
+  // app.get('/walkingTours', whispers_API.getWalkingTours);
+  // app.get('/walkingTours/:id', whispers_API.getWalkingTourById);
+
   app.post('/bookings', whispers_API.createBooking);
 
   app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));

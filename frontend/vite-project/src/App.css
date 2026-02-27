@@ -59,6 +59,7 @@ select {
     calc(var(--step-curve, 0px) + var(--step-offset-x, 0px)),
     var(--step-offset-y, 0px)
   );
+  display: none;
 }
 
 .step-box.box-left {
@@ -107,7 +108,7 @@ select {
       calc(var(--step-curve, 0px) + var(--step-offset-x, 0px)),
       var(--step-offset-y, 0px)
     )
-    rotate(calc(var(--step-rotate, 0deg) - 8deg));
+    rotate(calc(var(--step-rotate, 0deg)));
 }
 
 .step-right {
@@ -115,7 +116,7 @@ select {
       calc(var(--step-curve, 0px) + var(--step-offset-x, 0px)),
       var(--step-offset-y, 0px)
     )
-    rotate(calc(var(--step-rotate, 0deg) + 6deg));
+    rotate(calc(var(--step-rotate, 0deg)));
 }
 
 .step-active {
@@ -484,7 +485,6 @@ font-style: italic;  color: #000000;
   align-items: stretch;
   gap: 32px;
   width: 100%;
-  outline: 2px dashed #ff2d2d;
   padding: 18px;
 }
 
@@ -883,7 +883,7 @@ font-style: italic;  color: #000000;
 .hero-scroll-cta--bottom {
   position: absolute;
   left: 50%;
-  bottom: 20%;
+  bottom: 4%;
   transform: translateX(-50%);
 }
 
