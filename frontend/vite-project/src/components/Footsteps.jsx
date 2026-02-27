@@ -150,10 +150,10 @@ export default function Footsteps() {
     <div className="center-steps" aria-hidden="true" ref={containerRef}>
       {steps.map((step, index) => {
         const className = `center-step ${step.side === 'left' ? 'step-left' : 'step-right'}`;
-        const perStepDelay = 140;
-        const fadeInDuration = 420;
-        const visibleDuration = 1800;
-        const fadeOutDuration = 520;
+        const perStepDelay = 220;
+        const fadeInDuration = 700;
+        const visibleDuration = 2400;
+        const fadeOutDuration = 800;
         const stepStart = index * perStepDelay;
         const stepEnd = stepStart + fadeInDuration + visibleDuration + fadeOutDuration;
         let stepOpacity = 0;

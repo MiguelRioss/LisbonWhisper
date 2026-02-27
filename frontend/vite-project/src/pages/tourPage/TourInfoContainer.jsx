@@ -11,7 +11,7 @@ function TourInfoContainer({ tourData }) {
   }, []);
 
   return (
-    <div className="tour-page-background text-white py-10">
+    <div className="section-background text-white py-10">
       {' '}
       {/* Remove fixed height to allow growth */}
       <div className="container mx-auto flex flex-col justify-between">
@@ -19,9 +19,6 @@ function TourInfoContainer({ tourData }) {
         {/* Flexbox to distribute space */}
         {/* Title Row */}
         <div className="row mb-5 text-center">
-          <div className="col">
-            <h1 className="tour-title">{title}</h1>
-          </div>
         </div>
         {/* Description and Contact Us Row */}
         <div className="tour-container row mt-5 flex-grow">

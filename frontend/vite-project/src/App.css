@@ -241,10 +241,7 @@ em {
   letter-spacing: 0.02em;
 }
 
-.tour-page-background {
-  background: linear-gradient(to bottom, #202137, #0a0a0a, #12131f);
-  min-height: 100vh;
-}
+
 
 .tour-title,.carousel-slide-title {
   font-family: var(--font-primary);

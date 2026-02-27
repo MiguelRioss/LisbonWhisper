@@ -47,6 +47,16 @@ export default function Navbar({ navigation, logo }) {
             </div>
           </div>
 
+          <div className="hidden md:flex items-center">
+            <a
+              href="/walking-tours"
+              className="inline-flex items-center gap-2 rounded-full border border-white/60 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-white hover:text-gray-900 no-underline"
+            >
+              Explore Our Tours
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+
           {/* Profile Dropdown (disabled for now)
           <div>
             <ProfileDropdown />
