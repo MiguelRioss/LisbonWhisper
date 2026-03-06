@@ -213,7 +213,7 @@
   }
 
   .grid-container {
-    min-width: 840px;
+    min-width: calc(100% * 7 / 3);
   }
 }
 
