@@ -26,13 +26,19 @@ async function startServer() {
 
 
   const allowedOrigins = [
-  'http://localhost:5173', 
-  'https://lisbonwhisper.com'
-];
+    'http://localhost:5173',
+    'https://lisbonwhisper.com',
+    'https://www.lisbonwhisper.com',
+  ];
 
   app.use(
     cors({
-      origin: allowedOrigins,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const isAllowed =
+          allowedOrigins.includes(origin) || /https:\/\/.*\.vercel\.app$/.test(origin);
+        return isAllowed ? callback(null, true) : callback(new Error('Not allowed by CORS'));
+      },
       methods: 'GET,POST,PUT,DELETE',
       credentials: true,
     })

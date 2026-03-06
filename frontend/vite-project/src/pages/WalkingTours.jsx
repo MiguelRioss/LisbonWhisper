@@ -70,7 +70,7 @@ export default function WalkingTours() {
       <section className="walking-intro">
         <div className="walking-intro-inner">
           <div className="walking-intro-copy">
-            <h2 className="walking-intro-title">Walk slow, see more</h2>
+            <h2 className="walking-intro-title">Walk Slow, See More</h2>
             <p className="walking-intro-text">
               Our walking tours are crafted for travelers who want to feel the rhythm of Lisbon.
               We keep groups small, mix iconic sights with hidden alleys, and leave room for

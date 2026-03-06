@@ -8,7 +8,8 @@ export default function Footsteps() {
   const maxTop = 93;
   const sideYOffset = 0.6;
   const curveAmplitude = 0;
-  const baseCurve = 260;
+  const [layoutScale, setLayoutScale] = useState(1);
+  const baseCurve = 260 * layoutScale;
   const curveFrequency = 0.22;
   const curvePhase = Math.PI / 2;
   const leftBaseRotate = 0;
@@ -50,7 +51,9 @@ export default function Footsteps() {
 
   const getCurveValue = (index) => {
     const override = getOverride(index);
-    if (override && typeof override.curve === 'number') return baseCurve + override.curve;
+    if (override && typeof override.curve === 'number') {
+      return baseCurve + override.curve * layoutScale;
+    }
     return Math.sin(index * curveFrequency + curvePhase) * curveAmplitude;
   };
 
@@ -66,9 +69,9 @@ export default function Footsteps() {
 
   const buildStep = (index, top, sequenceIndex) => {
     const override = getOverride(index);
-    const curve = baseCurve + (override?.curve ?? 0);
-    const offsetX = override?.offsetX ?? 0;
-    const offsetY = override?.offsetY ?? 0;
+    const curve = baseCurve + (override?.curve ?? 0) * layoutScale;
+    const offsetX = (override?.offsetX ?? 0) * layoutScale;
+    const offsetY = (override?.offsetY ?? 0) * layoutScale;
     const side = override?.side ?? (sequenceIndex % 2 === 0 ? 'left' : 'right');
     const baseRotate = side === 'left' ? leftBaseRotate : rightBaseRotate;
     const rotate =
@@ -118,9 +121,24 @@ export default function Footsteps() {
       if (!containerRef.current) return;
       setContainerHeight(containerRef.current.getBoundingClientRect().height);
     };
+    const updateScale = () => {
+      const width = window.innerWidth || 1200;
+      if (width <= 600) {
+        setLayoutScale(0.35);
+      } else if (width <= 900) {
+        setLayoutScale(0.6);
+      } else {
+        setLayoutScale(1);
+      }
+    };
     updateHeight();
+    updateScale();
     window.addEventListener('resize', updateHeight);
-    return () => window.removeEventListener('resize', updateHeight);
+    window.addEventListener('resize', updateScale);
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+      window.removeEventListener('resize', updateScale);
+    };
   }, []);
 
   useEffect(() => {

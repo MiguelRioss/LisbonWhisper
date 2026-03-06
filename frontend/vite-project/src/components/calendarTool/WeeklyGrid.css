@@ -207,6 +207,16 @@
   }
 }
 
+@media (max-width: 900px) {
+  .weekly-grid {
+    overflow-x: auto;
+  }
+
+  .grid-container {
+    min-width: 840px;
+  }
+}
+
 .tour-info {
   margin-top: 1rem;
   padding: 1rem;

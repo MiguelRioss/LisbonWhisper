@@ -12,6 +12,7 @@ body {
   font-family: var(--font-primary);
   color: #000000;
   position: relative;
+  overflow-x: hidden;
 }
 
 html {
@@ -1075,6 +1076,28 @@ font-style: italic;  color: #000000;
   .tour-detail-panel {
     min-height: auto;
   }
+
+  .tours-header {
+    margin-left: 0;
+    padding-top: 16vh;
+    padding-bottom: 20vh;
+    align-items: center;
+    text-align: center;
+  }
+
+  .tours-header-title {
+    text-align: center;
+  }
+
+  .tours-header-image {
+    position: relative;
+    left: auto;
+    top: auto;
+    margin-top: 16px;
+    width: 200px;
+    height: 200px;
+    opacity: 0.25;
+  }
 }
 
 /* IntroContainer */
@@ -1994,6 +2017,11 @@ h1 {
     grid-template-columns: 1fr;
   }
 
+  .about-two-column--left .about-two-column-inner,
+  .about-two-column--right .about-two-column-inner {
+    grid-template-columns: 1fr;
+  }
+
   .team-carousel {
     max-width: 100%;
   }
@@ -2001,6 +2029,23 @@ h1 {
   .team-avatar {
     width: 104px;
     height: 104px;
+  }
+
+  .about-hero-title {
+    font-size: 2.2rem;
+  }
+
+  .about-section-title {
+    font-size: 1.8rem;
+  }
+
+  .about-section-text {
+    font-size: 1rem;
+  }
+
+  .about-image {
+    max-width: 100%;
+    min-height: 240px;
   }
 
   .walking-intro-inner {
@@ -2013,5 +2058,42 @@ h1 {
 
   .walking-steps-inner {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .about-hero-overlay {
+    margin: 0 8px;
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .about-hero-title {
+    font-size: 1.9rem;
+  }
+
+  .about-hero-description {
+    font-size: 0.98rem;
+  }
+
+  .about-two-column-inner {
+    gap: 28px;
+    padding: 0 16px;
+  }
+
+  .about-two-column-image {
+    justify-content: stretch;
+  }
+
+  .about-image-placeholder,
+  .about-image {
+    width: 100%;
+    max-width: 100%;
+    min-height: 240px;
+    border-radius: 18px;
+  }
+
+  .about-list li {
+    font-size: 0.95rem;
   }
 }
