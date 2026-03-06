@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import IntroCardComponent from '../IntroCardComponent';
 const localSrc = '/res/FREE_LISBON_VIDEO.mp4';
+const mobileSrc = '/res/FREE_LISBON_VIDEO-mobile.mp4';
 const posterSrc = '/res/videoPreview.png';
 
 function VideoCard() {
@@ -9,11 +10,28 @@ function VideoCard() {
   const [allowPlay, setAllowPlay] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const videoSrc = isMobile ? mobileSrc : localSrc;
 
   useEffect(() => {
     const timer = setTimeout(() => setAllowPlay(true), 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+    videoEl.load();
+    setIsPlaying(false);
+  }, [videoSrc]);
 
   useEffect(() => {
     if (!allowPlay || !isVisible) return;
@@ -60,7 +78,7 @@ function VideoCard() {
         muted
         playsInline
         preload="metadata"
-        src={localSrc}
+        src={videoSrc}
         poster={posterSrc}
         onPlaying={() => setIsPlaying(true)}
       />

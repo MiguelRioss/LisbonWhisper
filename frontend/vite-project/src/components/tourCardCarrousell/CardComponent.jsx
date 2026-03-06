@@ -5,6 +5,11 @@ const posterMap = {
   '/res/LisbonDownTown.mp4': '/res/9bfee964e2a50ec45dc449890ec9ed42.jpg',
 };
 
+const mobileVideoMap = {
+  '/res/Free_videoLisbon_AI_GENERATED.mp4': '/res/Free_videoLisbon_AI_GENERATED-mobile.mp4',
+  '/res/LisbonDownTown.mp4': '/res/LisbonDownTown-mobile.mp4',
+};
+
 function TourTile({ title, subtitle, videoSrc, onExplore, showOverlay = true }) {
   const posterSrc = posterMap[videoSrc] || '/res/pexels-fotios-photos-1599497.jpg';
   const tileRef = useRef(null);
@@ -12,11 +17,28 @@ function TourTile({ title, subtitle, videoSrc, onExplore, showOverlay = true }) 
   const [allowPlay, setAllowPlay] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const resolvedVideoSrc = isMobile ? mobileVideoMap[videoSrc] || videoSrc : videoSrc;
 
   useEffect(() => {
     const timer = setTimeout(() => setAllowPlay(true), 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+    videoEl.load();
+    setIsPlaying(false);
+  }, [resolvedVideoSrc]);
 
   useEffect(() => {
     if (!allowPlay || !isVisible) return;
@@ -59,7 +81,7 @@ function TourTile({ title, subtitle, videoSrc, onExplore, showOverlay = true }) 
           poster={posterSrc}
           onPlaying={() => setIsPlaying(true)}
         >
-          <source src={videoSrc} type="video/mp4" />
+          <source src={resolvedVideoSrc} type="video/mp4" />
         </video>
       </div>
 
