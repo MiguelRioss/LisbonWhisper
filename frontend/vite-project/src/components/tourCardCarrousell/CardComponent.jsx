@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const posterMap = {
   '/res/Free_videoLisbon_AI_GENERATED.mp4': '/res/f03ef0dcb35a8e63d746cfa4741a4f96.jpg',
@@ -7,10 +7,35 @@ const posterMap = {
 
 function TourTile({ title, subtitle, videoSrc, onExplore, showOverlay = true }) {
   const posterSrc = posterMap[videoSrc] || '/res/pexels-fotios-photos-1599497.jpg';
+  const videoRef = useRef(null);
+  const [allowPlay, setAllowPlay] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAllowPlay(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!allowPlay) return;
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+    const playPromise = videoEl.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => {});
+    }
+  }, [allowPlay]);
+
   return (
     <div className="tour-tile">
       <div className="tour-tile-media">
-        <video autoPlay loop muted playsInline preload="metadata" poster={posterSrc}>
+        <video
+          ref={videoRef}
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          poster={posterSrc}
+        >
           <source src={videoSrc} type="video/mp4" />
         </video>
       </div>
