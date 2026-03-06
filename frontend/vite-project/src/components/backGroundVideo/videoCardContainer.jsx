@@ -5,8 +5,10 @@ const posterSrc = '/res/videoPreview.png';
 
 function VideoCard() {
   const videoRef = useRef(null);
+  const containerRef = useRef(null);
   const [allowPlay, setAllowPlay] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => setAllowPlay(true), 3000);
@@ -14,17 +16,34 @@ function VideoCard() {
   }, []);
 
   useEffect(() => {
-    if (!allowPlay) return;
+    if (!allowPlay || !isVisible) return;
     const videoEl = videoRef.current;
     if (!videoEl) return;
     const playPromise = videoEl.play();
     if (playPromise && typeof playPromise.catch === 'function') {
       playPromise.catch(() => {});
     }
-  }, [allowPlay]);
+  }, [allowPlay, isVisible]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+        if (!entry.isIntersecting && videoRef.current) {
+          videoRef.current.pause();
+          setIsPlaying(false);
+        }
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="hero-layer relative w-full h-screen overflow-hidden">
+    <div className="hero-layer relative w-full h-screen overflow-hidden" ref={containerRef}>
       <div className="absolute inset-0 z-10 mt-10">
         <IntroCardComponent />
       </div>
