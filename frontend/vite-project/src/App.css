@@ -1096,7 +1096,8 @@ font-style: italic;  color: #000000;
     margin-top: 16px;
     width: 200px;
     height: 200px;
-    opacity: 0.25;
+    opacity: 1;
+    filter: brightness(0) saturate(100%);
   }
 }
 
@@ -2022,6 +2023,14 @@ h1 {
     grid-template-columns: 1fr;
   }
 
+  .about-two-column-content {
+    order: 1;
+  }
+
+  .about-two-column-image {
+    order: 2;
+  }
+
   .team-carousel {
     max-width: 100%;
   }
@@ -2095,5 +2104,13 @@ h1 {
 
   .about-list li {
     font-size: 0.95rem;
+  }
+
+  .introText {
+    padding-top: 36px;
+  }
+
+  .introLogo {
+    margin-top: 10px;
   }
 }
