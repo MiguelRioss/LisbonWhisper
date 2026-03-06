@@ -1,5 +1,6 @@
 import IntroCardComponent from '../IntroCardComponent';
-const localSrc = '../../res/FREE_LISBON_VIDEO.mp4';
+const localSrc = '/res/FREE_LISBON_VIDEO.mp4';
+const posterSrc = '/res/videoPreview.png';
 
 function VideoCard() {
   return (
@@ -18,8 +19,9 @@ function VideoCard() {
         loop
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         src={localSrc}
+        poster={posterSrc}
       />
     </div>
   );

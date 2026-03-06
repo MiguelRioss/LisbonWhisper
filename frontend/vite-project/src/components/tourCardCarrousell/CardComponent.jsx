@@ -1,10 +1,16 @@
 ﻿import React from 'react';
 
+const posterMap = {
+  '/res/Free_videoLisbon_AI_GENERATED.mp4': '/res/f03ef0dcb35a8e63d746cfa4741a4f96.jpg',
+  '/res/LisbonDownTown.mp4': '/res/9bfee964e2a50ec45dc449890ec9ed42.jpg',
+};
+
 function TourTile({ title, subtitle, videoSrc, onExplore, showOverlay = true }) {
+  const posterSrc = posterMap[videoSrc] || '/res/pexels-fotios-photos-1599497.jpg';
   return (
     <div className="tour-tile">
       <div className="tour-tile-media">
-        <video autoPlay loop muted playsInline preload="auto">
+        <video autoPlay loop muted playsInline preload="metadata" poster={posterSrc}>
           <source src={videoSrc} type="video/mp4" />
         </video>
       </div>
