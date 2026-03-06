@@ -830,6 +830,49 @@ font-style: italic;  color: #000000;
   inset: 0;
 }
 
+.tour-video-poster,
+.tour-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tour-video-poster {
+  z-index: 1;
+}
+
+.tour-video {
+  z-index: 2;
+}
+
+.hero-video-poster,
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-video-poster {
+  z-index: 0;
+}
+
+.hero-video {
+  z-index: 1;
+}
+
+.video-fade {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.video-fade.is-playing {
+  opacity: 1;
+}
+
 .tour-tile-media video {
   width: 100%;
   height: 100%;

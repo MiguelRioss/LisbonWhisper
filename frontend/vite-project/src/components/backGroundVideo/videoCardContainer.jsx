@@ -6,6 +6,7 @@ const posterSrc = '/res/videoPreview.png';
 function VideoCard() {
   const videoRef = useRef(null);
   const [allowPlay, setAllowPlay] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setAllowPlay(true), 3000);
@@ -32,8 +33,9 @@ function VideoCard() {
         <span className="hero-scroll-text">See Our Tours</span>
       </a>
 
+      <img className="hero-video-poster" src={posterSrc} alt="" aria-hidden="true" />
       <video
-        className="w-full h-full object-cover"
+        className={`hero-video video-fade ${isPlaying ? 'is-playing' : ''}`}
         ref={videoRef}
         loop
         muted
@@ -41,6 +43,7 @@ function VideoCard() {
         preload="metadata"
         src={localSrc}
         poster={posterSrc}
+        onPlaying={() => setIsPlaying(true)}
       />
     </div>
   );

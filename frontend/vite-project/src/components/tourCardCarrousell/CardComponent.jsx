@@ -9,6 +9,7 @@ function TourTile({ title, subtitle, videoSrc, onExplore, showOverlay = true }) 
   const posterSrc = posterMap[videoSrc] || '/res/pexels-fotios-photos-1599497.jpg';
   const videoRef = useRef(null);
   const [allowPlay, setAllowPlay] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setAllowPlay(true), 3000);
@@ -28,13 +29,16 @@ function TourTile({ title, subtitle, videoSrc, onExplore, showOverlay = true }) 
   return (
     <div className="tour-tile">
       <div className="tour-tile-media">
+        <img className="tour-video-poster" src={posterSrc} alt="" aria-hidden="true" />
         <video
           ref={videoRef}
+          className={`tour-video video-fade ${isPlaying ? 'is-playing' : ''}`}
           loop
           muted
           playsInline
           preload="metadata"
           poster={posterSrc}
+          onPlaying={() => setIsPlaying(true)}
         >
           <source src={videoSrc} type="video/mp4" />
         </video>
