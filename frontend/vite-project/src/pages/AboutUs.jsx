@@ -38,7 +38,11 @@ function AboutUs() {
     <div className="about-page">
       <section className="about-hero-full">
         <div className="about-hero-media">
-          <div className="about-hero-placeholder">Hero Image Placeholder</div>
+          <img
+            className="about-hero-image"
+            src="/res/image-doors.jpg"
+            alt="Lisbon doors"
+          />
         </div>
         <div className="about-hero-overlay">
           <p className="about-hero-kicker">Lisbon Whisper</p>

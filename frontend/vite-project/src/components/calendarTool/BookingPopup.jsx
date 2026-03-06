@@ -88,7 +88,7 @@ const BookingPopup = ({ createBookingHandler, tourName, tourDescriptions, date, 
               <button
                 type="button"
                 className="contact-button"
-                onClick={() => window.location.href = '/contact'} 
+                onClick={() => window.location.href = '/contact-us'} 
               >
                 Contact Us
               </button>

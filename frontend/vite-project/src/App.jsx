@@ -17,6 +17,7 @@ import ComingSoon from './pages/ComingSoon';
 import WalkingTours from './pages/WalkingTours';
 import PrivateTours from './pages/PrivateTours';
 import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
 
 const videoSrc = '/res/Free_videoLisbon_AI_GENERATED.mp4';
 const videoSrcDownTown = '/res/LisbonDownTown.mp4';
@@ -49,7 +50,7 @@ const navigation = [
   { name: 'About Us', href: '/about-us', current: false },
   { name: 'Walking Tours', href: '/walking-tours', current: false },
   { name: 'Private Tours', href: '/private-tours', current: false },
-  { name: 'Contact Us', href: '#', current: false },
+  { name: 'Contact Us', href: '/contact-us', current: false },
 ];
 
 function App() {
@@ -107,6 +108,8 @@ function App() {
         <Route path="/walking-tours" element={<WalkingTours />} />
         <Route path="/private-tours" element={<PrivateTours />} />
         <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/contact" element={<Navigate to="/contact-us" replace />} />
         <Route
           path="/tour/:tourId"
           element={
@@ -126,4 +129,3 @@ function App() {
 }
 
 export default App;
-

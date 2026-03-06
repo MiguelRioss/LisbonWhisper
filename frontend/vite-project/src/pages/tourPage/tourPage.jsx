@@ -1,5 +1,5 @@
 // TourPage.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -11,11 +11,20 @@ import img1 from '../../res/pexels-hillaryfox-1615815.jpg';
 import img2 from '../../res/pexels-pixabay-461936.jpg';
 import img3 from '../../res/pexels-fotios-photos-1599497.jpg';
 
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 function TourPage({ bookings, loading, error, createBookingHandler, refetchBookings }) {
   const location = useLocation();
+  const { tourId } = useParams();
   const tourData = location.state || {};
+  const derivedTitle = tourId ? tourId.replace(/-/g, ' ') : '';
+  const mergedTourData =
+    tourData && Object.keys(tourData).length
+      ? tourData
+      : derivedTitle
+      ? { title: derivedTitle }
+      : tourData;
+  const { hash } = location;
 
   const [availability, setAvailability] = useState([]);
 
@@ -30,9 +39,18 @@ function TourPage({ bookings, loading, error, createBookingHandler, refetchBooki
     }
   };
 
-  const tourName = tourData.title ?? tourData.name ?? '';
+  useEffect(() => {
+    if (!hash) return;
+    const target = document.querySelector(hash);
+    if (!target) return;
+    requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [hash]);
+
+  const tourName = mergedTourData.title ?? mergedTourData.name ?? '';
   return (
-    <div className="section-background">
+    <div className="home-surface">
       <GenericCarousel
       title = {tourName}
         items={[
@@ -42,9 +60,9 @@ function TourPage({ bookings, loading, error, createBookingHandler, refetchBooki
         ]}
       />
 
-      <TourInfoContainer tourData={tourData} />
+      <TourInfoContainer tourData={mergedTourData} />
 
-      <div className="section-background pt-16 pb-10 py-10 px-4">
+      <div id="time-slots" className="section-background pt-16 pb-10 py-10 px-4">
         <h2 className="text-5xl font-bold text-white mb-10 text-center">Select a Time Slot</h2>
 
         {error ? (
