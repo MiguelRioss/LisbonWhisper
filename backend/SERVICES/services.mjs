@@ -1,5 +1,7 @@
 import { sendEmailTemplate } from '../EMAIL/sendEmailTemplate.mjs';
 
+const PRICE_PER_PERSON_EUR = 39;
+
 //Este modulo Esta responsavel de recolher a data dos parametros/body etc para depois o services
 // usar sem ter que se preocupar com isso
 export default function (data) {
@@ -29,7 +31,8 @@ export default function (data) {
   }
 
   async function createBookingServices(bookingObject) {
-    const createdBooking = await data.createBooking(bookingObject);
+    const bookingForCreate = buildBookingForCreate(bookingObject);
+    const createdBooking = await data.createBooking(bookingForCreate);
 
     try {
       await sendEmailTemplate({
@@ -44,6 +47,8 @@ export default function (data) {
           BookingDate: escapeHtml(formatBookingDate(createdBooking?.date)),
           BookingTime: escapeHtml(createdBooking?.time || 'TBD'),
           Persons: escapeHtml(createdBooking?.persons || '1'),
+          PricePerPerson: escapeHtml(`${createdBooking?.pricePerPerson || PRICE_PER_PERSON_EUR} EUR`),
+          TotalPrice: escapeHtml(`${createdBooking?.totalPrice || PRICE_PER_PERSON_EUR} EUR`),
           CustomerEmail: escapeHtml(createdBooking?.email || ''),
           CustomerMessage: escapeHtml(
             createdBooking?.message ? String(createdBooking.message) : 'No additional notes.'
@@ -74,6 +79,8 @@ export default function (data) {
           BookingTime: escapeHtml(createdBooking?.time || ''),
           TourName: escapeHtml(createdBooking?.tourName || ''),
           Persons: escapeHtml(createdBooking?.persons || ''),
+          PricePerPerson: escapeHtml(`${createdBooking?.pricePerPerson || PRICE_PER_PERSON_EUR} EUR`),
+          TotalPrice: escapeHtml(`${createdBooking?.totalPrice || PRICE_PER_PERSON_EUR} EUR`),
           CustomerMessage: escapeHtml(createdBooking?.message || ''),
           WebsiteUrl: process.env.WEBSITE_URL || 'https://www.lisbonwhisper.com',
           ContactEmail: process.env.CONTACT_EMAIL || 'info@lisbonwhisper.com',
@@ -141,4 +148,32 @@ function formatBookingDate(isoDate) {
     month: 'long',
     year: 'numeric',
   });
+}
+
+function sanitizePersons(rawPersons) {
+  const parsed = Number(rawPersons);
+  if (!Number.isFinite(parsed)) return 1;
+  const rounded = Math.floor(parsed);
+  if (rounded < 1) return 1;
+  return rounded;
+}
+
+function buildBookingForCreate(input = {}) {
+  const persons = sanitizePersons(input?.persons);
+  const totalPrice = persons * PRICE_PER_PERSON_EUR;
+
+  return {
+    name: String(input?.name || '').trim(),
+    email: String(input?.email || '').trim(),
+    message: String(input?.message || '').trim(),
+    date: String(input?.date || '').trim(),
+    time: String(input?.time || '').trim(),
+    tourName: String(input?.tourName || '').trim(),
+    tourDescriptions: String(input?.tourDescriptions || '').trim(),
+    persons,
+    pricePerPerson: PRICE_PER_PERSON_EUR,
+    totalPrice,
+    currency: 'EUR',
+    createdAt: new Date().toISOString(),
+  };
 }

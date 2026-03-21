@@ -29,7 +29,7 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
       const date = new Date(monday);
       date.setDate(monday.getDate() + i);
       weekDates.push({
-        day: date.toLocaleString('en-GB ', { weekday: 'long' }),
+        day: date.toLocaleString('en-GB', { weekday: 'long' }),
         date: date.toISOString().split('T')[0],
       });
     }

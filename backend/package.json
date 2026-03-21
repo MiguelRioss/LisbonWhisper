@@ -7,7 +7,8 @@
     "start": "node server.mjs",
     "dev": "nodemon server.mjs",
     "smtp:test": "node scripts/testSmtpConnection.mjs",
-    "smtp:test:mailchimp": "node scripts/testMailchimpConnection.mjs"
+    "smtp:test:mailchimp": "node scripts/testMailchimpConnection.mjs",
+    "booking:test-email": "node scripts/testBookingServiceEmail.mjs"
   },
   "author": "",
   "license": "ISC",

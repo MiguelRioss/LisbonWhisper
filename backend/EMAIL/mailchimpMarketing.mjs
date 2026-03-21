@@ -33,6 +33,42 @@ function deriveServerPrefix(apiKey) {
   return match ? match[1].toLowerCase() : '';
 }
 
+function resolveDefaultAddressMergeField() {
+  const rawJson = String(process.env.MAILCHIMP_DEFAULT_ADDRESS_JSON || '').trim();
+  if (rawJson) {
+    try {
+      const parsed = JSON.parse(rawJson);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          addr1: String(parsed.addr1 || '').trim(),
+          addr2: String(parsed.addr2 || '').trim(),
+          city: String(parsed.city || '').trim(),
+          state: String(parsed.state || '').trim(),
+          zip: String(parsed.zip || '').trim(),
+          country: String(parsed.country || '').trim().toUpperCase(),
+        };
+      }
+    } catch {
+      // Ignore invalid JSON and fallback to discrete env vars below.
+    }
+  }
+
+  const addr1 = String(process.env.MAILCHIMP_DEFAULT_ADDRESS_ADDR1 || '').trim();
+  const city = String(process.env.MAILCHIMP_DEFAULT_ADDRESS_CITY || '').trim();
+  const country = String(process.env.MAILCHIMP_DEFAULT_ADDRESS_COUNTRY || '')
+    .trim()
+    .toUpperCase();
+  const addr2 = String(process.env.MAILCHIMP_DEFAULT_ADDRESS_ADDR2 || '').trim();
+  const state = String(process.env.MAILCHIMP_DEFAULT_ADDRESS_STATE || '').trim();
+  const zip = String(process.env.MAILCHIMP_DEFAULT_ADDRESS_ZIP || '').trim();
+
+  if (!addr1 || !city || !country) {
+    return null;
+  }
+
+  return { addr1, addr2, city, state, zip, country };
+}
+
 function resolveMailchimpConfig() {
   const apiKey = process.env.MAILCHIMP_API_KEY || '';
   const serverPrefix =
@@ -223,6 +259,8 @@ async function addOrUpdateAudienceMember(config, { email, firstName, lastName, s
   const mergeFields = {};
   if (firstName) mergeFields.FNAME = firstName;
   if (lastName) mergeFields.LNAME = lastName;
+  const defaultAddress = resolveDefaultAddressMergeField();
+  if (defaultAddress) mergeFields.ADDRESS = defaultAddress;
 
   const payload = {
     email_address: email,
