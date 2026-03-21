@@ -3,25 +3,28 @@ import React, { useEffect, useState } from 'react';
 function AboutUs() {
   const guides = [
     {
-      name: 'Pedro Santana',
+      name: 'Pedro Figueiredo',
       role: 'Tour Guide',
       description:
         "Responsible for leading tours and providing informative, engaging commentary on Lisbon's history, culture, and landmarks.",
-      image: '/res/pexels-photo-1534560.jpeg',
+      image:
+        'https://b0265ce9b8.clvaw-cdnwnd.com/2ccb01ce5441f44e1f63eb8db8873e7c/200000234-7f15b7f15d/pedro.figueiredo_2.png?ph=b0265ce9b8',
     },
     {
       name: 'Pepsi',
       role: 'Storyteller',
       description:
         "A trusted finder of Lisbon's hidden gems and secrets, crafting immersive stories that bring the city to life.",
-      image: '/res/pexels-hillaryfox-1615815.jpg',
+      image:
+        'https://b0265ce9b8.clvaw-cdnwnd.com/2ccb01ce5441f44e1f63eb8db8873e7c/200000200-2323d23242/pepsi_dog.png?ph=b0265ce9b8',
     },
     {
       name: 'Pedro Dias',
       role: 'Tour Guide',
       description:
         'Skilled in the art of storytelling, creating captivating narratives during tours and special experiences.',
-      image: '/res/pexels-pixabay-461936.jpg',
+      image:
+        'https://b0265ce9b8.clvaw-cdnwnd.com/2ccb01ce5441f44e1f63eb8db8873e7c/200000202-341d2341d5/unnamed.png?ph=b0265ce9b8',
     },
   ];
 
@@ -55,39 +58,45 @@ function AboutUs() {
       </section>
 
       <section className="about-intro">
-        <h2 className="about-section-title">About Lisbon Whisper</h2>
+        <h2 className="about-section-title">About LisbonWhisper</h2>
         <p className="about-section-text">
-          Lisbon Whisper exists to make every visit feel personal. We design immersive
-          experiences that go beyond the usual landmarks, connecting you with the city&apos;s
-          character, flavors, and untold stories.
+          Lisbon Whisper is not just a tour, it&apos;s your way into the real Lisbon.
+          <br />
+          <br />
+          We take you beyond the crowds, through hidden streets, untold stories, and
+          authentic local moments. This is where Lisbon stops being a destination... and
+          starts becoming your experience.
         </p>
       </section>
 
       <section className="about-two-column about-two-column--right">
         <div className="about-two-column-inner">
           <div className="about-two-column-content">
-            <h2 className="about-section-title">Why choose us</h2>
-            <p className="about-section-text">
-              Embark on an unforgettable journey with Lisbon Whisper, where we redefine
-              travel experiences to leave you spellbound:
-            </p>
+            <h2 className="about-section-title">Why choose Lisbon Whisper?</h2>
             <ul className="about-list">
               <li>
-                <strong>Personalized Walking Tours:</strong> Delve into Lisbon&apos;s iconic
-                landmarks and hidden gems guided by our passionate locals.
+                <strong>Authentic &amp; immersive experience:</strong> Discover Lisbon&apos;s
+                hidden secrets through unique routes, guided by passionate locals who turn
+                every walk into a living story.
               </li>
               <li>
-                <strong>Storytelling Workshops:</strong> Craft your own tales about
-                Lisbon&apos;s vibrant history and culture in interactive sessions.
+                <strong>Traditional flavors included:</strong> Enjoy authentic moments
+                with ginjinha and pastel de nata, thoughtfully integrated into the
+                journey for a truly local experience.
               </li>
               <li>
-                <strong>Private Tours:</strong> Tailored adventures for individuals or
-                small groups, ensuring an exclusive exploration of the city&apos;s treasures.
+                <strong>Full flexibility &amp; personalization:</strong> Choose between
+                guided, semi-guided, or private tours, tailored to your pace for an
+                exclusive and memorable experience.
               </li>
             </ul>
           </div>
           <div className="about-two-column-image">
-            <div className="about-image-placeholder">Image Placeholder</div>
+            <img
+              className="about-image"
+              src="/res/about-us-secttion.jpeg"
+              alt="About Lisbon Whisper"
+            />
           </div>
         </div>
       </section>

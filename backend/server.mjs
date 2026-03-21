@@ -1,9 +1,10 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import api from './API/api.mjs';
 
 import onlineData from './DATA/dataBase.mjs';
-import data from './DATA/dataBaseLocal.mjs';
+import localData from './DATA/dataBaseLocal.mjs';
 import services from './SERVICES/services.mjs';
 
 import { connectToMongo } from './DATA/mongoDb.mjs';
@@ -13,13 +14,18 @@ const PORT = 1904;
 async function startServer() {
   console.log('Start setting up server');
 
-  // Connect to MongoDB
+  let dataInit;
+
+  // Connect to MongoDB (fallback to local in-memory DB when unavailable)
   try {
     await connectToMongo();
     console.log('Connected to MongoDB');
+    dataInit = onlineData();
   } catch (err) {
-    console.error('Failed to connect to MongoDB', err);
-    process.exit(1);
+    console.warn('MongoDB unavailable, using local in-memory DB for this run.', {
+      message: err?.message || String(err),
+    });
+    dataInit = localData();
   }
 
   const app = express();
@@ -46,7 +52,6 @@ async function startServer() {
 
   app.use(express.json());
 
-  const dataInit = onlineData();
   const WhisperServices = services(dataInit);
   const whispers_API = api(WhisperServices);
 
@@ -64,6 +69,7 @@ async function startServer() {
   // app.get('/walkingTours/:id', whispers_API.getWalkingTourById);
 
   app.post('/bookings', whispers_API.createBooking);
+  app.post('/contact-form', whispers_API.sendContactForm);
 
   app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
 

@@ -5,15 +5,19 @@
   "main": "server.mjs",
   "scripts": {
     "start": "node server.mjs",
-    "dev": "nodemon server.mjs"
+    "dev": "nodemon server.mjs",
+    "smtp:test": "node scripts/testSmtpConnection.mjs",
+    "smtp:test:mailchimp": "node scripts/testMailchimpConnection.mjs"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "mongodb": "^6.16.0",
+    "nodemailer": "^7.0.13",
     "nodemon": "^3.1.9"
   }
 }

@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>New Booking Notice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f4f4f4">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f4">
+      <tr>
+        <td align="center">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 660px; background-color: #ffffff">
+            {{> hero}}
+            <tr>
+              <td style="padding: 24px; font-family: Arial, Helvetica, sans-serif; color: #111111">
+                <h1 style="margin: 0 0 14px 0; font-size: 24px; line-height: 1.3">
+                  New Booking Received
+                </h1>
+                <p style="margin: 0 0 8px 0; font-size: 15px; line-height: 1.6"><strong>Name:</strong> {{CustomerName}}</p>
+                <p style="margin: 0 0 8px 0; font-size: 15px; line-height: 1.6"><strong>Email:</strong> {{CustomerEmail}}</p>
+                <p style="margin: 0 0 8px 0; font-size: 15px; line-height: 1.6"><strong>Tour:</strong> {{TourName}}</p>
+                <p style="margin: 0 0 8px 0; font-size: 15px; line-height: 1.6"><strong>Date:</strong> {{BookingDate}}</p>
+                <p style="margin: 0 0 8px 0; font-size: 15px; line-height: 1.6"><strong>Time:</strong> {{BookingTime}}</p>
+                <p style="margin: 0 0 8px 0; font-size: 15px; line-height: 1.6"><strong>Persons:</strong> {{Persons}}</p>
+                <p style="margin: 0; font-size: 15px; line-height: 1.6"><strong>Message:</strong> {{CustomerMessage}}</p>
+              </td>
+            </tr>
+            {{> footer}}
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

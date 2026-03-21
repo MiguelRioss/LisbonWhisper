@@ -1,15 +1,27 @@
 // db.js
+import 'dotenv/config';
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri);
+let client;
 
 let bookingsCollection;
 
 export async function connectToMongo() {
-  if (!client.topology?.isConnected()) {
-    await client.connect();
+  const uri = String(process.env.MONGO_URI || '').trim();
+  if (!uri) {
+    throw new Error('MONGO_URI is empty');
   }
+  if (!uri.startsWith('mongodb://') && !uri.startsWith('mongodb+srv://')) {
+    throw new Error(
+      'Invalid MONGO_URI scheme. It must start with "mongodb://" or "mongodb+srv://"'
+    );
+  }
+
+  if (!client) {
+    client = new MongoClient(uri);
+  }
+
+  await client.connect();
 
   const db = client.db('bookingApp'); // your DB name
   bookingsCollection = db.collection('bookings');

@@ -1,8 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { sendContactForm } from '../services/contactService';
 
 function ContactUs() {
-  const handleSubmit = (event) => {
+  const [status, setStatus] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const payload = {
+      name: String(formData.get('name') || '').trim(),
+      email: String(formData.get('email') || '').trim(),
+      phone: String(formData.get('phone') || '').trim(),
+      message: String(formData.get('message') || '').trim(),
+    };
+
+    try {
+      setIsSubmitting(true);
+      setStatus('');
+      await sendContactForm(payload);
+      setStatus('Message sent successfully. We will get back to you soon.');
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      setStatus('Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -111,8 +137,13 @@ function ContactUs() {
 
                 <div className="contact-field contact-field--full">
                   <p className="contact-help">* Required fields</p>
-                  <button type="submit" className="contact-submit contact-submit--dark">
-                    Submit
+                  {status ? <p className="contact-help">{status}</p> : null}
+                  <button
+                    type="submit"
+                    className="contact-submit contact-submit--dark"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Sending...' : 'Submit'}
                   </button>
                 </div>
               </form>

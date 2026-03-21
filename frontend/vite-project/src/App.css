@@ -657,6 +657,13 @@ em {
   text-stroke: 2px rgba(0, 0, 0, 0.85);
 }
 
+@media (max-width: 600px) {
+  .carousel-hero-line {
+    font-size: clamp(4rem, 12vw, 7rem);
+    line-height: 1.02;
+  }
+}
+
 
 .logo {
   max-width: 100%;

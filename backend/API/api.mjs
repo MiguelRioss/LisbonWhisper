@@ -4,6 +4,7 @@ export default function (WhisperServices) {
   return {
     getBookings: handleRequestNoAuthorization(getBookingsAPI),
     createBooking: handleRequestNoAuthorization(createBookingAPI),
+    sendContactForm: handleRequestNoAuthorization(sendContactFormAPI),
   };
 
   async function getBookingsAPI(req, rsp) {
@@ -40,6 +41,16 @@ export default function (WhisperServices) {
       booking: createdBooking,
     };
   }
+
+  async function sendContactFormAPI(req, rsp) {
+    const contact = req.body.contact || req.body;
+    const result = await WhisperServices.sendContactFormServices(contact);
+    return {
+      statusCode: 200,
+      ...result,
+    };
+  }
+
   function handleRequestNoAuthorization(handler) {
     return async function (req, rsp) {
       try {

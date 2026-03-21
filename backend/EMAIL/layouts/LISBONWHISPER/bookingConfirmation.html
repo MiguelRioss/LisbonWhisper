@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lisbon Whisper Booking Confirmation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f4f4f4">
+    <div
+      style="
+        display: none;
+        font-size: 1px;
+        line-height: 1px;
+        max-height: 0;
+        max-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        mso-hide: all;
+      "
+    >
+      Your Lisbon Whisper booking has been received.
+    </div>
+
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      style="background-color: #f4f4f4"
+    >
+      <tr>
+        <td align="center">
+          <table
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            style="max-width: 660px; background-color: #ffffff"
+          >
+            {{> hero}}
+
+            <tr>
+              <td
+                style="
+                  padding: 24px;
+                  font-family: Arial, Helvetica, sans-serif;
+                  color: #111111;
+                "
+              >
+                <h1
+                  style="
+                    margin: 0 0 12px 0;
+                    font-size: 28px;
+                    line-height: 1.3;
+                    text-align: center;
+                  "
+                >
+                  Booking received
+                </h1>
+
+                <p
+                  style="
+                    margin: 0 0 20px 0;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    text-align: center;
+                  "
+                >
+                  Thank you for choosing Lisbon Whisper. We are excited to guide your
+                  walk through Lisbon.
+                </p>
+
+                <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6">
+                  Hi {{CustomerName}},
+                </p>
+
+                <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6">
+                  Your booking details are confirmed below:
+                </p>
+
+                <table
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  role="presentation"
+                  style="
+                    border: 1px solid #d7d7d7;
+                    border-radius: 8px;
+                    margin: 0 0 20px 0;
+                  "
+                >
+                  <tr>
+                    <td style="padding: 12px 14px; font-size: 15px; line-height: 1.6">
+                      <strong>Tour:</strong> {{TourName}}<br />
+                      <strong>Date:</strong> {{BookingDate}}<br />
+                      <strong>Time:</strong> {{BookingTime}}<br />
+                      <strong>Persons:</strong> {{Persons}}<br />
+                      <strong>Email:</strong> {{CustomerEmail}}<br />
+                      <strong>Message:</strong> {{CustomerMessage}}
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin: 0 0 18px 0; font-size: 16px; line-height: 1.6">
+                  If you need to adjust your booking, reply to this email and we will help.
+                </p>
+
+                <table
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  role="presentation"
+                  style="margin: 0 0 24px 0"
+                >
+                  <tr>
+                    <td>
+                      <a
+                        href="{{WebsiteUrl}}"
+                        style="
+                          display: inline-block;
+                          background-color: #0f2f2a;
+                          color: #ffffff;
+                          text-decoration: none;
+                          font-size: 14px;
+                          font-weight: 700;
+                          letter-spacing: 0.4px;
+                          text-transform: uppercase;
+                          padding: 12px 20px;
+                          border-radius: 6px;
+                        "
+                      >
+                        Visit Lisbon Whisper
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin: 0; font-size: 16px; line-height: 1.6">
+                  Warm regards,<br /><br />
+                  <strong>Lisbon Whisper Team</strong><br />
+                  <a
+                    href="mailto:{{ReplyEmail}}"
+                    style="color: #0f2f2a; text-decoration: underline"
+                    >{{ReplyEmail}}</a
+                  >
+                </p>
+              </td>
+            </tr>
+
+            {{> footer}}
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
