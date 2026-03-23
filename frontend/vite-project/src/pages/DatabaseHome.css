@@ -155,29 +155,9 @@
   background: #7a1f1f;
 }
 
-.database-code-block {
-  border: 1px solid rgba(16, 36, 62, 0.14);
-  border-radius: 14px;
-  background: #fbfcff;
-  padding: 14px 16px;
-}
-
-.database-code-block p {
-  margin: 0 0 6px;
-  font-weight: 600;
-  color: #35597d;
-}
-
-.database-code-block code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
-  font-size: 0.92rem;
-  color: #183a61;
-}
-
 .database-stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -220,6 +200,72 @@
   margin: 0;
 }
 
+.database-table-section {
+  border: 1px solid rgba(16, 36, 62, 0.12);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.table-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.table-heading h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.table-heading p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #35597d;
+}
+
+.table-shell {
+  border: 1px solid rgba(16, 36, 62, 0.12);
+  border-radius: 10px;
+  overflow: auto;
+}
+
+.database-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.database-table thead th {
+  background: #f5f9ff;
+  color: #284b6f;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(16, 36, 62, 0.16);
+}
+
+.database-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(16, 36, 62, 0.09);
+  font-size: 0.92rem;
+  color: #1e3e5f;
+}
+
+.database-table tbody tr:nth-child(2n) td {
+  background: #fbfdff;
+}
+
+.database-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .database-status,
 .database-error {
   margin-top: 14px;
@@ -230,13 +276,20 @@
   color: #9b1c1c;
 }
 
+.database-error--global {
+  border: 1px solid rgba(155, 28, 28, 0.32);
+  background: rgba(155, 28, 28, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
 @media (max-width: 900px) {
   .database-shell {
     padding: 22px;
   }
 
   .database-stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -252,5 +305,9 @@
 
   .database-title {
     font-size: 1.7rem;
+  }
+
+  .database-stats-grid {
+    grid-template-columns: 1fr;
   }
 }

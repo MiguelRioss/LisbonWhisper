@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "assets:compress": "node scripts/compress-public-assets.mjs",
+    "assets:compress:dry": "node scripts/compress-public-assets.mjs --dry-run",
+    "assets:compress:in-place": "node scripts/compress-public-assets.mjs --in-place"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",

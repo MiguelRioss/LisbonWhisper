@@ -128,6 +128,29 @@ function resolveMailchimpPingConfig() {
   return { apiKey, serverPrefix };
 }
 
+function resolveMailchimpAudienceConfig() {
+  const apiKey = process.env.MAILCHIMP_API_KEY || '';
+  const serverPrefix =
+    process.env.MAILCHIMP_SERVER_PREFIX || deriveServerPrefix(apiKey);
+  const audienceId = process.env.MAILCHIMP_AUDIENCE_ID || '';
+
+  if (!apiKey) {
+    throw new Error('Missing MAILCHIMP_API_KEY');
+  }
+  if (!serverPrefix) {
+    throw new Error('Missing MAILCHIMP_SERVER_PREFIX');
+  }
+  if (!audienceId) {
+    throw new Error('Missing MAILCHIMP_AUDIENCE_ID');
+  }
+
+  return {
+    apiKey,
+    serverPrefix,
+    audienceId,
+  };
+}
+
 function buildAuthHeader(apiKey) {
   const token = Buffer.from(`anystring:${apiKey}`).toString('base64');
   return `Basic ${token}`;
@@ -339,4 +362,51 @@ async function verifyMailchimpMarketingConnection() {
   return { ok: true, transport: 'mailchimp_marketing' };
 }
 
-export { sendViaMailchimpMarketing, verifyMailchimpMarketingConnection };
+function clampNumber(value, min, max, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(parsed)));
+}
+
+async function getAudienceMembers({ count = 100, offset = 0 } = {}) {
+  const config = resolveMailchimpAudienceConfig();
+  const safeCount = clampNumber(count, 1, 1000, 100);
+  const safeOffset = clampNumber(offset, 0, 100000, 0);
+
+  const params = new URLSearchParams({
+    count: String(safeCount),
+    offset: String(safeOffset),
+    sort_field: 'timestamp_opt',
+    sort_dir: 'DESC',
+  });
+
+  const response = await mailchimpRequest(
+    config,
+    `/lists/${config.audienceId}/members?${params.toString()}`
+  );
+
+  const members = Array.isArray(response?.members) ? response.members : [];
+
+  return {
+    audienceId: config.audienceId,
+    totalItems: Number(response?.total_items || 0),
+    count: members.length,
+    members: members.map((member) => ({
+      id: member?.id || '',
+      email: member?.email_address || '',
+      status: member?.status || '',
+      firstName: member?.merge_fields?.FNAME || '',
+      lastName: member?.merge_fields?.LNAME || '',
+      fullName: member?.full_name || '',
+      memberRating: member?.member_rating ?? null,
+      lastChanged: member?.last_changed || '',
+      timestampSignup: member?.timestamp_signup || '',
+      timestampOpt: member?.timestamp_opt || '',
+      tagsCount: Array.isArray(member?.tags) ? member.tags.length : 0,
+      language: member?.language || '',
+      source: member?.source || '',
+    })),
+  };
+}
+
+export { sendViaMailchimpMarketing, verifyMailchimpMarketingConnection, getAudienceMembers };

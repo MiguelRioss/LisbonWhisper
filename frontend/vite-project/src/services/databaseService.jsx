@@ -43,3 +43,40 @@ export const fetchDatabaseHome = async (token) => {
 
   return payload;
 };
+
+export const fetchDatabaseBookings = async (token, { limit = 200 } = {}) => {
+  const response = await fetch(`${API_BASE}/database/bookings?limit=${encodeURIComponent(limit)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(buildErrorMessage('Failed to load bookings', payload, response.statusText));
+  }
+
+  return payload;
+};
+
+export const fetchMailchimpClients = async (token, { count = 200, offset = 0 } = {}) => {
+  const query = new URLSearchParams({
+    count: String(count),
+    offset: String(offset),
+  });
+
+  const response = await fetch(`${API_BASE}/database/mailchimp/clients?${query.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(buildErrorMessage('Failed to load Mailchimp clients', payload, response.statusText));
+  }
+
+  return payload;
+};

@@ -7,6 +7,7 @@ import api from './API/api.mjs';
 import onlineData from './DATA/dataBase.mjs';
 import localData from './DATA/dataBaseLocal.mjs';
 import services from './SERVICES/services.mjs';
+import { getAudienceMembers } from './EMAIL/mailchimpMarketing.mjs';
 
 import { connectToMongo } from './DATA/mongoDb.mjs';
 
@@ -46,6 +47,31 @@ function isDateWithinNextDays(isoDate = '', days = 7) {
   const end = now + days * 24 * 60 * 60 * 1000;
   const value = parsed.getTime();
   return value >= now && value <= end;
+}
+
+function parseNumber(value, fallback, min, max) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  const floored = Math.floor(parsed);
+  return Math.max(min, Math.min(max, floored));
+}
+
+function normalizeBookingsPayload(bookingsResponse) {
+  const bookings = Array.isArray(bookingsResponse?.bookings) ? bookingsResponse.bookings : [];
+
+  return bookings.map((booking) => ({
+    id: booking?._id || booking?.id || '',
+    name: booking?.name || '',
+    email: booking?.email || '',
+    date: booking?.date || '',
+    time: booking?.time || '',
+    persons: booking?.persons ?? '',
+    totalPrice: booking?.totalPrice ?? '',
+    currency: booking?.currency || 'EUR',
+    tourName: booking?.tourName || '',
+    message: booking?.message || '',
+    createdAt: booking?.createdAt || '',
+  }));
 }
 
 async function startServer() {
@@ -167,21 +193,35 @@ async function startServer() {
   app.get('/database/home', requireDatabaseAuth, async (req, res) => {
     try {
       const bookingsResponse = await WhisperServices.getBookingAndProcessServices();
-      const bookings = Array.isArray(bookingsResponse?.bookings) ? bookingsResponse.bookings : [];
+      const bookings = normalizeBookingsPayload(bookingsResponse);
 
       const upcomingBookings = bookings.filter((booking) => isDateInFuture(booking?.date)).length;
       const weekBookings = bookings.filter((booking) => isDateWithinNextDays(booking?.date, 7)).length;
+
+      let mailchimpTotalClients = null;
+      let mailchimpStatus = 'unavailable';
+
+      try {
+        const mailchimpResponse = await getAudienceMembers({ count: 1, offset: 0 });
+        mailchimpTotalClients = mailchimpResponse.totalItems;
+        mailchimpStatus = 'connected';
+      } catch (mailchimpError) {
+        console.warn('Mailchimp clients unavailable for /database/home', {
+          message: mailchimpError?.message || String(mailchimpError),
+        });
+      }
 
       return res.json({
         title: 'Lisbon Whisper Database',
         subtitle: 'Database admin home',
         authenticatedAs: req.databaseAdmin.username,
-        tokenExpiresAt: new Date(req.databaseAdmin.expiresAt).toISOString(),
         generatedAt: new Date().toISOString(),
         stats: {
           totalBookings: bookings.length,
           upcomingBookings,
           next7DaysBookings: weekBookings,
+          mailchimpTotalClients,
+          mailchimpStatus,
         },
       });
     } catch (error) {
@@ -189,6 +229,58 @@ async function startServer() {
       return res.status(500).json({
         status: 500,
         message: 'Failed to load database home data',
+      });
+    }
+  });
+
+  app.get('/database/bookings', requireDatabaseAuth, async (req, res) => {
+    try {
+      const limit = parseNumber(req.query.limit, 200, 1, 2000);
+      const bookingsResponse = await WhisperServices.getBookingAndProcessServices();
+      const bookings = normalizeBookingsPayload(bookingsResponse);
+
+      const sorted = bookings.sort((a, b) => {
+        const aTime = Date.parse(a.createdAt || a.date || '');
+        const bTime = Date.parse(b.createdAt || b.date || '');
+
+        if (!Number.isFinite(aTime) && !Number.isFinite(bTime)) return 0;
+        if (!Number.isFinite(aTime)) return 1;
+        if (!Number.isFinite(bTime)) return -1;
+        return bTime - aTime;
+      });
+
+      return res.json({
+        total: sorted.length,
+        count: Math.min(limit, sorted.length),
+        bookings: sorted.slice(0, limit),
+      });
+    } catch (error) {
+      console.error('Error loading /database/bookings', error);
+      return res.status(500).json({
+        status: 500,
+        message: 'Failed to load bookings',
+      });
+    }
+  });
+
+  app.get('/database/mailchimp/clients', requireDatabaseAuth, async (req, res) => {
+    const count = parseNumber(req.query.count, 200, 1, 1000);
+    const offset = parseNumber(req.query.offset, 0, 0, 100000);
+
+    try {
+      const clientsResponse = await getAudienceMembers({ count, offset });
+      return res.json({
+        total: clientsResponse.totalItems,
+        count: clientsResponse.count,
+        audienceId: clientsResponse.audienceId,
+        clients: clientsResponse.members,
+      });
+    } catch (error) {
+      console.error('Error loading /database/mailchimp/clients', error);
+      return res.status(502).json({
+        status: 502,
+        message:
+          'Failed to load Mailchimp clients. Check MAILCHIMP_API_KEY, MAILCHIMP_SERVER_PREFIX and MAILCHIMP_AUDIENCE_ID.',
       });
     }
   });
