@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import './App.css';
 
 import Navbar from './components/navbar/NavBar';
@@ -18,6 +18,7 @@ import WalkingTours from './pages/WalkingTours';
 import PrivateTours from './pages/PrivateTours';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
+import DatabaseHome from './pages/DatabaseHome';
 
 const videoSrc = '/res/Free_videoLisbon_AI_GENERATED.mp4';
 const videoSrcDownTown = '/res/LisbonDownTown.mp4';
@@ -54,6 +55,9 @@ const navigation = [
 ];
 
 function App() {
+  const location = useLocation();
+  const isDatabaseRoute = location.pathname.startsWith('/database');
+
   const [hasAccess, setHasAccess] = useState(localStorage.getItem('hasAccess') === 'true');
 
   const [availability, setAvailability] = useState([]);
@@ -73,12 +77,17 @@ function App() {
   };
 
   useEffect(() => {
+    if (isDatabaseRoute) {
+      setLoading(false);
+      return;
+    }
+
     fetchAvailability();
     const intervalId = setInterval(fetchAvailability, 30000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [isDatabaseRoute]);
 
-  if (!hasAccess) {
+  if (!hasAccess && !isDatabaseRoute) {
     return (
       <ComingSoon
         onSuccess={() => {
@@ -91,8 +100,7 @@ function App() {
 
   return (
     <>
-      
-      <Navbar navigation={navigation} logo={logo} />
+      {!isDatabaseRoute && <Navbar navigation={navigation} logo={logo} />}
       <ScrollToTop />
       <Routes>
         <Route
@@ -109,6 +117,7 @@ function App() {
         <Route path="/private-tours" element={<PrivateTours />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/database" element={<DatabaseHome />} />
         <Route path="/contact" element={<Navigate to="/contact-us" replace />} />
         <Route
           path="/tour/:tourId"
@@ -123,7 +132,7 @@ function App() {
           }
         />
       </Routes>
-      <Footer navigation={navigation} logo={logo} />
+      {!isDatabaseRoute && <Footer navigation={navigation} logo={logo} />}
     </>
   );
 }
