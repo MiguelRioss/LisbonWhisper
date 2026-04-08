@@ -10,13 +10,54 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   margin: 20px;
 }
 
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
   border: 2px solid #29263c;
+}
+
+.grid-nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.58rem 0.86rem;
+  border-radius: 10px;
+  border: 1px solid #59657f;
+  background: linear-gradient(180deg, #1f2b47 0%, #111c33 100%);
+  color: #f8fbff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.2s ease;
+}
+
+.grid-nav-button:hover {
+  border-color: #8aa2d5;
+  background: linear-gradient(180deg, #2a3a5f 0%, #162640 100%);
+  transform: translateY(-1px);
+}
+
+.grid-nav-button:active {
+  transform: translateY(0);
+}
+
+.grid-nav-arrow {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.grid-nav-range {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e6edf9;
+  text-align: center;
 }
 
 .grid-header-cell {
@@ -222,12 +263,40 @@
 }
 
 @media (max-width: 900px) {
-  .weekly-grid {
-    overflow-x: auto;
+  .grid-navigation {
+    margin: 14px 0;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
-  .grid-container {
-    min-width: calc(100% * 7 / 3);
+  .grid-nav-button {
+    min-width: 110px;
+    padding: 0.58rem 0.72rem;
+    font-size: 0.8rem;
+  }
+
+  .grid-nav-range {
+    width: 100%;
+    order: 3;
+    font-size: 0.95rem;
+    margin-top: 0.15rem;
+  }
+
+  .grid-header-cell {
+    height: 88px;
+  }
+
+  .grid-header-cell .day {
+    font-size: 0.82rem;
+  }
+
+  .grid-header-cell .date {
+    font-size: 0.76rem;
+  }
+
+  .time-slot-cell {
+    height: 88px;
+    font-size: 0.78rem;
   }
 }
 

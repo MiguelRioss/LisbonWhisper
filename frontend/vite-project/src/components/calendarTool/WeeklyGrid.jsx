@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './WeeklyGrid.css';
 import BookingCell from './BookingCell';
 import BookingPopup from './BookingPopup';
 
 const timeSlots = ['9:00-11:00', '10:00-12:00', '14:00-16:00', '15:00-17:00', '16:00-18:00'];
+const MOBILE_BREAKPOINT = 900;
+const MOBILE_VISIBLE_DAYS = 3;
+const DESKTOP_VISIBLE_DAYS = 7;
 
 const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
   const { title, descriptions } = tourData;
   const [currentMonday, setCurrentMonday] = useState(getMonday(new Date()));
   const [expandedSlot, setExpandedSlot] = useState(null);
   const [fadeTransition, setFadeTransition] = useState(true);
+  const [isMobile, setIsMobile] = useState(isMobileViewport);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -23,11 +27,22 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
     };
   }, [expandedSlot]);
 
-  const generateWeekDates = (monday) => {
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(isMobileViewport());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  const generateDates = (startDate, totalDays) => {
     const weekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
+    for (let i = 0; i < totalDays; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
       weekDates.push({
         day: date.toLocaleString('en-GB', { weekday: 'long' }),
         date: date.toISOString().split('T')[0],
@@ -36,7 +51,9 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
     return weekDates;
   };
 
-  const weekDates = generateWeekDates(currentMonday);
+  const visibleDays = isMobile ? MOBILE_VISIBLE_DAYS : DESKTOP_VISIBLE_DAYS;
+  const weekDates = generateDates(currentMonday, visibleDays);
+  const navigationStep = visibleDays;
 
   const triggerFade = (callback) => {
     setFadeTransition(false);
@@ -49,7 +66,7 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
   const handlePreviousWeek = () => {
     triggerFade(() => {
       const previousMonday = new Date(currentMonday);
-      previousMonday.setDate(currentMonday.getDate() - 7);
+      previousMonday.setDate(currentMonday.getDate() - navigationStep);
       setCurrentMonday(previousMonday);
     });
   };
@@ -57,7 +74,7 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
   const handleNextWeek = () => {
     triggerFade(() => {
       const nextMonday = new Date(currentMonday);
-      nextMonday.setDate(currentMonday.getDate() + 7);
+      nextMonday.setDate(currentMonday.getDate() + navigationStep);
       setCurrentMonday(nextMonday);
     });
   };
@@ -77,26 +94,22 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
     <div className="weekly-grid">
       {/* Week Navigation */}
       <div className="grid-navigation">
-        <button
-          onClick={handlePreviousWeek}
-          className="px-4 py-2 font-medium text-white rounded-md
-            bg-gradient-to-b from-[#1a1a1a] to-[#2f2f3f] border border-gray-600
-            hover:from-[#2a2a2a] hover:to-[#3f3f4f] transition duration-200"
-        >
-          ← Previous Week
+        <button onClick={handlePreviousWeek} className="grid-nav-button" type="button">
+          <span className="grid-nav-arrow" aria-hidden="true">
+            &larr;
+          </span>
+          <span>{isMobile ? 'Previous 3 Days' : 'Previous Week'}</span>
         </button>
 
-        <h3>
-          {weekDates[0].date} - {weekDates[6].date}
+        <h3 className="grid-nav-range">
+          {weekDates[0].date} - {weekDates[weekDates.length - 1].date}
         </h3>
 
-        <button
-          onClick={handleNextWeek}
-          className="px-4 py-2 font-medium text-white rounded-md
-            bg-gradient-to-b from-[#1a1a1a] to-[#2f2f3f] border border-gray-600
-            hover:from-[#2a2a2a] hover:to-[#3f3f4f] transition duration-200"
-        >
-          Next Week →
+        <button onClick={handleNextWeek} className="grid-nav-button" type="button">
+          <span>{isMobile ? 'Next 3 Days' : 'Next Week'}</span>
+          <span className="grid-nav-arrow" aria-hidden="true">
+            &rarr;
+          </span>
         </button>
       </div>
 
@@ -104,6 +117,7 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
       <div
         className={`grid-container transform transition duration-1000 ease-in-out 
           ${fadeTransition ? 'opacity-200 scale-200' : 'opacity-0 scale-100'}`}
+        style={{ gridTemplateColumns: `repeat(${weekDates.length}, minmax(0, 1fr))` }}
       >
         {/* Header */}
         {weekDates.map((date, index) => (
@@ -154,6 +168,11 @@ const getMonday = (date) => {
   const day = date.getDay();
   const diff = date.getDate() - day + (day === 0 ? -6 : 1);
   return new Date(date.setDate(diff));
+};
+
+const isMobileViewport = () => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth <= MOBILE_BREAKPOINT;
 };
 
 // Helper functions to parse slotKey
