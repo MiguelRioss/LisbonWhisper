@@ -13,7 +13,6 @@ import Footsteps from './components/Footsteps';
 import logo from './res/logo.png';
 import { fetchBookings, createBooking } from './services/bookingService';
 
-import ComingSoon from './pages/ComingSoon';
 import WalkingTours from './pages/WalkingTours';
 import PrivateTours from './pages/PrivateTours';
 import AboutUs from './pages/AboutUs';
@@ -58,8 +57,6 @@ function App() {
   const location = useLocation();
   const isDatabaseRoute = location.pathname.startsWith('/database');
 
-  const [hasAccess, setHasAccess] = useState(localStorage.getItem('hasAccess') === 'true');
-
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -86,17 +83,6 @@ function App() {
     const intervalId = setInterval(fetchAvailability, 30000);
     return () => clearInterval(intervalId);
   }, [isDatabaseRoute]);
-
-  if (!hasAccess && !isDatabaseRoute) {
-    return (
-      <ComingSoon
-        onSuccess={() => {
-          localStorage.setItem('hasAccess', 'true');
-          setHasAccess(true);
-        }}
-      />
-    );
-  }
 
   return (
     <>

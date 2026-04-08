@@ -10,7 +10,8 @@ const BookingPopup = ({
   onCollapse,
   maxPersons,
 }) => {
-  const PRICE_PER_PERSON = 39;
+  const PRICE_PER_PERSON = 34;
+  const ORIGINAL_PRICE_PER_PERSON = 49;
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [persons, setPersons] = useState(1);
   const [error, setError] = useState('');
@@ -115,10 +116,12 @@ const BookingPopup = ({
               </div>
               <div className="booking-price-summary">
                 <p>
-                  <strong>Price per person:</strong> {PRICE_PER_PERSON} EUR
+                  <strong>Price per person:</strong>{' '}
+                  <span className="booking-current-price">{`\u20AC${PRICE_PER_PERSON}`}</span>{' '}
+                  <span className="booking-original-price">{`\u20AC${ORIGINAL_PRICE_PER_PERSON}`}</span>
                 </p>
                 <p>
-                  <strong>Estimated total:</strong> {estimatedTotal} EUR
+                  <strong>Estimated total:</strong> {`\u20AC${estimatedTotal}`}
                 </p>
               </div>
             </div>
