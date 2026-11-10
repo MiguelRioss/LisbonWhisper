@@ -1,6 +1,6 @@
 import { sendEmailTemplate } from '../EMAIL/sendEmailTemplate.mjs';
 
-const PRICE_PER_PERSON_EUR = 34;
+const PRICE_PER_PERSON_EUR = 49;
 
 //Este modulo Esta responsavel de recolher a data dos parametros/body etc para depois o services
 // usar sem ter que se preocupar com isso
