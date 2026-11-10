@@ -69,7 +69,7 @@ function AboutUs() {
         </p>
       </section>
 
-      <section className="about-two-column about-two-column--right">
+      <section className="about-two-column about-two-column--right about-benefits">
         <div className="about-two-column-inner">
           <div className="about-two-column-content">
             <h2 className="about-section-title">Why choose Lisbon Whisper?</h2>

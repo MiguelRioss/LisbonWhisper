@@ -10,8 +10,7 @@ const BookingPopup = ({
   onCollapse,
   maxPersons,
 }) => {
-  const PRICE_PER_PERSON = 34;
-  const ORIGINAL_PRICE_PER_PERSON = 49;
+  const PRICE_PER_PERSON = 49;
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [persons, setPersons] = useState(1);
   const [error, setError] = useState('');
@@ -72,13 +71,14 @@ const BookingPopup = ({
   };
 
   return (
-    <div className="booking-popup-overlay">
-      <div className="booking-popup">
-        <button className="modal-close" onClick={onCollapse} disabled={isSubmitting}>
-          x
+    <div className="booking-popup-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !isSubmitting) onCollapse(); }}>
+      <div className="booking-popup" role="dialog" aria-modal="true" aria-labelledby="booking-popup-title">
+        <button type="button" className="modal-close" aria-label="Close booking dialog" onClick={onCollapse} disabled={isSubmitting}>
+          ×
         </button>
 
-        <h2>Book Slot</h2>
+        <span className="booking-popup-eyebrow">Lisbon Whisper · Booking</span>
+        <h2 id="booking-popup-title">Reserve your place</h2>
         <p className="booking-slot-time">
           <strong>
             {formatReadableDate(date)} at {time}
@@ -89,7 +89,7 @@ const BookingPopup = ({
           <div className="booking-side-panel">
             <div className="tour-info">
               <h3>{tourName}</h3>
-              <p>{tourDescriptions}</p>
+              <p>{Array.isArray(tourDescriptions) ? tourDescriptions[0] : tourDescriptions}</p>
             </div>
 
             <div className="booking-side-section">
@@ -118,7 +118,6 @@ const BookingPopup = ({
                 <p>
                   <strong>Price per person:</strong>{' '}
                   <span className="booking-current-price">{`\u20AC${PRICE_PER_PERSON}`}</span>{' '}
-                  <span className="booking-original-price">{`\u20AC${ORIGINAL_PRICE_PER_PERSON}`}</span>
                 </p>
                 <p>
                   <strong>Estimated total:</strong> {`\u20AC${estimatedTotal}`}
@@ -146,7 +145,9 @@ const BookingPopup = ({
             {error && <div className="form-error">{error}</div>}
 
             <div className="popup-form-fields">
+              <label htmlFor="booking-name">Name</label>
               <input
+                id="booking-name"
                 type="text"
                 name="name"
                 placeholder="Name"
@@ -155,7 +156,9 @@ const BookingPopup = ({
                 required
                 disabled={isSubmitting}
               />
+              <label htmlFor="booking-email">Email</label>
               <input
+                id="booking-email"
                 type="email"
                 name="email"
                 placeholder="Email"
@@ -164,7 +167,9 @@ const BookingPopup = ({
                 required
                 disabled={isSubmitting}
               />
+              <label htmlFor="booking-message">Message <span>(optional)</span></label>
               <textarea
+                id="booking-message"
                 name="message"
                 placeholder="Message (optional)"
                 value={formData.message}
@@ -175,7 +180,7 @@ const BookingPopup = ({
 
             <div className="popup-actions">
               <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Confirm'}
+                {isSubmitting ? 'Submitting...' : 'Confirm booking'}
               </button>
               <button type="button" onClick={onCollapse} disabled={isSubmitting}>
                 Cancel

@@ -24,7 +24,7 @@ function TourPage({ bookings, loading, error, createBookingHandler, refetchBooki
       : derivedTitle
       ? { title: derivedTitle }
       : tourData;
-  const { hash } = location;
+  const { hash } = location;  
 
   const [availability, setAvailability] = useState([]);
 

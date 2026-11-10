@@ -1,35 +1,41 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import './WeeklyGrid.css';
 import BookingCell from './BookingCell';
 import BookingPopup from './BookingPopup';
 
 const timeSlots = ['9:00-11:00', '10:00-12:00', '14:00-16:00', '15:00-17:00', '16:00-18:00'];
 const MOBILE_BREAKPOINT = 900;
+const SMALL_SCREEN_BREAKPOINT = 600;
 const MOBILE_VISIBLE_DAYS = 3;
 const DESKTOP_VISIBLE_DAYS = 7;
 
 const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
   const { title, descriptions } = tourData;
-  const [currentMonday, setCurrentMonday] = useState(getMonday(new Date()));
+  const [currentMonday, setCurrentMonday] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth <= SMALL_SCREEN_BREAKPOINT
+      ? new Date()
+      : getMonday(new Date())
+  );
   const [expandedSlot, setExpandedSlot] = useState(null);
   const [fadeTransition, setFadeTransition] = useState(true);
-  const [isMobile, setIsMobile] = useState(isMobileViewport);
+  const [hasChangedWeek, setHasChangedWeek] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => typeof window === 'undefined' ? 1200 : window.innerWidth);
 
   // Lock body scroll when modal is open
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
     if (expandedSlot !== null) {
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
     }
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = previousOverflow;
     };
   }, [expandedSlot]);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(isMobileViewport());
+      setViewportWidth(window.innerWidth);
     };
 
     window.addEventListener('resize', handleResize);
@@ -51,16 +57,24 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
     return weekDates;
   };
 
-  const visibleDays = isMobile ? MOBILE_VISIBLE_DAYS : DESKTOP_VISIBLE_DAYS;
+  const visibleDays = viewportWidth <= SMALL_SCREEN_BREAKPOINT ? 1 : viewportWidth <= MOBILE_BREAKPOINT ? MOBILE_VISIBLE_DAYS : DESKTOP_VISIBLE_DAYS;
+  const navigationLabel = visibleDays === 1 ? 'Day' : visibleDays === 3 ? '3 Days' : 'Week';
   const weekDates = generateDates(currentMonday, visibleDays);
   const navigationStep = visibleDays;
 
   const triggerFade = (callback) => {
+    if (!fadeTransition) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      callback();
+      setHasChangedWeek(true);
+      return;
+    }
     setFadeTransition(false);
     setTimeout(() => {
       callback();
-      setFadeTransition(true);
-    }, 180);
+      setHasChangedWeek(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setFadeTransition(true)));
+    }, 240);
   };
 
   const handlePreviousWeek = () => {
@@ -94,19 +108,19 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
     <div className="weekly-grid">
       {/* Week Navigation */}
       <div className="grid-navigation">
-        <button onClick={handlePreviousWeek} className="grid-nav-button" type="button">
+        <button onClick={handlePreviousWeek} className="grid-nav-button" type="button" disabled={!fadeTransition}>
           <span className="grid-nav-arrow" aria-hidden="true">
             &larr;
           </span>
-          <span>{isMobile ? 'Previous 3 Days' : 'Previous Week'}</span>
+          <span>Previous {navigationLabel}</span>
         </button>
 
         <h3 className="grid-nav-range">
           {weekDates[0].date} - {weekDates[weekDates.length - 1].date}
         </h3>
 
-        <button onClick={handleNextWeek} className="grid-nav-button" type="button">
-          <span>{isMobile ? 'Next 3 Days' : 'Next Week'}</span>
+        <button onClick={handleNextWeek} className="grid-nav-button" type="button" disabled={!fadeTransition}>
+          <span>Next {navigationLabel}</span>
           <span className="grid-nav-arrow" aria-hidden="true">
             &rarr;
           </span>
@@ -115,13 +129,13 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
 
       {/* Weekly Grid */}
       <div
-        className={`grid-container transform transition duration-1000 ease-in-out 
-          ${fadeTransition ? 'opacity-200 scale-200' : 'opacity-0 scale-100'}`}
+        key={`${weekDates[0].date}-${visibleDays}`}
+        className={`grid-container ${fadeTransition ? '' : 'grid-container-changing'} ${hasChangedWeek ? 'grid-container-rebuild' : ''}`}
         style={{ gridTemplateColumns: `repeat(${weekDates.length}, minmax(0, 1fr))` }}
       >
         {/* Header */}
         {weekDates.map((date, index) => (
-          <div key={index} className="grid-header-cell">
+          <div key={date.date} className="grid-header-cell" style={{ '--piece-index': index }}>
             <div className="day">{date.day}</div>
             <div className="date">{date.date}</div>
           </div>
@@ -139,6 +153,7 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
                 <BookingCell
                   isBooked={isBooked}
                   time={slot}
+                  pieceIndex={weekDates.length + slotIndex * weekDates.length + dayIndex}
                   onSelect={() => setExpandedSlot(slotKey)}
                 />
               </React.Fragment>
@@ -148,7 +163,7 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
       </div>
 
       {/* Booking Popup rendered outside the grid */}
-      {expandedSlot && (
+      {expandedSlot && createPortal(
         <BookingPopup
           createBookingHandler={createBookingHandler}
           tourName={title}
@@ -157,7 +172,7 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
           time={getTimeFromSlotKey(expandedSlot)}
           onCollapse={() => setExpandedSlot(null)}
           maxPersons={8}
-        />
+        />, document.body
       )}
     </div>
   );
@@ -168,11 +183,6 @@ const getMonday = (date) => {
   const day = date.getDay();
   const diff = date.getDate() - day + (day === 0 ? -6 : 1);
   return new Date(date.setDate(diff));
-};
-
-const isMobileViewport = () => {
-  if (typeof window === 'undefined') return false;
-  return window.innerWidth <= MOBILE_BREAKPOINT;
 };
 
 // Helper functions to parse slotKey

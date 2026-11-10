@@ -2,12 +2,11 @@ export default function Logo({ logo }) {
   return (
     <div className="flex flex-shrink-0 flex-col items-center">
       <img
-        alt="Your Company"
+        alt="Lisbon Whisper"
         src={logo}
-        className="h-8 w-auto"
-        style={{ filter: 'invert(1)' }} // Optional: Makes the logo white
+        className="h-16 w-16 object-contain"
       />
-      <span className="text-gray-300 text-sm">Lisbon Whisper</span>
+      <span className="site-logo-label text-sm">Lisbon Whisper</span>
     </div>
   );
 }

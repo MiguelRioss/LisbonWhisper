@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function PrivateTours() {
   return (
     <div className="about-page private-page">
@@ -61,12 +63,13 @@ export default function PrivateTours() {
               Private tours are tailored to your group size, date, and preferred themes. Contact
               us with your wish list and we will craft a personalized proposal.
             </p>
-            <a className="private-cta" href="/contact-us">
+            <Link className="private-cta" to="/contact-us">
               Contact us to receive an offer
-            </a>
+            </Link>
           </div>
         </div>
       </section>
     </div>
   );
 }
+

@@ -18,13 +18,14 @@ import PrivateTours from './pages/PrivateTours';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import DatabaseHome from './pages/DatabaseHome';
+import Giveaway, { GiveawayHighlight } from './pages/Giveaway';
 
 const videoSrc = '/res/Free_videoLisbon_AI_GENERATED.mp4';
 const videoSrcDownTown = '/res/LisbonDownTown.mp4';
 
 const cardData = [
   {
-    title: 'the Moorish Whispers',
+    title: 'The Moorish Whispers',
     descriptions: [
       "Discover Lisbon's hidden secrets from the Torel viewpoint to Rua Augusta.",
       'A journey that will make us travel back in time through the stories of this mysterious Lisbon.',
@@ -34,7 +35,7 @@ const cardData = [
     backgroundImage: './res/f03ef0dcb35a8e63d746cfa4741a4f96.jpg',
   },
   {
-    title: 'the West Whispers',
+    title: 'The West Whispers',
     descriptions: [
       'This tour takes you to a part of Lisbon marked by its art deco and art noveau palaces.',
       'Starting from Rossio train station, you reach the first of three viewpoints with the best view of Sao Jorge Castle.',
@@ -51,6 +52,7 @@ const navigation = [
   { name: 'Walking Tours', href: '/walking-tours', current: false },
   { name: 'Private Tours', href: '/private-tours', current: false },
   { name: 'Contact Us', href: '/contact-us', current: false },
+  { name: 'Sorteio', href: '/sorteio', current: false },
 ];
 
 function App() {
@@ -88,6 +90,7 @@ function App() {
     <>
       {!isDatabaseRoute && <Navbar navigation={navigation} logo={logo} />}
       <ScrollToTop />
+      <main className="page-transition" key={location.pathname}>
       <Routes>
         <Route
           path="/"
@@ -96,6 +99,7 @@ function App() {
               <Footsteps />
               <VideoCard />
               <Carrousel cardData={cardData} />
+              <GiveawayHighlight />
             </div>
           }
         />
@@ -103,6 +107,7 @@ function App() {
         <Route path="/private-tours" element={<PrivateTours />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/sorteio" element={<Giveaway />} />
         <Route path="/database" element={<DatabaseHome />} />
         <Route path="/contact" element={<Navigate to="/contact-us" replace />} />
         <Route
@@ -118,6 +123,7 @@ function App() {
           }
         />
       </Routes>
+      </main>
       {!isDatabaseRoute && <Footer navigation={navigation} logo={logo} />}
     </>
   );

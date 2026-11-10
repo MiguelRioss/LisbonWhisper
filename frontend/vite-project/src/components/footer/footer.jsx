@@ -1,18 +1,22 @@
-import React from 'react';
 import { PhoneIcon } from '@heroicons/react/24/outline';
-import Logo from '../navbar/Logo';
+import { Link } from 'react-router-dom';
 
 const Footer = ({ navigation, logo }) => {
   return (
-    <footer className="bg-gray-800 text-white py-6">
-      <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer className="site-footer">
+      <div className="site-footer-main">
         {/* Logo */}
-        <div className="flex flex-col items-center md:items-start space-y-2">
-          <Logo logo={logo} />
-          <span className="text-xs text-gray-400">
-            Guide registered at RNAAT with nº1242/2023
-          </span>
-          <div className="flex flex-col text-sm text-gray-300">
+        <div className="site-footer-brand">
+          <img src={logo} alt="Lisbon Whisper" />
+          <div className="site-footer-brand-copy">
+            <strong>Lisbon Whisper</strong>
+            <span>Discover Lisbon, one story at a time.</span>
+          </div>
+        </div>
+
+        <div className="site-footer-column">
+          <h2>Contact</h2>
+          <div className="site-footer-links">
             <a
               href="mailto:geral@lisbonwhisper.pt"
               className="text-gray-300 hover:text-white transition duration-200 no-underline"
@@ -36,23 +40,25 @@ const Footer = ({ navigation, logo }) => {
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="text-sm text-center md:text-left">
-          © 2024 Lisbon Whisper. All rights reserved.
-        </div>
-
         {/* Navigation */}
-        <div className="flex items-center gap-2 text-base">
+        <nav className="site-footer-column" aria-label="Footer navigation">
+          <h2>Explore</h2>
+          <div className="site-footer-links">
           {navigation.map((item) => (
-            <a
+            <Link
               key={item.name}
-              href={item.href}
+              to={item.href}
               className="text-gray-300 hover:text-white transition duration-200 no-underline"
             >
               {item.name}
-            </a>
+            </Link>
           ))}
-        </div>
+          </div>
+        </nav>
+      </div>
+      <div className="site-footer-bottom">
+        <span>© {new Date().getFullYear()} Lisbon Whisper. All rights reserved.</span>
+        <span>Guide registered at RNAAT · nº 1242/2023</span>
       </div>
     </footer>
   );

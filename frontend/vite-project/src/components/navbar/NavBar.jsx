@@ -1,5 +1,6 @@
 import { Disclosure } from '@headlessui/react';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import MobileMenu from './MobileMenu';
 import Logo from './Logo';
 import NavigationLinks from './NavigationLinks';
@@ -20,16 +21,16 @@ export default function Navbar({ navigation, logo }) {
   return (
     <Disclosure
       as="nav"
-      className="bg-gray-800/80 backdrop-blur-md z-50 fixed top-0 left-0 right-0 w-full"
+      className={`site-navbar ${isCompact ? 'site-navbar-scrolled' : ''} z-50 fixed top-0 left-0 right-0 w-full`}
     >
       <div
         className={`mx-auto max-w-8xl px-6 sm:px-6 lg:px-8 transition-all duration-300 ${
-          isCompact ? 'py-1' : 'py-2'
+          isCompact ? 'py-1' : 'py-1'
         }`}
       >
         <div
           className={`relative flex items-center justify-between transition-all duration-300 ${
-            isCompact ? 'h-12' : 'h-16'
+            isCompact ? 'h-16' : 'h-20'
           }`}
         >
           {/* Mobile Menu */}
@@ -39,22 +40,22 @@ export default function Navbar({ navigation, logo }) {
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
             <div className="flex items-center space-x-4 gap-5">
               {/* Clickable logo */}
-              <a href="/" className="text-inherit no-underline hover:no-underline">
+              <Link to="/" className="text-inherit no-underline hover:no-underline">
                 <Logo logo={logo} />
-              </a>
+              </Link>
 
               <NavigationLinks navigation={navigation} />
             </div>
           </div>
 
           <div className="hidden md:flex items-center">
-            <a
-              href="/walking-tours"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/60 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-white hover:text-gray-900 no-underline"
+            <Link
+              to="/walking-tours"
+              className="site-nav-cta inline-flex items-center gap-2 rounded-lg px-5 py-2 text-xs font-semibold uppercase tracking-wide no-underline"
             >
               Explore Our Tours
               <span aria-hidden="true">→</span>
-            </a>
+            </Link>
           </div>
 
           {/* Profile Dropdown (disabled for now)

@@ -1,19 +1,23 @@
 import React from 'react';
 import './WeeklyGrid.css';
 
-const BookingCell = ({ isBooked, time, onSelect }) => {
+const BookingCell = ({ isBooked, time, onSelect, pieceIndex }) => {
   const status = isBooked ? 'Sold Out' : 'Book Now';
 
   return (
-    <div
+    <button
+      type="button"
+      disabled={isBooked}
+      aria-label={`${time}, ${status}`}
       className={`time-slot-cell ${isBooked ? 'sold-out' : ''}`}
-      onClick={!isBooked ? onSelect : undefined}
+      style={{ '--piece-index': pieceIndex }}
+      onClick={onSelect}
     >
       <div className="slot-content">
         <div className="slot-time">{time}</div>
         <div className={`slot-status ${isBooked ? 'sold' : 'available'}`}>{status}</div>
       </div>
-    </div>
+    </button>
   );
 };
 

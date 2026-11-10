@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const tours = [
   {
@@ -146,9 +146,9 @@ export default function WalkingTours() {
         </div>
         <div className="walking-cta">
           <p>Want a private version or a custom route?</p>
-          <a className="private-cta" href="/contact-us">
+          <Link className="private-cta" to="/contact-us">
             Contact us
-          </a>
+          </Link>
         </div>
       </section>
     </div>
