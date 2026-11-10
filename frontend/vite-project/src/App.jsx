@@ -18,7 +18,6 @@ import PrivateTours from './pages/PrivateTours';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import DatabaseHome from './pages/DatabaseHome';
-import Giveaway, { GiveawayHighlight } from './pages/Giveaway';
 
 const videoSrc = '/res/Free_videoLisbon_AI_GENERATED.mp4';
 const videoSrcDownTown = '/res/LisbonDownTown.mp4';
@@ -52,7 +51,6 @@ const navigation = [
   { name: 'Walking Tours', href: '/walking-tours', current: false },
   { name: 'Private Tours', href: '/private-tours', current: false },
   { name: 'Contact Us', href: '/contact-us', current: false },
-  { name: 'Sorteio', href: '/sorteio', current: false },
 ];
 
 function App() {
@@ -99,7 +97,6 @@ function App() {
               <Footsteps />
               <VideoCard />
               <Carrousel cardData={cardData} />
-              <GiveawayHighlight />
             </div>
           }
         />
@@ -107,7 +104,7 @@ function App() {
         <Route path="/private-tours" element={<PrivateTours />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
-        <Route path="/sorteio" element={<Giveaway />} />
+        <Route path="/sorteio" element={<Navigate to="/" replace />} />
         <Route path="/database" element={<DatabaseHome />} />
         <Route path="/contact" element={<Navigate to="/contact-us" replace />} />
         <Route
