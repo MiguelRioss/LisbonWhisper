@@ -12,7 +12,7 @@ export const fetchBookings = async () => {
 
 // POST: Create a new booking
 export const createBooking = async (bookingData) => {
-  const response = await fetch(`${API_BASE}/bookings`, {
+  const response = await fetch(`${API_BASE}/checkout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -24,5 +24,5 @@ export const createBooking = async (bookingData) => {
     throw new Error(`Failed to create booking: ${response.statusText}`);
   }
 
-  return await response.json(); // Optional: you can return created booking
+  return await response.json();
 };

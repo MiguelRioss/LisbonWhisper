@@ -12,6 +12,8 @@ import services from './SERVICES/services.mjs';
 import createDatabaseManagementServices from './SERVICES/databaseManagementServices.mjs';
 
 import { connectToMongo } from './DATA/mongoDb.mjs';
+import CheckoutService from './SERVICES/checkoutService.ts';
+import CheckoutController from './API/checkoutController.ts';
 
 const PORT = 1904;
 
@@ -33,6 +35,7 @@ async function startServer() {
   }
 
   const app = express();
+  const checkout = new CheckoutController(new CheckoutService(dataInit, services(dataInit)));
 
   const allowedOrigins = [
     'http://localhost:5173',
@@ -53,7 +56,15 @@ async function startServer() {
     })
   );
 
+  app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const result = await checkout.webhook(req.body, req.headers['stripe-signature']);
+    res.status(result.status).json(result.body);
+  });
   app.use(express.json());
+  app.post('/checkout', async (req, res) => {
+    const result = await checkout.createSession(req.body);
+    res.status(result.status).json(result.body);
+  });
 
   const whisperServices = services(dataInit);
   const whispers_API = api(whisperServices);
@@ -90,7 +101,6 @@ async function startServer() {
 
   app.get('/bookings', whispers_API.getBookings);
 
-  app.post('/bookings', whispers_API.createBooking);
   app.post('/contact-form', whispers_API.sendContactForm);
 
   app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));

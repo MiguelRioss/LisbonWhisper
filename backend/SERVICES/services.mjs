@@ -9,6 +9,7 @@ export default function (data) {
     getBookingAndProcessServices,
     createBookingServices,
     sendContactFormServices,
+    sendBookingEmails,
   };
 
   async function getBookingAndProcessServices(comparador = {}) {
@@ -34,6 +35,11 @@ export default function (data) {
     const bookingForCreate = buildBookingForCreate(bookingObject);
     const createdBooking = await data.createBooking(bookingForCreate);
 
+    await sendBookingEmails(createdBooking);
+    return createdBooking;
+  }
+
+  async function sendBookingEmails(createdBooking) {
     try {
       await sendEmailTemplate({
         to: String(createdBooking?.email || '').trim(),
@@ -95,7 +101,6 @@ export default function (data) {
       });
     }
 
-    return createdBooking;
   }
 
   async function sendContactFormServices(contactObject) {

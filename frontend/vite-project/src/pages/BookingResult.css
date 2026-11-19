@@ -1,0 +1,38 @@
+.booking-result {
+  min-height: 65vh;
+  display: grid;
+  place-items: center;
+  padding: 3rem 1rem;
+  background: linear-gradient(145deg, #f2f6ff, #eef8f3);
+  color: #10243e;
+}
+
+.booking-result-card {
+  width: min(100%, 560px);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid #dce6ed;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 20px 55px #10243e18;
+  text-align: center;
+}
+
+.booking-result-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.booking-result-icon--success { background: #dff5e9; color: #176b43; }
+.booking-result-icon--error { background: #fff0e8; color: #a34220; }
+.booking-result-eyebrow { margin-top: 1.5rem; text-transform: uppercase; letter-spacing: .13em; font-size: .75rem; font-weight: 700; }
+.booking-result-card h1 { margin: .5rem 0 1rem; font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.booking-result-card p { line-height: 1.6; }
+.booking-result-note { color: #506579; font-size: .9rem; }
+.booking-result-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
+.booking-result-actions a { padding: .8rem 1.2rem; border-radius: 8px; background: #0a4d8d; color: white; text-decoration: none; font-weight: 700; }
+.booking-result-actions .booking-result-secondary { background: white; color: #0a4d8d; border: 1px solid #0a4d8d; }

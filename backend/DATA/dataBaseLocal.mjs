@@ -6,6 +6,8 @@ export default function () {
   return {
     getBookings,
     createBooking,
+    getBookingById: (id) => bookings.bookings.find((booking) => String(booking.id) === String(id)),
+    updateBookingPayment: (id, fields) => Object.assign(bookings.bookings.find((booking) => String(booking.id) === String(id)), fields),
   };
 
   // Fetch all bookings

@@ -18,6 +18,8 @@ import PrivateTours from './pages/PrivateTours';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import DatabaseHome from './pages/DatabaseHome';
+import BookingSuccess from './pages/BookingSuccess';
+import BookingError from './pages/BookingError';
 
 const videoSrc = '/res/Free_videoLisbon_AI_GENERATED.mp4';
 const videoSrcDownTown = '/res/LisbonDownTown.mp4';
@@ -104,6 +106,9 @@ function App() {
         <Route path="/private-tours" element={<PrivateTours />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/booking/success" element={<BookingSuccess />} />
+        <Route path="/booking/cancel" element={<BookingError />} />
+        <Route path="/booking/error" element={<BookingError />} />
         <Route path="/sorteio" element={<Navigate to="/" replace />} />
         <Route path="/database" element={<DatabaseHome />} />
         <Route path="/contact" element={<Navigate to="/contact-us" replace />} />

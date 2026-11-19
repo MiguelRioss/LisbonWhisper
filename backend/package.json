@@ -4,8 +4,9 @@
   "type": "module",
   "main": "server.mjs",
   "scripts": {
-    "start": "node server.mjs",
-    "dev": "nodemon server.mjs",
+    "start": "node --import tsx server.mjs",
+    "dev": "nodemon --exec node --import tsx server.mjs",
+    "typecheck": "tsc --noEmit",
     "smtp:test": "node scripts/testSmtpConnection.mjs",
     "smtp:test:mailchimp": "node scripts/testMailchimpConnection.mjs",
     "booking:test-email": "node scripts/testBookingServiceEmail.mjs"
@@ -19,6 +20,13 @@
     "express": "^4.21.2",
     "mongodb": "^6.16.0",
     "nodemailer": "^7.0.13",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "stripe": "^23.2.0",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
   }
 }

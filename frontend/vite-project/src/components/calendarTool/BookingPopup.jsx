@@ -55,6 +55,10 @@ const BookingPopup = ({
     try {
       setIsSubmitting(true);
       const response = await createBookingHandler(booking);
+      if (response?.url) {
+        window.location.assign(response.url);
+        return;
+      }
       const createdBooking = response?.booking || null;
       setServerPricing({
         pricePerPerson: createdBooking?.pricePerPerson,

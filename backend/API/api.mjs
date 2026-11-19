@@ -3,14 +3,12 @@
 export default function (WhisperServices) {
   return {
     getBookings: handleRequestNoAuthorization(getBookingsAPI),
-    createBooking: handleRequestNoAuthorization(createBookingAPI),
     sendContactForm: handleRequestNoAuthorization(sendContactFormAPI),
   };
 
   async function getBookingsAPI(req, rsp) {
     const bookings = await WhisperServices.getBookingAndProcessServices();
-    console.log('Fetched bookings:', bookings);
-    return bookings; // Return the data to the wrapper
+    return { bookings: bookings.bookings.filter((booking) => !booking.paymentStatus || booking.paymentStatus === 'paid') };
   }
 
   async function getBookingsWithSpecificDayAPI(req, rsp) {

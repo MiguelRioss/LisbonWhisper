@@ -6,6 +6,8 @@ export default function () {
     getBookings,
     getFilteredBookings,
     createBooking,
+    getBookingById,
+    updateBookingPayment,
   };
 
   async function getBookings() {
@@ -33,5 +35,12 @@ export default function () {
     booking._id = result.insertedId;
     console.log('New booking added:', booking);
     return booking; // this can stay as a single object
+  }
+  async function getBookingById(id) {
+    if (!ObjectId.isValid(id)) return null;
+    return getBookingsCollection().findOne({ _id: new ObjectId(id) });
+  }
+  async function updateBookingPayment(id, fields) {
+    return getBookingsCollection().updateOne({ _id: new ObjectId(id) }, { $set: fields });
   }
 }
