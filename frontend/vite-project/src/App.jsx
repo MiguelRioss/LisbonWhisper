@@ -120,7 +120,6 @@ function App() {
               loading={loading}
               error={error}
               createBookingHandler={createBooking}
-              refetchBookings={fetchAvailability}
             />
           }
         />

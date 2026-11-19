@@ -68,7 +68,7 @@ const BookingPopup = ({
       setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
-      setError('Failed to submit booking.');
+      setError(err.message || 'Failed to submit booking.');
     } finally {
       setIsSubmitting(false);
     }

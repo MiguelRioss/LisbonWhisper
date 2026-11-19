@@ -19,10 +19,10 @@ export const createBooking = async (bookingData) => {
     },
     body: JSON.stringify({ booking: bookingData }),
   });
-  console.log(bookingData);
+  const payload = await response.json();
   if (!response.ok) {
-    throw new Error(`Failed to create booking: ${response.statusText}`);
+    throw new Error(payload?.message || `Failed to create booking: ${response.statusText}`);
   }
 
-  return await response.json();
+  return payload;
 };

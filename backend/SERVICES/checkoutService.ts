@@ -37,6 +37,16 @@ export default class CheckoutService {
     return value.trim();
   }
 
+  private tourDescriptions(value: unknown): string {
+    if (Array.isArray(value)) {
+      if (!value.every((description) => typeof description === 'string')) {
+        throw new CheckoutValidationError('tourDescriptions must contain text');
+      }
+      return value.map((description) => description.trim()).join('\n');
+    }
+    return this.optionalText(value, 'tourDescriptions');
+  }
+
   async createSession(booking: CheckoutBookingRequest | undefined): Promise<CheckoutSuccessResponse> {
       if (!booking || typeof booking !== 'object') {
         throw new CheckoutValidationError('booking is required');
@@ -55,7 +65,7 @@ export default class CheckoutService {
       const reservation = {
         name, email, date, time, tourName, persons,
         message: this.optionalText(booking.message, 'message'),
-        tourDescriptions: this.optionalText(booking.tourDescriptions, 'tourDescriptions'),
+        tourDescriptions: this.tourDescriptions(booking.tourDescriptions),
         paymentStatus: 'pending',
       };
       const created = await this.bookingsData.createBooking(reservation);

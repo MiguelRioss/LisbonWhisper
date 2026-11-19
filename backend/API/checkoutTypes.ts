@@ -6,7 +6,7 @@ export interface CheckoutBookingRequest {
   tourName: string;
   persons: number;
   message?: string;
-  tourDescriptions?: string;
+  tourDescriptions?: string | string[];
 }
 
 export interface CheckoutRequestBody {
