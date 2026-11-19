@@ -8,5 +8,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["http/**/*.ts", "services/**/*.ts", "repo/**/*.ts", "domain/**/*.ts"]
+  "include": ["http/**/*.ts", "services/**/*.ts", "repo/**/*.ts", "domain/**/*.ts", "tests/**/*.ts"]
 }
