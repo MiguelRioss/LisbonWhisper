@@ -1,3 +1,5 @@
 tools/ffmpeg/
+**/node_modules/
+**/dist/
 backend/.env
 backend/.env.local
