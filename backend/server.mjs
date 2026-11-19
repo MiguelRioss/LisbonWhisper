@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import Stripe from 'stripe';
 import api from './http/api.mjs';
 import databaseManagementApi from './http/databaseManagementApi.mjs';
 
@@ -18,11 +17,13 @@ import WebhookService from './services/webhook/WebhookService.ts';
 import CheckoutController from './http/checkout/CheckoutController.ts';
 import WebhookController from './http/webhook/WebhookController.ts';
 import BookingRepository from './repo/BookingRepository.ts';
+import StripeAdapter from './services/stripe/StripeAdapter.ts';
 
 const PORT = 1904;
 
 async function startServer() {
   console.log('Start setting up server');
+  const stripeAdapter = StripeAdapter.fromEnvironment(process.env);
 
   let dataInit;
 
@@ -32,6 +33,7 @@ async function startServer() {
     console.log('Connected to MongoDB');
     dataInit = onlineData();
   } catch (err) {
+    if (stripeAdapter.isLive) throw err;
     console.warn('MongoDB unavailable, using local in-memory DB for this run.', {
       message: err?.message || String(err),
     });
@@ -40,9 +42,8 @@ async function startServer() {
 
   const app = express();
   const bookings = new BookingRepository(dataInit);
-  const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
-  const checkout = new CheckoutController(new CheckoutService(bookings, stripe, process.env.WEBSITE_URL));
-  const webhook = new WebhookController(new WebhookService(bookings, services(dataInit), stripe, process.env.STRIPE_WEBHOOK_SECRET));
+  const checkout = new CheckoutController(new CheckoutService(bookings, stripeAdapter.client, process.env.WEBSITE_URL));
+  const webhook = new WebhookController(new WebhookService(bookings, services(dataInit), stripeAdapter.client, stripeAdapter.webhookSecret, stripeAdapter.mode));
 
   const allowedOrigins = [
     'http://localhost:5173',

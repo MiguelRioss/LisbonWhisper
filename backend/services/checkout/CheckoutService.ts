@@ -4,11 +4,6 @@ import { CheckoutConfigurationError } from '../../domain/CheckoutError.ts';
 import type BookingRepository from '../../repo/BookingRepository.ts';
 import type { CheckoutBookingRequest, CheckoutSuccessResponse } from '../../http/checkout/CheckoutTypes.ts';
 
-const TOUR_IMAGES: Record<string, string> = {
-  'The Moorish Whispers': 'f03ef0dcb35a8e63d746cfa4741a4f96.jpg',
-  'The West Whispers': '9bfee964e2a50ec45dc449890ec9ed42.jpg',
-};
-
 export default class CheckoutService {
   constructor(
     private readonly bookings: BookingRepository,
@@ -24,7 +19,7 @@ export default class CheckoutService {
     const bookingId = String(created._id || created.id);
 
     try {
-      const image = TOUR_IMAGES[booking.details.tourName];
+      const logoUrl = `${baseUrl}/res/logo.png`;
       const stripeRequest: Stripe.Checkout.SessionCreateParams = {
         mode: 'payment',
         submit_type: 'book',
@@ -37,14 +32,14 @@ export default class CheckoutService {
             product_data: {
               name: booking.details.tourName,
               description: booking.checkoutDescription,
-              ...(image ? { images: [`${baseUrl}/res/${image}`] } : {}),
+              images: [logoUrl],
             },
           },
           quantity: booking.details.persons,
         }],
         branding_settings: {
           display_name: 'Lisbon Whisper',
-          logo: { type: 'url', url: `${baseUrl}/res/logo.png` },
+          logo: { type: 'url', url: logoUrl },
           background_color: '#f2f6ff',
           button_color: '#0a4d8d',
         },

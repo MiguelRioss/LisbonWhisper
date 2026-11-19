@@ -6,6 +6,7 @@ import { CheckoutValidationError } from '../domain/CheckoutError.ts';
 import BookingRepository from '../repo/BookingRepository.ts';
 import CheckoutService from '../services/checkout/CheckoutService.ts';
 import WebhookService from '../services/webhook/WebhookService.ts';
+import StripeAdapter from '../services/stripe/StripeAdapter.ts';
 
 test('booking rejects missing required fields and formats tour details', () => {
   assert.throws(() => Booking.from(undefined), CheckoutValidationError);
@@ -38,18 +39,46 @@ test('signed paid webhook updates booking and sends email only once', async () =
   const payload = JSON.stringify({
     id: 'evt_test_example',
     type: 'checkout.session.completed',
+    livemode: false,
     data: { object: { id: 'cs_test_example', client_reference_id: '7', payment_status: 'paid', amount_total: 9800, currency: 'eur', payment_intent: 'pi_test_example' } },
   });
   const signature = stripe.webhooks.generateTestHeaderString({ payload, secret });
 
   await service.handle(Buffer.from(payload), signature);
   await service.handle(Buffer.from(payload), signature);
+  await assert.rejects(() => new WebhookService(repository, { async sendBookingEmails() {} }, stripe, secret, 'live').handle(Buffer.from(payload), signature), /Stripe webhook mode mismatch/);
 
   assert.equal(booking.paymentStatus, 'paid');
   assert.equal(emailsSent, 1);
 });
 
-test('checkout sends tour details, image and logo to Stripe', async () => {
+test('Stripe adapter keeps test and live credentials separate', () => {
+  const testAdapter = StripeAdapter.fromEnvironment({
+    STRIPE_MODE: 'test',
+    STRIPE_TEST_SECRET_KEY: 'sk_test_example',
+    STRIPE_TEST_WEBHOOK_SECRET: 'whsec_test_example',
+    STRIPE_LIVE_SECRET_KEY: 'rk_live_example',
+    STRIPE_LIVE_WEBHOOK_SECRET: 'whsec_live_example',
+  });
+  assert.equal(testAdapter.mode, 'test');
+  assert.ok(testAdapter.client);
+  assert.equal(testAdapter.webhookSecret, 'whsec_test_example');
+
+  const liveAdapter = StripeAdapter.fromEnvironment({
+    STRIPE_MODE: 'live',
+    STRIPE_LIVE_SECRET_KEY: 'rk_live_example',
+    STRIPE_LIVE_WEBHOOK_SECRET: 'whsec_live_example',
+  });
+  assert.equal(liveAdapter.mode, 'live');
+  assert.ok(liveAdapter.client);
+  assert.equal(liveAdapter.webhookSecret, 'whsec_live_example');
+  assert.throws(() => StripeAdapter.fromEnvironment({ STRIPE_MODE: 'live', STRIPE_SECRET_KEY: 'sk_test_example', STRIPE_WEBHOOK_SECRET: 'whsec_test_example' }), /Live Stripe key and webhook secret are required/);
+  const legacyTestAdapter = StripeAdapter.fromEnvironment({ STRIPE_SECRET_KEY: 'sk_test_legacy', STRIPE_WEBHOOK_SECRET: 'whsec_legacy' });
+  assert.equal(legacyTestAdapter.mode, 'test');
+  assert.equal(legacyTestAdapter.webhookSecret, 'whsec_legacy');
+});
+
+test('checkout sends tour details and company logo to Stripe', async () => {
   let parameters: Stripe.Checkout.SessionCreateParams | undefined;
   const stripe = {
     checkout: {
@@ -77,6 +106,6 @@ test('checkout sends tour details, image and logo to Stripe', async () => {
   assert.equal(parameters?.line_items?.[0]?.quantity, 2);
   assert.equal(parameters?.line_items?.[0]?.price_data?.unit_amount, 4900);
   assert.equal(parameters?.line_items?.[0]?.price_data?.product_data?.description, '2026-12-01 · 10:00-12:00 — Hidden streets');
-  assert.deepEqual(parameters?.line_items?.[0]?.price_data?.product_data?.images, ['https://www.lisbonwhisper.com/res/f03ef0dcb35a8e63d746cfa4741a4f96.jpg']);
+  assert.deepEqual(parameters?.line_items?.[0]?.price_data?.product_data?.images, ['https://www.lisbonwhisper.com/res/logo.png']);
   assert.deepEqual(parameters?.branding_settings?.logo, { type: 'url', url: 'https://www.lisbonwhisper.com/res/logo.png' });
 });

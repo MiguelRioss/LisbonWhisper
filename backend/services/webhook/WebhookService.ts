@@ -3,6 +3,7 @@ import type BookingRepository from '../../repo/BookingRepository.ts';
 import type { BookingRecord } from '../../domain/Booking.ts';
 import { TOUR_PRICE_CENTS } from '../../domain/Booking.ts';
 import { CheckoutConfigurationError } from '../../domain/CheckoutError.ts';
+import type { StripeMode } from '../stripe/StripeAdapter.ts';
 
 interface BookingEmails {
   sendBookingEmails(booking: BookingRecord): Promise<void>;
@@ -14,11 +15,15 @@ export default class WebhookService {
     private readonly bookingEmails: BookingEmails,
     private readonly stripe: Stripe | null,
     private readonly webhookSecret: string | undefined,
+    private readonly mode: StripeMode = 'test',
   ) {}
 
   async handle(payload: Buffer, signature: string | string[] | undefined): Promise<void> {
     if (!this.stripe || !this.webhookSecret) throw new CheckoutConfigurationError();
     const event = this.stripe.webhooks.constructEvent(payload, signature || '', this.webhookSecret);
+    if (event.livemode !== (this.mode === 'live')) {
+      throw new CheckoutConfigurationError('Stripe webhook mode mismatch');
+    }
     if (event.type !== 'checkout.session.completed' && event.type !== 'checkout.session.async_payment_succeeded') return;
     const session = event.data.object;
     if (session.payment_status !== 'paid' || !session.client_reference_id) return;

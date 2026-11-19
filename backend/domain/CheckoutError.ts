@@ -12,7 +12,7 @@ export class CheckoutValidationError extends CheckoutError {
 }
 
 export class CheckoutConfigurationError extends CheckoutError {
-  constructor() {
-    super('Stripe checkout is not configured', 503);
+  constructor(message = 'Stripe checkout is not configured') {
+    super(message, 503);
   }
 }
