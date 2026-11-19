@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const tours = [
   {
-    title: 'the Moorish Whispers',
+    title: 'The Moorish Whispers',
     description: "Discover Lisbon's hidden secrets from the Torel viewpoint to Rua Augusta.",
     descriptions: [
       "Discover Lisbon's hidden secrets from the Torel viewpoint to Rua Augusta.",
@@ -14,7 +14,7 @@ const tours = [
     tag: 'Moorish',
   },
   {
-    title: 'the West Whispers',
+    title: 'The West Whispers',
     description:
       'This tour takes you to a part of Lisbon marked by its art deco and art noveau palaces.',
     descriptions: [

@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import servicesFactory from '../SERVICES/services.mjs';
-import dataBaseLocal from '../DATA/dataBaseLocal.mjs';
+import servicesFactory from '../services/services.mjs';
+import dataBaseLocal from '../repo/dataBaseLocal.mjs';
 
 async function run() {
   const to = process.env.TEST_BOOKING_EMAIL || process.env.CONTACT_EMAIL || '';

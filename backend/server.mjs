@@ -1,19 +1,23 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import api from './API/api.mjs';
-import databaseManagementApi from './API/databaseManagementApi.mjs';
+import Stripe from 'stripe';
+import api from './http/api.mjs';
+import databaseManagementApi from './http/databaseManagementApi.mjs';
 
-import onlineData from './DATA/dataBase.mjs';
-import localData from './DATA/dataBaseLocal.mjs';
-import createDatabaseAdminSessionData from './DATA/databaseAdminSessionData.mjs';
-import createMailchimpAudienceData from './DATA/mailchimpAudienceData.mjs';
-import services from './SERVICES/services.mjs';
-import createDatabaseManagementServices from './SERVICES/databaseManagementServices.mjs';
+import onlineData from './repo/dataBase.mjs';
+import localData from './repo/dataBaseLocal.mjs';
+import createDatabaseAdminSessionData from './repo/databaseAdminSessionData.mjs';
+import createMailchimpAudienceData from './repo/mailchimpAudienceData.mjs';
+import services from './services/services.mjs';
+import createDatabaseManagementServices from './services/databaseManagementServices.mjs';
 
-import { connectToMongo } from './DATA/mongoDb.mjs';
-import CheckoutService from './SERVICES/checkoutService.ts';
-import CheckoutController from './API/checkoutController.ts';
+import { connectToMongo } from './repo/mongoDb.mjs';
+import CheckoutService from './services/checkout/CheckoutService.ts';
+import WebhookService from './services/webhook/WebhookService.ts';
+import CheckoutController from './http/checkout/CheckoutController.ts';
+import WebhookController from './http/webhook/WebhookController.ts';
+import BookingRepository from './repo/BookingRepository.ts';
 
 const PORT = 1904;
 
@@ -35,7 +39,10 @@ async function startServer() {
   }
 
   const app = express();
-  const checkout = new CheckoutController(new CheckoutService(dataInit, services(dataInit)));
+  const bookings = new BookingRepository(dataInit);
+  const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+  const checkout = new CheckoutController(new CheckoutService(bookings, stripe, process.env.WEBSITE_URL));
+  const webhook = new WebhookController(new WebhookService(bookings, services(dataInit), stripe, process.env.STRIPE_WEBHOOK_SECRET));
 
   const allowedOrigins = [
     'http://localhost:5173',
@@ -57,7 +64,7 @@ async function startServer() {
   );
 
   app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-    const result = await checkout.webhook(req.body, req.headers['stripe-signature']);
+    const result = await webhook.handle(req.body, req.headers['stripe-signature']);
     res.status(result.status).json(result.body);
   });
   app.use(express.json());

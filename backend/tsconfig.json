@@ -8,5 +8,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["API/checkoutController.ts", "API/checkoutTypes.ts", "API/checkoutResponses.ts", "SERVICES/checkoutService.ts", "errors/**/*.ts"]
+  "include": ["http/**/*.ts", "services/**/*.ts", "repo/**/*.ts", "domain/**/*.ts"]
 }
