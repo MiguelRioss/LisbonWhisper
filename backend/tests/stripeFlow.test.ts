@@ -128,6 +128,11 @@ test('checkout sends tour details and company logo to Stripe', async () => {
   };
   await assert.rejects(service.createSession({ ...input, persons: 4 }), /up to 3 people/);
   await assert.rejects(service.createSession({ ...input, promoCode: 'INVALID' }), /promo code is invalid/i);
+  await assert.rejects(service.quote({ tourId: input.tourId, persons: 2, promoCode: 'INVALID' }), /promo code is invalid/i);
+  const quote = await service.quote({ tourId: input.tourId, persons: 2, promoCode: ' partner30 ' });
+  assert.deepEqual(quote, {
+    promoCode: 'PARTNER30', discountPercent: 30, subtotalCents: 10500, discountCents: 3150, totalPriceCents: 7350,
+  });
   assert.equal(Boolean(storedBooking), false);
   assert.equal(Boolean(parameters), false);
   const response = await service.createSession(input);
@@ -144,7 +149,7 @@ test('checkout sends tour details and company logo to Stripe', async () => {
   await service.createSession({ ...input, promoCode: ' partner30 ' });
   assert.equal(storedBooking?.promoCode, 'PARTNER30');
   assert.equal(storedBooking?.discountCents, 3150);
-  assert.equal(storedBooking?.totalPriceCents, 7350);
+  assert.equal(storedBooking?.totalPriceCents, quote.totalPriceCents);
   assert.equal(parameters?.line_items?.[0]?.price_data?.unit_amount, 3675);
   assert.equal(parameters?.line_items?.[0]?.quantity, 2);
 

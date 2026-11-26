@@ -1,8 +1,8 @@
 import type { CheckoutErrorResponse, CheckoutSuccessResponse } from './CheckoutTypes.ts';
 
-export class CheckoutSuccess {
+export class CheckoutSuccess<T = CheckoutSuccessResponse> {
   readonly status = 200;
-  constructor(readonly body: CheckoutSuccessResponse) {}
+  constructor(readonly body: T) {}
 }
 
 export class CheckoutFailure {

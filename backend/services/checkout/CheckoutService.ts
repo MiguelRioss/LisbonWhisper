@@ -2,7 +2,7 @@ import type Stripe from 'stripe';
 import { Booking, TOUR_PRICE_CENTS } from '../../domain/Booking.ts';
 import { CheckoutConfigurationError, CheckoutValidationError } from '../../domain/CheckoutError.ts';
 import type BookingRepository from '../../repo/BookingRepository.ts';
-import type { CheckoutBookingRequest, CheckoutSuccessResponse } from '../../http/checkout/CheckoutTypes.ts';
+import type { CheckoutBookingRequest, CheckoutQuoteRequest, CheckoutQuoteResponse, CheckoutSuccessResponse } from '../../http/checkout/CheckoutTypes.ts';
 
 type CheckoutTour = { slug: string; title: string; priceCents: number; maxPersons: number };
 type CheckoutPromoCode = { discountPercent: number };
@@ -22,20 +22,32 @@ export default class CheckoutService {
     private readonly catalog?: TourCatalog,
   ) {}
 
-  async createSession(input: CheckoutBookingRequest | undefined): Promise<CheckoutSuccessResponse> {
-    const booking = Booking.from(input);
-    if (!this.stripe || !this.siteUrl) throw new CheckoutConfigurationError();
-    const tourId = typeof input?.tourId === 'string' ? input.tourId.trim() : '';
+  async quote(input: CheckoutQuoteRequest | undefined): Promise<CheckoutQuoteResponse> {
+    if (!this.catalog) throw new CheckoutConfigurationError();
+    if (typeof input?.tourId !== 'string' || !input.tourId.trim()) {
+      throw new CheckoutValidationError('Tour is required.');
+    }
+    const { promoCode, discountPercent, subtotalCents, discountCents, totalPriceCents } =
+      await this.priceBooking(input.tourId.trim(), '', input.persons, input.promoCode);
+    return { promoCode, discountPercent, subtotalCents, discountCents, totalPriceCents };
+  }
+
+  private async priceBooking(tourId: string, fallbackTourName: string, persons: number, rawPromoCode: unknown) {
+    if (!Number.isInteger(persons) || persons < 1 || persons > 20) {
+      throw new CheckoutValidationError('persons must be an integer between 1 and 20');
+    }
     const tour = this.catalog && (tourId
       ? await this.catalog.getTourById(tourId)
-      : await this.catalog.getTourByTitle(booking.details.tourName));
+      : await this.catalog.getTourByTitle(fallbackTourName));
     if (this.catalog && !tour) throw new CheckoutValidationError('Tour not found');
-    if (tour && booking.details.persons > tour.maxPersons) {
+    if (tour && persons > tour.maxPersons) {
       throw new CheckoutValidationError(`This tour allows up to ${tour.maxPersons} people`);
     }
     const unitPriceCents = tour?.priceCents ?? TOUR_PRICE_CENTS;
-    const tourName = tour?.title ?? booking.details.tourName;
-    const { persons, promoCode } = booking.details;
+    if (rawPromoCode != null && typeof rawPromoCode !== 'string') {
+      throw new CheckoutValidationError('This promo code is invalid.');
+    }
+    const promoCode = rawPromoCode?.trim().toUpperCase() ?? '';
     let discountPercent = 0;
     if (promoCode) {
       const promo = /^[A-Z0-9][A-Z0-9_-]{0,31}$/.test(promoCode)
@@ -52,6 +64,17 @@ export default class CheckoutService {
     if (totalPriceCents > 0 && totalPriceCents < MINIMUM_EUR_CHARGE_CENTS) {
       throw new CheckoutValidationError('The discounted total is below the minimum payment of €0.50. Add more guests or remove the code.');
     }
+    return { tour, unitPriceCents, promoCode, discountPercent, subtotalCents, discountCents, totalPriceCents };
+  }
+
+  async createSession(input: CheckoutBookingRequest | undefined): Promise<CheckoutSuccessResponse> {
+    const booking = Booking.from(input);
+    if (!this.stripe || !this.siteUrl) throw new CheckoutConfigurationError();
+    const { persons, tourName: fallbackTourName } = booking.details;
+    const tourId = typeof input?.tourId === 'string' ? input.tourId.trim() : '';
+    const { tour, unitPriceCents, promoCode, discountPercent, discountCents, totalPriceCents } =
+      await this.priceBooking(tourId, fallbackTourName, persons, input?.promoCode);
+    const tourName = tour?.title ?? fallbackTourName;
     const baseUrl = this.siteUrl.replace(/\/$/, '');
     const created = await this.bookings.create({
       ...booking.details,
@@ -61,7 +84,7 @@ export default class CheckoutService {
       pricePerPerson: unitPriceCents / 100,
       totalPrice: totalPriceCents / 100,
       totalPriceCents,
-      ...(promoCode && { discountPercent, discountCents }),
+      ...(promoCode && { promoCode, discountPercent, discountCents }),
       currency: 'EUR',
     });
     const bookingId = String(created._id || created.id);

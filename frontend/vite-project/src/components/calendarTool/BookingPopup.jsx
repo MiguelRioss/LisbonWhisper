@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { fetchCheckoutQuote } from '../../services/bookingService';
 import './WeeklyGrid.css';
+
+const euro = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' });
 
 const BookingPopup = ({
   createBookingHandler,
@@ -16,23 +19,51 @@ const BookingPopup = ({
   const [persons, setPersons] = useState(1);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [promoError, setPromoError] = useState('');
+  const [quote, setQuote] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [serverPricing, setServerPricing] = useState(null);
 
   const estimatedTotal = persons * priceCents / 100;
+  const busy = isSubmitting || isApplyingPromo;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'promoCode') {
+      setQuote(null);
+      setPromoError('');
+      setError('');
+    }
   };
 
+  async function applyPromo(guestCount = persons) {
+    if (busy || !formData.promoCode.trim()) return;
+    setIsApplyingPromo(true);
+    setPromoError('');
+    setError('');
+    setQuote(null);
+    try {
+      const price = await fetchCheckoutQuote({ tourId, persons: guestCount, promoCode: formData.promoCode });
+      setQuote(price);
+    } catch (err) {
+      setPromoError(err.message);
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  }
+
   const handlePersonsChange = (delta) => {
-    setPersons((prev) => Math.min(Math.max(1, prev + delta), maxPersons));
+    if (busy) return;
+    const next = Math.min(Math.max(1, persons + delta), maxPersons);
+    setPersons(next);
+    if (quote) void applyPromo(next);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (busy) return;
     setError('');
 
     if (!formData.name.trim()) {
@@ -106,7 +137,7 @@ const BookingPopup = ({
                   <button
                     type="button"
                     onClick={() => handlePersonsChange(-1)}
-                    disabled={isSubmitting || persons <= 1}
+                    disabled={busy || persons <= 1}
                   >
                     -
                   </button>
@@ -114,20 +145,26 @@ const BookingPopup = ({
                   <button
                     type="button"
                     onClick={() => handlePersonsChange(1)}
-                    disabled={isSubmitting || persons >= maxPersons}
+                    disabled={busy || persons >= maxPersons}
                   >
                     +
                   </button>
                 </div>
               </div>
-              <div className="booking-price-summary">
+              <div className="booking-price-summary" aria-live="polite">
                 <p>
                   <strong>Price per person:</strong>{' '}
-                  <span className="booking-current-price">{`\u20AC${priceCents / 100}`}</span>{' '}
+                  <span className="booking-current-price">{euro.format((quote ? quote.subtotalCents / persons : priceCents) / 100)}</span>
                 </p>
-                <p>
-                  <strong>{formData.promoCode.trim() ? 'Subtotal before discount:' : 'Estimated total:'}</strong> {`\u20AC${estimatedTotal}`}
-                </p>
+                {quote ? (
+                  <>
+                    <p><strong>Subtotal:</strong> {euro.format(quote.subtotalCents / 100)}</p>
+                    <p><strong>Discount ({quote.discountPercent}%):</strong> −{euro.format(quote.discountCents / 100)}</p>
+                    <p><strong>Total after discount:</strong> {euro.format(quote.totalPriceCents / 100)}</p>
+                  </>
+                ) : (
+                  <p><strong>{isApplyingPromo ? 'Subtotal before discount:' : 'Estimated total:'}</strong> {euro.format(estimatedTotal)}</p>
+                )}
               </div>
             </div>
 
@@ -183,23 +220,37 @@ const BookingPopup = ({
                 disabled={isSubmitting}
               />
               <label htmlFor="booking-promo-code">Promo code <span>(optional)</span></label>
-              <input
-                id="booking-promo-code"
-                name="promoCode"
-                type="text"
-                value={formData.promoCode}
-                onChange={handleChange}
-                maxLength={32}
-                autoCapitalize="characters"
-                spellCheck={false}
-                aria-describedby="booking-promo-hint"
-                disabled={isSubmitting}
-              />
-              <small id="booking-promo-hint">Your discounted total will appear on the payment page.</small>
+              <div className="booking-promo-row">
+                <input
+                  id="booking-promo-code"
+                  name="promoCode"
+                  type="text"
+                  value={formData.promoCode}
+                  onChange={handleChange}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      void applyPromo();
+                    }
+                  }}
+                  maxLength={32}
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  aria-invalid={Boolean(promoError)}
+                  aria-describedby="booking-promo-hint"
+                  disabled={busy}
+                />
+                <button type="button" onClick={() => applyPromo()} disabled={busy || !formData.promoCode.trim()}>
+                  {isApplyingPromo ? 'Applying…' : 'Apply'}
+                </button>
+              </div>
+              <small id="booking-promo-hint" role={promoError ? 'alert' : 'status'}>
+                {promoError || (quote ? `${quote.promoCode} applied.` : 'Apply your code to see the discounted total.')}
+              </small>
             </div>
 
             <div className="popup-actions">
-              <button type="submit" disabled={isSubmitting}>
+              <button type="submit" disabled={busy}>
                 {isSubmitting ? 'Submitting...' : 'Confirm booking'}
               </button>
               <button type="button" onClick={onCollapse} disabled={isSubmitting}>

@@ -73,6 +73,10 @@ async function startServer() {
     res.status(result.status).json(result.body);
   });
   app.use(express.json());
+  app.post('/checkout/quote', async (req, res) => {
+    const result = await checkout.quote(req.body);
+    res.set('Cache-Control', 'no-store').status(result.status).json(result.body);
+  });
   app.post('/checkout', async (req, res) => {
     const result = await checkout.createSession(req.body);
     res.status(result.status).json(result.body);

@@ -65,7 +65,6 @@ export class Booking {
       date,
       time,
       tourName,
-      promoCode: Booking.optionalText(input.promoCode, 'Promo code').toUpperCase() || undefined,
       persons: input.persons,
       message: Booking.optionalText(input.message, 'message'),
       tourDescriptions: Array.isArray(descriptions)

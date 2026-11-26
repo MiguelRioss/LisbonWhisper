@@ -11,6 +11,20 @@ export interface CheckoutSuccessResponse {
   sessionId: string;
 }
 
+export interface CheckoutQuoteRequest {
+  tourId: string;
+  persons: number;
+  promoCode?: string;
+}
+
+export interface CheckoutQuoteResponse {
+  promoCode: string;
+  discountPercent: number;
+  subtotalCents: number;
+  discountCents: number;
+  totalPriceCents: number;
+}
+
 export interface CheckoutErrorResponse {
   message: string;
 }
