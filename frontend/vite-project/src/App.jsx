@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import './App.css';
 
@@ -11,7 +11,8 @@ import TourPage from './pages/tourPage/tourPage';
 import Footsteps from './components/Footsteps';
 
 import logo from './res/logo.png';
-import { fetchBookings, createBooking } from './services/bookingService';
+import { useFetch } from './api/useFetch';
+import { bookingsCacheKey, fetchBookings, createBooking } from './services/bookingService';
 
 import WalkingTours from './pages/WalkingTours';
 import PrivateTours from './pages/PrivateTours';
@@ -59,32 +60,20 @@ function App() {
   const location = useLocation();
   const isDatabaseRoute = location.pathname.startsWith('/database');
 
-  const [availability, setAvailability] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchAvailability = async () => {
-    try {
-      const data = await fetchBookings();
-      setAvailability(data.bookings);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to fetch availability data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { status, refetch } = useFetch(isDatabaseRoute ? null : bookingsCacheKey, fetchBookings);
+  const result = status.kind === 'success' ? status : status.stale;
+  const availability = result?.body.kind === 'json' ? result.body.json?.bookings : undefined;
+  const waiting = status.kind === 'idle' || status.kind === 'loading';
+  const loading = waiting && !Array.isArray(availability);
+  const error = !waiting && (status.kind !== 'success' || !Array.isArray(availability))
+    ? 'Failed to fetch availability data'
+    : null;
 
   useEffect(() => {
-    if (isDatabaseRoute) {
-      setLoading(false);
-      return;
-    }
-
-    fetchAvailability();
-    const intervalId = setInterval(fetchAvailability, 30000);
+    if (isDatabaseRoute) return;
+    const intervalId = setInterval(refetch, 30000);
     return () => clearInterval(intervalId);
-  }, [isDatabaseRoute]);
+  }, [isDatabaseRoute, refetch]);
 
   return (
     <>
@@ -116,6 +105,7 @@ function App() {
           path="/tour/:tourId"
           element={
             <TourPage
+              tours={cardData}
               bookings={availability}
               loading={loading}
               error={error}

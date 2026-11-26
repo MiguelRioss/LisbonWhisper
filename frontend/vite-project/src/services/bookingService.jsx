@@ -1,14 +1,8 @@
 const API_BASE = 'https://lisbonwhisper.onrender.com';
 
-// GET: Fetch all bookings
-export const fetchBookings = async () => {
-  const response = await fetch(`${API_BASE}/bookings`);
-  console.log('...Fetching');
-  if (!response.ok) {
-    throw new Error(`Failed to fetch bookings: ${response.statusText}`);
-  }
-  return await response.json(); // returns { bookings: [...] }
-};
+export const bookingsCacheKey = `${API_BASE}/bookings`;
+
+export const fetchBookings = (signal, url) => fetch(url, { signal });
 
 // POST: Create a new booking
 export const createBooking = async (bookingData) => {

@@ -31,11 +31,11 @@ const Footer = ({ navigation, logo }) => {
               (+351) 965398865
             </a>
             <a
-              href="tel:+351969923328"
+              href="tel:+351915597714"
               className="flex items-center gap-2 text-gray-300 hover:text-white transition duration-200 no-underline"
             >
               <PhoneIcon className="h-4 w-4 text-gray-300" aria-hidden="true" />
-              (+351) 969923328
+              (+351) 915597714
             </a>
           </div>
         </div>

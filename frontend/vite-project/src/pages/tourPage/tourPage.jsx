@@ -13,17 +13,17 @@ import img3 from '../../res/pexels-fotios-photos-1599497.jpg';
 
 import { useLocation, useParams } from 'react-router-dom';
 
-function TourPage({ bookings, loading, error, createBookingHandler }) {
+function TourPage({ tours, bookings, loading, error, createBookingHandler }) {
   const location = useLocation();
   const { tourId } = useParams();
-  const tourData = location.state || {};
-  const derivedTitle = tourId ? tourId.replace(/-/g, ' ') : '';
-  const mergedTourData =
-    tourData && Object.keys(tourData).length
-      ? tourData
-      : derivedTitle
-      ? { title: derivedTitle }
-      : tourData;
+  const routeTour = tours.find((tour) => tour.title.replace(/\s+/g, '-').toLowerCase() === tourId);
+  const tourData = { ...routeTour, ...location.state };
+  const tourName =
+    tourData.title?.trim() ||
+    tourData.name?.trim() ||
+    routeTour?.title ||
+    tourId.replace(/-/g, ' ');
+  const resolvedTourData = { ...tourData, title: tourName };
   const { hash } = location;  
 
   const handleCreateBooking = async (bookingData) => {
@@ -44,7 +44,6 @@ function TourPage({ bookings, loading, error, createBookingHandler }) {
     });
   }, [hash]);
 
-  const tourName = mergedTourData.title ?? mergedTourData.name ?? '';
   return (
     <div className="home-surface">
       <GenericCarousel
@@ -56,7 +55,7 @@ function TourPage({ bookings, loading, error, createBookingHandler }) {
         ]}
       />
 
-      <TourInfoContainer tourData={mergedTourData} />
+      <TourInfoContainer tourData={resolvedTourData} />
 
       <div id="time-slots" className="section-background pt-16 pb-10 py-10 px-4">
         <h2 className="text-5xl font-bold text-white mb-10 text-center">Select a Time Slot</h2>
@@ -65,7 +64,7 @@ function TourPage({ bookings, loading, error, createBookingHandler }) {
           <div className="text-danger text-center">{error}</div>
         ) : (
           <WeeklyGrid
-            tourData={tourData}
+            tourData={resolvedTourData}
             createBookingHandler={handleCreateBooking}
             bookings={loading ? null : bookings}
           />

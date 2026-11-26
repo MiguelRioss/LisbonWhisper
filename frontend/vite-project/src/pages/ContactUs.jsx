@@ -70,8 +70,8 @@ function ContactUs() {
                 <a className="contact-panel-link" href="tel:+351965398865">
                   (+351) 965398865
                 </a>
-                <a className="contact-panel-link" href="tel:+351969923328">
-                  (+351) 969923328
+                <a className="contact-panel-link" href="tel:+351915597714">
+                  (+351) 915597714
                 </a>
               </div>
             </div>
