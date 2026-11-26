@@ -10,8 +10,8 @@
     '/res/LisbonDownTown.mp4': '/res/LisbonDownTown-mobile.mp4',
   };
 
-  function TourTile({ title, subtitle, videoSrc, onExplore, showOverlay = true }) {
-    const posterSrc = posterMap[videoSrc] || '/res/pexels-fotios-photos-1599497.jpg';
+  function TourTile({ title, subtitle, videoSrc, image, onExplore, showOverlay = true }) {
+    const posterSrc = image || posterMap[videoSrc] || '/res/pexels-fotios-photos-1599497.jpg';
     const tileRef = useRef(null);
     const videoRef = useRef(null);
     const [allowPlay, setAllowPlay] = useState(false);
@@ -48,7 +48,7 @@
       if (playPromise && typeof playPromise.catch === 'function') {
         playPromise.catch(() => {});
       }
-    }, [allowPlay, isVisible]);
+    }, [allowPlay, isVisible, resolvedVideoSrc]);
 
     useEffect(() => {
       const el = tileRef.current;
@@ -146,7 +146,7 @@ function DetailPanel({ descriptions = [], subtitle, title }) {
   );
 }
 
-  export function LeftMediaRow({ title, descriptions = [], videoSrc, handleShowMoreWithParams }) {
+  export function LeftMediaRow({ title, descriptions = [], videoSrc, image, handleShowMoreWithParams }) {
     const subtitle = descriptions[0] ?? '';
     return (
       <div className="tour-row">
@@ -154,6 +154,7 @@ function DetailPanel({ descriptions = [], subtitle, title }) {
           title={title}
           subtitle={subtitle}
           videoSrc={videoSrc}
+          image={image}
           onExplore={() => handleShowMoreWithParams(title, descriptions, videoSrc)}
           showOverlay={false}
         />
@@ -168,7 +169,7 @@ function DetailPanel({ descriptions = [], subtitle, title }) {
     );
   }
 
-  export function RightMediaRow({ title, descriptions = [], videoSrc, handleShowMoreWithParams }) {
+  export function RightMediaRow({ title, descriptions = [], videoSrc, image, handleShowMoreWithParams }) {
     const subtitle = descriptions[0] ?? '';
     return (
       <div className="tour-row tour-row--reverse">
@@ -176,6 +177,7 @@ function DetailPanel({ descriptions = [], subtitle, title }) {
           title={title}
           subtitle={subtitle}
           videoSrc={videoSrc}
+          image={image}
           onExplore={() => handleShowMoreWithParams(title, descriptions, videoSrc)}
           showOverlay={false}
         />

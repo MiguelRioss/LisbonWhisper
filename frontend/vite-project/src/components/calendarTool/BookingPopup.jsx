@@ -4,13 +4,14 @@ import './WeeklyGrid.css';
 const BookingPopup = ({
   createBookingHandler,
   tourName,
+  tourId,
   tourDescriptions,
   date,
   time,
   onCollapse,
   maxPersons,
+  priceCents,
 }) => {
-  const PRICE_PER_PERSON = 49;
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [persons, setPersons] = useState(1);
   const [error, setError] = useState('');
@@ -18,7 +19,7 @@ const BookingPopup = ({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [serverPricing, setServerPricing] = useState(null);
 
-  const estimatedTotal = persons * PRICE_PER_PERSON;
+  const estimatedTotal = persons * priceCents / 100;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,6 +50,7 @@ const BookingPopup = ({
       date,
       time,
       tourName,
+      tourId,
       tourDescriptions,
     };
 
@@ -121,7 +123,7 @@ const BookingPopup = ({
               <div className="booking-price-summary">
                 <p>
                   <strong>Price per person:</strong>{' '}
-                  <span className="booking-current-price">{`\u20AC${PRICE_PER_PERSON}`}</span>{' '}
+                  <span className="booking-current-price">{`\u20AC${priceCents / 100}`}</span>{' '}
                 </p>
                 <p>
                   <strong>Estimated total:</strong> {`\u20AC${estimatedTotal}`}

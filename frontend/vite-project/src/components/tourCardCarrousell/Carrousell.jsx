@@ -71,6 +71,7 @@ function Carrousel({ cardData }) {
               title={data.title}
               descriptions={data.descriptions}
               videoSrc={data.videoSrc}
+              image={data.image || data.backgroundImage}
               handleShowMoreWithParams={() => handleNavigateToTourPage(data)}
             />
           );

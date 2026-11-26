@@ -14,6 +14,78 @@
   padding: 16px;
   margin-bottom: 16px;
 }
+.lisbon-tour-media-form {
+  display: grid;
+  gap: 16px;
+}
+.database-ui.db-dialog.lisbon-tour-editor[open] {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(calc(100% - 24px), 700px);
+  height: fit-content;
+  max-height: calc(100% - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.lisbon-tour-editor .db-modal-head {
+  flex: none;
+  flex-wrap: nowrap;
+  background: var(--db-bg);
+}
+.lisbon-tour-editor .db-modal-head h2 {
+  overflow-wrap: anywhere;
+}
+.lisbon-tour-editor .db-modal-head button {
+  flex-shrink: 0;
+}
+.lisbon-tour-editor .db-modal-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+.lisbon-tour-media-form > button {
+  justify-self: start;
+}
+.lisbon-tour-media-form textarea {
+  width: 100%;
+  border: 1px solid var(--db-line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  resize: vertical;
+}
+.lisbon-media-picker,
+.lisbon-carousel-image {
+  display: grid;
+  gap: 8px;
+}
+.lisbon-media-picker img,
+.lisbon-media-picker video {
+  display: block;
+  width: min(100%, 240px);
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.lisbon-media-picker video {
+  background: #111;
+}
+.lisbon-tour-carousel {
+  border: 1px solid var(--db-line);
+  border-radius: 8px;
+  padding: 12px;
+}
+.lisbon-tour-carousel legend {
+  float: none;
+  width: auto;
+  padding: 0 6px;
+  font-size: inherit;
+  font-weight: 600;
+}
+.lisbon-carousel-image {
+  margin-bottom: 16px;
+}
 .lisbon-database .lisbon-database-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

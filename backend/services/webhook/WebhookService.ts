@@ -33,7 +33,7 @@ export default class WebhookService {
     const session = event.data.object;
     if (session.payment_status !== 'paid' || !session.client_reference_id) return;
     const booking = await this.bookings.findById(session.client_reference_id);
-    if (!booking || booking.paymentStatus === 'paid' || booking.stripeSessionId !== session.id || session.amount_total !== booking.persons * TOUR_PRICE_CENTS || session.currency !== 'eur') return;
+    if (!booking || booking.paymentStatus === 'paid' || booking.stripeSessionId !== session.id || session.amount_total !== booking.persons * (booking.unitPriceCents ?? TOUR_PRICE_CENTS) || session.currency !== 'eur') return;
     await this.clients?.saveClient({ email: booking.email, name: booking.name, source: 'booking' });
     await this.bookings.updatePayment(session.client_reference_id, { paymentStatus: 'paid', stripePaymentIntentId: session.payment_intent });
     await this.bookingEmails.sendBookingEmails(booking);

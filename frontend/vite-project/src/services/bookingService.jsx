@@ -1,5 +1,11 @@
 import { API_BASE } from './apiBase';
 
+export const tourBookingInfo = {
+  startingPoint: 'Hard Rock Cafe, Restauradores',
+  priceCents: 4900,
+  maxPersons: 8,
+};
+
 export const bookingsCacheKey = `${API_BASE}/bookings`;
 export const toursCacheKey = `${API_BASE}/tours`;
 export const tourCacheKey = (id) => `${toursCacheKey}/${encodeURIComponent(id)}`;

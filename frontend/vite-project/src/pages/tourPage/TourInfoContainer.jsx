@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { tourBookingInfo } from '../../services/bookingService';
 
 function TourInfoContainer({ tourData }) {
   const { title, descriptions } = tourData;
@@ -13,13 +14,13 @@ function TourInfoContainer({ tourData }) {
   const normalizedTitle = (title ?? '').toLowerCase();
 
   const mainImage =
-    normalizedTitle.includes('moorish')
+    tourData.image || tourData.backgroundImage || (normalizedTitle.includes('moorish')
       ? '/res/f03ef0dcb35a8e63d746cfa4741a4f96.jpg'
       : normalizedTitle.includes('west')
       ? '/res/9bfee964e2a50ec45dc449890ec9ed42.jpg'
-      : '/res/pexels-fotios-photos-1599497.jpg';
+      : '/res/pexels-fotios-photos-1599497.jpg');
 
-  const contactImage = '/res/pexels-fotios-photos-1599497.jpg';
+  const contactImage = tourData.availabilityImage || '/res/pexels-fotios-photos-1599497.jpg';
 
   return (
     <div className="tour-info-section">
@@ -65,13 +66,13 @@ function TourInfoContainer({ tourData }) {
 
             <ul className="tour-detail-list">
               <li>
-                <strong>Starting point:</strong> Hard Rock Cafe, Restauradores
+                <strong>Starting point:</strong> {tourData.startingPoint ?? tourBookingInfo.startingPoint}
               </li>
               <li>
-                <strong>Price:</strong> €49{' '}
+                <strong>Price:</strong> €{(tourData.priceCents ?? tourBookingInfo.priceCents) / 100}
               </li>
               <li>
-                <strong>Group size:</strong> 1-8 pax
+                <strong>Group size:</strong> 1–{tourData.maxPersons ?? tourBookingInfo.maxPersons} pax
               </li>
             </ul>
 

@@ -7,8 +7,9 @@ import {
   fetchDatabaseClients,
 } from '../services/databaseService';
 import { Button, DatabaseShell, DataTable, Field } from '../database-generic/index.js';
-import { useFetch } from '../api/useFetch';
-import { fetchPublicData, toursCacheKey } from '../services/bookingService';
+import { useFetch, useFetchCache } from '../api/useFetch';
+import { fetchPublicData, tourBookingInfo, tourCacheKey, toursCacheKey } from '../services/bookingService';
+import TourEditor from './TourEditor';
 import './DatabaseHome.css';
 
 const sections = [
@@ -42,6 +43,9 @@ const tourColumns = [
   { key: 'title', label: 'Tour' },
   { key: 'slug', label: 'URL slug' },
   { key: 'description', label: 'Description' },
+  { key: 'startingPoint', label: 'Starting point', render: (value) => value ?? tourBookingInfo.startingPoint },
+  { key: 'priceCents', label: 'Price', render: (value) => `€${(value ?? tourBookingInfo.priceCents) / 100} per person` },
+  { key: 'maxPersons', label: 'Group size', render: (value) => `1–${value ?? tourBookingInfo.maxPersons} people` },
 ];
 
 const promoCodeColumns = [
@@ -66,6 +70,9 @@ function formatDate(isoDate) {
 
 function DatabaseHome() {
   const [section, setSection] = useState('bookings');
+  const [selectedTour, setSelectedTour] = useState(null);
+  const [mediaNotice, setMediaNotice] = useState('');
+  const { invalidate } = useFetchCache();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_STORAGE_KEY) || '');
@@ -92,6 +99,8 @@ function DatabaseHome() {
     sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken('');
     setSection('bookings');
+    setSelectedTour(null);
+    setMediaNotice('');
     setLastRefresh('');
     setDashboard(null);
     setBookings([]);
@@ -309,7 +318,37 @@ function DatabaseHome() {
               {...table}
               loading={(section === 'tours' ? toursLoading : loading) && table.rows.length === 0}
               caption={activeSection.title}
+              actions={section === 'tours' ? (tour) => (
+                <>
+                  <Button aria-label={`Edit tour ${tour.title}`} onClick={() => {
+                    setMediaNotice('');
+                    setSelectedTour({ tour, mode: 'details' });
+                  }}>
+                    Edit tour
+                  </Button>
+                  <Button aria-label={`Media Content for ${tour.title}`} onClick={() => {
+                    setMediaNotice('');
+                    setSelectedTour({ tour, mode: 'media' });
+                  }}>
+                    Media Content
+                  </Button>
+                </>
+              ) : undefined}
             />
+            {section === 'tours' && mediaNotice && <p role="status">{mediaNotice}</p>}
+            {selectedTour && (
+              <TourEditor
+                {...selectedTour}
+                token={token}
+                onClose={() => setSelectedTour(null)}
+                onSaved={(slug, notice) => {
+                  invalidate(toursCacheKey);
+                  invalidate(tourCacheKey(slug));
+                  setSelectedTour(null);
+                  setMediaNotice(notice);
+                }}
+              />
+            )}
           </>
         )}
         {error && <p role="alert">{error}</p>}

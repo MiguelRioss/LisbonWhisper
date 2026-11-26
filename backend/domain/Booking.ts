@@ -3,6 +3,7 @@ import { CheckoutValidationError } from './CheckoutError.ts';
 export const TOUR_PRICE_CENTS = 4900;
 
 export interface BookingInput {
+  tourId?: string;
   name: string;
   email: string;
   date: string;
@@ -14,6 +15,11 @@ export interface BookingInput {
 }
 
 export interface BookingRecord {
+  tourId?: string;
+  unitPriceCents?: number;
+  pricePerPerson?: number;
+  totalPrice?: number;
+  currency?: string;
   id?: string | number;
   _id?: unknown;
   name: string;

@@ -29,7 +29,7 @@ function TourPage({ tours, bookings, loading, error, createBookingHandler }) {
     tourData.name?.trim() ||
     routeTour?.title ||
     tourId.replace(/-/g, ' ');
-  const resolvedTourData = { ...tourData, title: tourName };
+  const resolvedTourData = { ...tourData, slug: tourData.slug || tourId, title: tourName };
   const { hash } = location;  
 
   const handleCreateBooking = async (bookingData) => {
@@ -57,12 +57,10 @@ function TourPage({ tours, bookings, loading, error, createBookingHandler }) {
   return (
     <div className="home-surface">
       <GenericCarousel
-      title = {tourName}
-        items={[
-          { text: 'First slide', imgSrc: img1 },
-          { text: 'Second slide', imgSrc: img2 },
-          { text: 'Third slide', imgSrc: img3 },
-        ]}
+        key={tourId}
+        title={tourName}
+        items={(tourData.carouselImages?.length ? tourData.carouselImages : [img1, img2, img3])
+          .map((imgSrc) => ({ imgSrc }))}
       />
 
       <TourInfoContainer tourData={resolvedTourData} />

@@ -44,7 +44,7 @@ async function startServer() {
   const catalog = await createCatalogData();
   const whisperServices = services(dataInit, catalog);
   const bookings = new BookingRepository(dataInit);
-  const checkout = new CheckoutController(new CheckoutService(bookings, stripeAdapter.client, process.env.WEBSITE_URL));
+  const checkout = new CheckoutController(new CheckoutService(bookings, stripeAdapter.client, process.env.WEBSITE_URL, catalog));
   const webhook = new WebhookController(new WebhookService(
     bookings, whisperServices, stripeAdapter.client, stripeAdapter.webhookSecret, stripeAdapter.mode, catalog
   ));
@@ -110,6 +110,8 @@ async function startServer() {
   );
 
   app.get('/bookings', whispers_API.getBookings);
+  app.put('/database/tours/:id/media', databaseManagement_API.requireDatabaseAuth, databaseManagement_API.updateTourMedia);
+  app.put('/database/tours/:id', databaseManagement_API.requireDatabaseAuth, databaseManagement_API.updateTourDetails);
   app.route('/database/promo-codes')
     .get(databaseManagement_API.requireDatabaseAuth, databaseManagement_API.getPromoCodes)
     .post(databaseManagement_API.requireDatabaseAuth, databaseManagement_API.createPromoCode);

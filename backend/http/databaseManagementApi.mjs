@@ -34,6 +34,8 @@ export default function createDatabaseManagementApi(databaseManagementServices) 
     getDatabaseBookings: handleRequest(getDatabaseBookingsAPI),
     getDatabaseClients: handleRequest(getDatabaseClientsAPI),
     getPromoCodes: handleRequest(() => databaseManagementServices.getPromoCodes()),
+    updateTourMedia: handleRequest((req) => databaseManagementServices.updateTourMedia(req.params.id, req.body)),
+    updateTourDetails: handleRequest((req) => databaseManagementServices.updateTourDetails(req.params.id, req.body)),
     createPromoCode: handleRequest((req, res) => {
       res.status(201);
       return databaseManagementServices.createPromoCode(req.body);

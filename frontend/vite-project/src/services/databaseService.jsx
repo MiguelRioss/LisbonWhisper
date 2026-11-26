@@ -1,5 +1,20 @@
 import { API_BASE } from './apiBase';
 
+export async function saveTour(token, id, changes, { media = false } = {}) {
+  const response = await fetch(`${API_BASE}/database/tours/${encodeURIComponent(id)}${media ? '/media' : ''}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(changes),
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    if (response.status === 404 && !payload) {
+      throw new Error('Tour editing is unavailable on this server. Check that the backend has been updated.');
+    }
+    throw new Error(buildErrorMessage('Unable to save tour', payload, response.statusText));
+  }
+  return payload;
+}
 export async function requestPromoCodes(token, promoCode) {
   const response = await fetch(`${API_BASE}/database/promo-codes`, {
     method: promoCode ? 'POST' : 'GET',

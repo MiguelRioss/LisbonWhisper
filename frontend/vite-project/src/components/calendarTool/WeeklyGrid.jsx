@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import './WeeklyGrid.css';
 import BookingCell from './BookingCell';
 import BookingPopup from './BookingPopup';
+import { tourBookingInfo } from '../../services/bookingService';
 
 const timeSlots = ['9:00-11:00', '10:00-12:00', '14:00-16:00', '15:00-17:00', '16:00-18:00'];
 const MOBILE_BREAKPOINT = 900;
@@ -167,11 +168,13 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
         <BookingPopup
           createBookingHandler={createBookingHandler}
           tourName={title}
+          tourId={tourData.slug}
           tourDescriptions={descriptions}
           date={getDateFromSlotKey(expandedSlot)}
           time={getTimeFromSlotKey(expandedSlot)}
           onCollapse={() => setExpandedSlot(null)}
-          maxPersons={8}
+          maxPersons={tourData.maxPersons ?? tourBookingInfo.maxPersons}
+          priceCents={tourData.priceCents ?? tourBookingInfo.priceCents}
         />, document.body
       )}
     </div>

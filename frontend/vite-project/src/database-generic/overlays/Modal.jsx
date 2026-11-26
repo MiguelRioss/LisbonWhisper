@@ -2,7 +2,7 @@ import "./Modal.css";
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "../actions/Button.jsx";
-export function Modal({ open, title = "Details", onClose, children }) {
+export function Modal({ open, title = "Details", onClose, className = "", children }) {
   const dialog = useRef(null);
   const titleId = useId();
   function containTab(event) {
@@ -43,7 +43,7 @@ export function Modal({ open, title = "Details", onClose, children }) {
   if (!open) return null;
   return createPortal(
     <dialog
-      className="database-ui db-dialog"
+      className={`database-ui db-dialog ${className}`}
       ref={dialog}
       onKeyDown={containTab}
       aria-labelledby={titleId}

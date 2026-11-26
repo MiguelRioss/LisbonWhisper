@@ -28,7 +28,7 @@ test('booking rejects missing required fields and formats tour details', () => {
 test('signed paid webhook updates booking and sends email only once', async () => {
   const stripe = new Stripe('sk_test_example');
   const secret = 'whsec_example';
-  const booking = { id: 7, name: 'Guest', email: 'guest@example.com', date: '2026-12-01', time: '10:00', tourName: 'Tour', persons: 2, message: '', tourDescriptions: '', paymentStatus: 'pending', stripeSessionId: 'cs_test_example' };
+  const booking = { id: 7, name: 'Guest', email: 'guest@example.com', date: '2026-12-01', time: '10:00', tourName: 'Tour', persons: 2, unitPriceCents: 5250, message: '', tourDescriptions: '', paymentStatus: 'pending', stripeSessionId: 'cs_test_example' };
   let emailsSent = 0;
   const repository = new BookingRepository({
     async createBooking() { return booking; },
@@ -40,7 +40,7 @@ test('signed paid webhook updates booking and sends email only once', async () =
     id: 'evt_test_example',
     type: 'checkout.session.completed',
     livemode: false,
-    data: { object: { id: 'cs_test_example', client_reference_id: '7', payment_status: 'paid', amount_total: 9800, currency: 'eur', payment_intent: 'pi_test_example' } },
+    data: { object: { id: 'cs_test_example', client_reference_id: '7', payment_status: 'paid', amount_total: 10500, currency: 'eur', payment_intent: 'pi_test_example' } },
   });
   const signature = stripe.webhooks.generateTestHeaderString({ payload, secret });
 
@@ -80,6 +80,7 @@ test('Stripe adapter keeps test and live credentials separate', () => {
 
 test('checkout sends tour details and company logo to Stripe', async () => {
   let parameters: Stripe.Checkout.SessionCreateParams | undefined;
+  let storedPrice: number | undefined;
   const stripe = {
     checkout: {
       sessions: {
@@ -91,20 +92,30 @@ test('checkout sends tour details and company logo to Stripe', async () => {
     },
   } as unknown as Stripe;
   const repository = new BookingRepository({
-    async createBooking(booking) { return { ...booking, id: 7 }; },
+    async createBooking(booking) { storedPrice = booking.unitPriceCents; return { ...booking, id: 7 }; },
     async getBookingById() { return null; },
     async updateBookingPayment() {},
   });
-  const service = new CheckoutService(repository, stripe, 'https://www.lisbonwhisper.com');
-
-  const response = await service.createSession({
-    name: 'Guest', email: 'guest@example.com', date: '2026-12-01', time: '10:00-12:00',
-    tourName: 'The Moorish Whispers', persons: 2, tourDescriptions: ['Hidden streets'],
+  const service = new CheckoutService(repository, stripe, 'https://www.lisbonwhisper.com', {
+    async getTourById(id) {
+      return id === 'the-moorish-whispers'
+        ? { slug: id, title: 'Updated Moorish Tour', priceCents: 5250, maxPersons: 3 }
+        : null;
+    },
+    async getTourByTitle() { return null; },
   });
+  const input = {
+    name: 'Guest', email: 'guest@example.com', date: '2026-12-01', time: '10:00-12:00',
+    tourId: 'the-moorish-whispers', tourName: 'The Moorish Whispers', persons: 2, tourDescriptions: ['Hidden streets'],
+  };
+  await assert.rejects(service.createSession({ ...input, persons: 4 }), /up to 3 people/);
+  const response = await service.createSession(input);
 
   assert.equal(response.sessionId, 'cs_test_example');
   assert.equal(parameters?.line_items?.[0]?.quantity, 2);
-  assert.equal(parameters?.line_items?.[0]?.price_data?.unit_amount, 4900);
+  assert.equal(storedPrice, 5250);
+  assert.equal(parameters?.line_items?.[0]?.price_data?.unit_amount, 5250);
+  assert.equal(parameters?.line_items?.[0]?.price_data?.product_data?.name, 'Updated Moorish Tour');
   assert.equal(parameters?.line_items?.[0]?.price_data?.product_data?.description, '2026-12-01 · 10:00-12:00 — Hidden streets');
   assert.deepEqual(parameters?.line_items?.[0]?.price_data?.product_data?.images, ['https://www.lisbonwhisper.com/res/logo.png']);
   assert.deepEqual(parameters?.branding_settings?.logo, { type: 'url', url: 'https://www.lisbonwhisper.com/res/logo.png' });

@@ -56,8 +56,71 @@ export default function createDatabaseManagementServices({
     getDatabaseClientsView,
     getPromoCodes,
     createPromoCode,
+    updateTourMedia,
+    updateTourDetails,
   };
 
+  function mediaUrl(value, label) {
+    const url = typeof value === 'string' ? value.trim() : '';
+    if (url.length <= 2048 && !/[\s\\\u0000-\u001f\u007f]/.test(url)) {
+      if (url.startsWith('/') && !url.startsWith('//')) return url;
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol === 'https:' && !parsed.username && !parsed.password) return url;
+      } catch {
+        // Invalid URLs are reported below.
+      }
+    }
+    throw { status: 400, message: `${label} must be an HTTPS URL or a site-relative path.` };
+  }
+
+  async function updateTourMedia(id, input) {
+    if (!Array.isArray(input?.carouselImages) || input.carouselImages.length < 1 || input.carouselImages.length > 10) {
+      throw { status: 400, message: 'Enter between 1 and 10 carousel image URLs.' };
+    }
+    const image = mediaUrl(input.image, 'Main image');
+    const tour = await catalog.updateTour(id, {
+      videoSrc: mediaUrl(input.videoSrc, 'Home page video'),
+      image,
+      backgroundImage: image,
+      availabilityImage: mediaUrl(input.availabilityImage, 'Check Availability image'),
+      carouselImages: input.carouselImages.map((url) => mediaUrl(url, 'Carousel image')),
+    });
+    if (!tour) throw { status: 404, message: 'Tour not found' };
+    return { tour };
+  }
+
+  async function updateTourDetails(id, input) {
+    function text(value, label, maximum) {
+      const result = typeof value === 'string' ? value.trim() : '';
+      if (!result || result.length > maximum) {
+        throw { status: 400, message: `${label} must be between 1 and ${maximum} characters.` };
+      }
+      return result;
+    }
+    const { priceCents, maxPersons } = input || {};
+    if (!Number.isInteger(priceCents) || priceCents < 100 || priceCents > 1000000) {
+      throw { status: 400, message: 'Price per person must be between €1 and €10,000.' };
+    }
+    if (!Number.isInteger(maxPersons) || maxPersons < 1 || maxPersons > 20) {
+      throw { status: 400, message: 'Maximum group size must be between 1 and 20.' };
+    }
+    const description = text(input.description, 'Short description', 300);
+    if (!Array.isArray(input.additionalDetails) || input.additionalDetails.length > 10) {
+      throw { status: 400, message: 'Enter at most 10 additional paragraphs.' };
+    }
+    const tour = await catalog.updateTour(id, {
+      title: text(input.title, 'Tour name', 120),
+      tag: text(input.tag, 'Tour label', 40),
+      description,
+      descriptions: [description, ...input.additionalDetails.map((paragraph) => text(paragraph, 'Paragraph', 2000))],
+      startingPoint: text(input.startingPoint, 'Starting point', 200),
+      priceCents,
+      maxPersons,
+    });
+    if (!tour) throw { status: 404, message: 'Tour not found' };
+    return { tour };
+  }
   async function getPromoCodes() {
     return { promoCodes: await catalog.getPromoCodes() };
   }
