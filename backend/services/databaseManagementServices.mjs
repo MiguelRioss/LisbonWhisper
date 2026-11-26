@@ -267,10 +267,26 @@ export default function createDatabaseManagementServices({
     };
   }
 
-  async function getBookingsView({ limit }) {
+  async function getBookingsView({ limit, promoterId, paidOnly }) {
     const safeLimit = parseNumber(limit, 200, 1, 2000);
-    const bookingsResponse = await bookingsData.getBookings();
-    const bookings = normalizeBookingsPayload(bookingsResponse);
+    if (promoterId !== undefined && typeof promoterId !== 'string') {
+      throw { status: 400, message: 'Choose a valid promoter.' };
+    }
+    const [bookingsResponse, promoters] = await Promise.all([
+      bookingsData.getBookings(),
+      catalog.getPromoters(),
+    ]);
+    const promotersByCode = new Map();
+    for (const { _id, promoCode, companyName, firstName, lastName } of promoters) {
+      if (!promoCode) continue;
+      const linked = promotersByCode.get(promoCode) ?? [];
+      linked.push({ id: String(_id), companyName, firstName, lastName });
+      promotersByCode.set(promoCode, linked);
+    }
+    const bookings = normalizeBookingsPayload(bookingsResponse)
+      .map((booking) => ({ ...booking, promoters: promotersByCode.get(booking.promoCode) ?? [] }))
+      .filter((booking) => !promoterId || booking.promoters.some(({ id }) => id === promoterId))
+      .filter((booking) => !paidOnly || (booking.paymentStatus === 'paid' && booking.totalPrice !== 0));
 
     const sorted = bookings.sort((a, b) => {
       const aTime = Date.parse(a.createdAt || a.date || '');

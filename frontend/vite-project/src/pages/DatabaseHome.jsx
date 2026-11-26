@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import logo from '../res/logo.png';
 import { authenticateDatabaseAdmin, createPromoCode, createPromoter, savePromoterPromoCode } from '../services/databaseService';
 import { Badge, Button, DatabaseShell, DataTable, Field, Modal } from '../database-generic/index.js';
 import { useFetchCache } from '../api/useFetch';
 import { tourCacheKey, toursCacheKey } from '../services/bookingService';
 import { useDatabaseResources } from '../services/databaseResources';
 import { useTourCatalog } from '../services/tourResources';
+import { exportDatabaseView } from '../services/exportDatabaseView';
 import TourEditor from './TourEditor';
 import PromoterCodeField from './PromoterCodeField';
 import './DatabaseHome.css';
@@ -17,11 +19,15 @@ const sections = [
   { id: 'promoters', title: 'Promoters', description: 'Company contacts' },
 ];
 
-function BookingPaymentStatus({ status, total }) {
-  if (status === 'paid') return <Badge tone="success">{total === 0 ? 'Confirmed · free' : 'Paid'}</Badge>;
-  if (status === 'pending') return <Badge tone="warning">Awaiting payment</Badge>;
-  if (status === 'checkout_failed') return <Badge tone="danger">Checkout failed</Badge>;
-  return <Badge>Payment unverified</Badge>;
+function promoterLabel({ companyName, firstName, lastName }) {
+  return `${companyName} · ${firstName} ${lastName}`;
+}
+
+function paymentLabel(status, row) {
+  if (status === 'paid') return row.totalPrice === 0 ? 'Confirmed · free' : 'Paid';
+  if (status === 'pending') return 'Awaiting payment';
+  if (status === 'checkout_failed') return 'Checkout failed';
+  return 'Payment unverified';
 }
 
 const bookingColumns = [
@@ -32,8 +38,16 @@ const bookingColumns = [
   { key: 'time', label: 'Time' },
   { key: 'persons', label: 'Persons' },
   { key: 'totalPrice', label: 'Total', render: (price, row) => price == null ? '—' : `${price} ${row.currency || 'EUR'}` },
-  { key: 'paymentStatus', label: 'Payment', render: (status, row) => <BookingPaymentStatus status={status} total={row.totalPrice} /> },
+  {
+    key: 'paymentStatus',
+    label: 'Payment',
+    render: (status, row) => (
+      <Badge tone={{ paid: 'success', pending: 'warning', checkout_failed: 'danger' }[status]}>{paymentLabel(status, row)}</Badge>
+    ),
+    exportValue: paymentLabel,
+  },
   { key: 'promoCode', label: 'Promo code', render: (code) => code || '—' },
+  { key: 'promoters', label: 'Promoter', render: (promoters) => promoters?.map(promoterLabel).join(', ') || '—' },
   { key: 'createdAt', label: 'Created', render: formatDate },
 ];
 
@@ -61,6 +75,7 @@ const promoCodeColumns = [
   {
     key: 'promoters',
     label: 'Promoters',
+    exportValue: (promoters) => promoters?.map(promoterLabel).join(', ') || 'Unassigned',
     render: (promoters) => promoters?.length ? (
       <ul className="lisbon-promo-promoters">
         {promoters.map(({ _id, companyName, firstName, lastName }) => (
@@ -130,6 +145,10 @@ function formatDate(isoDate) {
 
 function DatabaseHome() {
   const [section, setSection] = useState('bookings');
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const [promoterId, setPromoterId] = useState('');
+  const [paidOnly, setPaidOnly] = useState(false);
   const [selectedTour, setSelectedTour] = useState(null);
   const [selectedPromoter, setSelectedPromoter] = useState(null);
   const [mediaNotice, setMediaNotice] = useState('');
@@ -138,7 +157,7 @@ function DatabaseHome() {
   const [password, setPassword] = useState('');
   const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_STORAGE_KEY) || '');
   const catalog = useTourCatalog(Boolean(token) && section === 'tours');
-  const { summary, records, promoCodeOptions, invalidateSection } = useDatabaseResources(token, section);
+  const { summary, records, promoCodeOptions, promoterOptions, invalidateSection } = useDatabaseResources(token, section, promoterId, paidOnly);
   const dashboard = summary.data;
   const [promoCodesError, setPromoCodesError] = useState('');
   const [savingPromoCode, setSavingPromoCode] = useState(false);
@@ -152,6 +171,8 @@ function DatabaseHome() {
     sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken('');
     setSection('bookings');
+    setPromoterId('');
+    setPaidOnly(false);
     setSelectedTour(null);
     setSelectedPromoter(null);
     setMediaNotice('');
@@ -161,7 +182,7 @@ function DatabaseHome() {
     setLoginError('');
   }, []);
 
-  const sessionExpired = summary.statusCode === 401 || records.statusCode === 401 || promoCodeOptions.statusCode === 401;
+  const sessionExpired = [summary, records, promoCodeOptions, promoterOptions].some(({ statusCode }) => statusCode === 401);
   useEffect(() => {
     if (!token || !sessionExpired) return;
     clearSession();
@@ -174,6 +195,7 @@ function DatabaseHome() {
     summary.refetch();
     activeResource.refetch();
     if (section === 'promoters') promoCodeOptions.refetch();
+    if (section === 'bookings') promoterOptions.refetch();
   }
 
   const handleLogin = async (event) => {
@@ -232,6 +254,7 @@ function DatabaseHome() {
     try {
       await createPromoter(token, fields);
       invalidateSection('promoters');
+      invalidateSection('bookings');
       if (fields.promoCode) invalidateSection('promoCodes');
       form.reset();
     } catch (err) {
@@ -249,7 +272,21 @@ function DatabaseHome() {
     promoters: { columns: promoterColumns, getRowId: (row) => row._id },
   }[section];
   const payload = section === 'tours' ? catalog.tours : records.data?.[section];
-  const rows = Array.isArray(payload) ? payload : [];
+  const promoters = Array.isArray(promoterOptions.data?.promoters) ? promoterOptions.data.promoters : [];
+  const loadedRows = Array.isArray(payload) ? payload : [];
+  const rows = section === 'bookings'
+    ? loadedRows
+      .map((booking) => ({
+        ...booking,
+        promoters: booking.promoters ?? promoters
+          .filter((promoter) => booking.promoCode && promoter.promoCode === booking.promoCode)
+          .map((promoter) => ({ ...promoter, id: promoter._id })),
+      }))
+      .filter((booking) => (
+        (!paidOnly || (booking.paymentStatus === 'paid' && booking.totalPrice !== 0)) &&
+        (!promoterId || booking.promoters.some(({ id }) => id === promoterId))
+      ))
+    : loadedRows;
   const recordsError = !activeResource.loading && !Array.isArray(payload)
     ? activeResource.message || `Unable to load ${activeSection.title.toLowerCase()}.`
     : undefined;
@@ -257,16 +294,28 @@ function DatabaseHome() {
     ? summary.message || 'Unable to load dashboard totals.'
     : undefined;
 
+  async function handleExport() {
+    setExporting(true);
+    setExportError('');
+    try {
+      await exportDatabaseView(activeSection.title, table.columns, rows);
+    } catch {
+      setExportError('Unable to export the current view. Try again.');
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div className="lisbon-database">
       <DatabaseShell
         as="div"
         title="Database Management"
         description={token ? 'Tour reservations, clients and tour information.' : undefined}
-        brand={<span>Lisbon Whisper</span>}
+        brand={<img className="lisbon-database-logo" src={logo} alt="Lisbon Whisper" />}
         sections={token ? sections : undefined}
         selected={section}
-        onSelect={setSection}
+        onSelect={(next) => { setSection(next); setExportError(''); }}
         headerActions={token && (
           <div className="db-actions">
             <Button onClick={refresh} disabled={summary.loading || activeResource.loading || savingPromoCode || savingPromoter}>Refresh</Button>
@@ -345,12 +394,43 @@ function DatabaseHome() {
                 {promoterError && <p role="alert">{promoterError}</p>}
               </form>
             )}
+            <div className="lisbon-database-table-controls">
+              {section === 'bookings' && (
+                <div className="db-field">
+                  <label htmlFor="booking-promoter">Filter by promoter</label>
+                  <select
+                    id="booking-promoter"
+                    value={promoterId}
+                    onChange={(event) => setPromoterId(event.target.value)}
+                    disabled={promoterOptions.loading || !Array.isArray(promoterOptions.data?.promoters)}
+                  >
+                    <option value="">All promoters</option>
+                    {promoters.map((promoter) => (
+                      <option key={promoter._id} value={promoter._id}>{promoterLabel(promoter)}</option>
+                    ))}
+                  </select>
+                  {!promoterOptions.loading && !Array.isArray(promoterOptions.data?.promoters) && (
+                    <small role="status">Unable to load promoters.</small>
+                  )}
+                </div>
+              )}
+              {section === 'bookings' && (
+                <label className="lisbon-paid-filter">
+                  <input type="checkbox" checked={paidOnly} onChange={(event) => setPaidOnly(event.target.checked)} />
+                  Paid only
+                </label>
+              )}
+              <Button onClick={handleExport} disabled={exporting || activeResource.loading || !Array.isArray(payload)}>
+                {exporting ? 'Exporting…' : 'Export current view'}
+              </Button>
+            </div>
             <DataTable
               {...table}
               rows={rows}
               error={recordsError}
               loading={activeResource.loading && rows.length === 0}
               caption={activeSection.title}
+              emptyMessage={section === 'bookings' && (promoterId || paidOnly) ? 'No bookings match these filters.' : undefined}
               actions={section === 'tours' ? (tour) => (
                 <>
                   <Button aria-label={`Edit tour ${tour.title}`} onClick={() => {
@@ -396,6 +476,7 @@ function DatabaseHome() {
                 onSaved={() => {
                   invalidateSection('promoters');
                   invalidateSection('promoCodes');
+                  invalidateSection('bookings');
                   setSelectedPromoter(null);
                 }}
               />
@@ -404,6 +485,7 @@ function DatabaseHome() {
         )}
         {loginError && <p role="alert">{loginError}</p>}
         {summaryError && <p role="alert">{summaryError}</p>}
+        {exportError && <p role="alert">{exportError}</p>}
       </DatabaseShell>
     </div>
   );

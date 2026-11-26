@@ -16,15 +16,24 @@ function sessionKey(token, path) {
   return token && path ? `admin:${token}:${path}` : null;
 }
 
-export function useDatabaseResources(token, section) {
+export function useDatabaseResources(token, section, promoterId, paidOnly) {
   const { evict, invalidate } = useFetchCache();
-  const path = endpoints[section];
+  const filters = new URLSearchParams();
+  if (section === 'bookings' && promoterId) filters.set('promoterId', promoterId);
+  if (section === 'bookings' && paidOnly) filters.set('paidOnly', 'true');
+  const query = filters.toString();
+  const path = query ? `${endpoints.bookings}&${query}` : endpoints[section];
   const options = { maxAgeMs: MAX_AGE_MS };
   const read = (url, signal) => fetch(`${API_BASE}${url}`, {
     signal, cache: 'no-store', headers: { Authorization: `Bearer ${token}` },
   });
   const summary = useJsonResource(sessionKey(token, endpoints.home), (signal) => read(endpoints.home, signal), options);
-  const records = useJsonResource(sessionKey(token, path), (signal) => read(path, signal), options);
+  const records = useJsonResource(sessionKey(token, path), (signal) => read(path, signal), { ...options, cacheSuccess: !query });
+  const promoterOptions = useJsonResource(
+    sessionKey(section === 'bookings' ? token : null, endpoints.promoters),
+    (signal) => read(endpoints.promoters, signal),
+    options,
+  );
   const promoCodeOptions = useJsonResource(
     sessionKey(section === 'promoters' ? token : null, endpoints.promoCodes),
     (signal) => read(endpoints.promoCodes, signal),
@@ -40,6 +49,7 @@ export function useDatabaseResources(token, section) {
     summary,
     records,
     promoCodeOptions,
+    promoterOptions,
     invalidateSection: (name) => {
       const key = sessionKey(token, endpoints[name]);
       if (key) invalidate(key);

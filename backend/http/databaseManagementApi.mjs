@@ -80,6 +80,8 @@ export default function createDatabaseManagementApi(databaseManagementServices) 
   async function getDatabaseBookingsAPI(req) {
     return databaseManagementServices.getBookingsView({
       limit: req.query?.limit,
+      promoterId: req.query?.promoterId,
+      paidOnly: req.query?.paidOnly === 'true',
     });
   }
 
