@@ -1,0 +1,18 @@
+.database-ui.db-dialog {
+  width: min(92vw, 700px);
+  max-height: 90vh;
+  padding: 0;
+  border: 1px solid var(--db-line);
+  border-radius: 14px;
+  background: var(--db-bg);
+}
+.database-ui.db-dialog::backdrop {
+  background: #0007;
+}
+.database-ui .db-modal-head {
+  padding: 16px;
+  border-bottom: 1px solid var(--db-line);
+}
+.database-ui .db-modal-body {
+  padding: 24px;
+}

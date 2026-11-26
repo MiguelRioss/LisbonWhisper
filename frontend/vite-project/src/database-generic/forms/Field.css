@@ -1,0 +1,19 @@
+.database-ui .db-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.database-ui .db-field > label {
+  font-weight: 600;
+}
+.database-ui .db-field input,
+.database-ui .db-field select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--db-line);
+  border-radius: 8px;
+  background: white;
+  padding: 10px 12px;
+  font: inherit;
+  color: inherit;
+}

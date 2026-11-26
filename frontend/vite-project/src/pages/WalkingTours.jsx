@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 
-const tours = [
+const fallbackTours = [
   {
     title: 'The Moorish Whispers',
     description: "Discover Lisbon's hidden secrets from the Torel viewpoint to Rua Augusta.",
@@ -28,10 +28,10 @@ const tours = [
   },
 ];
 
-export default function WalkingTours() {
+export default function WalkingTours({ tours = fallbackTours }) {
   const navigate = useNavigate();
   const handleNavigateToTourPage = (tour) => {
-    navigate(`/tour/${tour.title.replace(/\s+/g, '-').toLowerCase()}`, {
+    navigate(`/tour/${tour.slug || tour.title.replace(/\s+/g, '-').toLowerCase()}`, {
       state: {
         title: tour.title,
         descriptions: tour.descriptions,

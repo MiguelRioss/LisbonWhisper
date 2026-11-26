@@ -32,7 +32,12 @@ export default function createDatabaseManagementApi(databaseManagementServices) 
     authenticateAdmin: handleRequest(authenticateAdminAPI),
     getDatabaseHome: handleRequest(getDatabaseHomeAPI),
     getDatabaseBookings: handleRequest(getDatabaseBookingsAPI),
-    getMailchimpClients: handleRequest(getMailchimpClientsAPI),
+    getDatabaseClients: handleRequest(getDatabaseClientsAPI),
+    getPromoCodes: handleRequest(() => databaseManagementServices.getPromoCodes()),
+    createPromoCode: handleRequest((req, res) => {
+      res.status(201);
+      return databaseManagementServices.createPromoCode(req.body);
+    }),
   };
 
   function requireDatabaseAuth(req, res, next) {
@@ -69,8 +74,8 @@ export default function createDatabaseManagementApi(databaseManagementServices) 
     });
   }
 
-  async function getMailchimpClientsAPI(req) {
-    return databaseManagementServices.getMailchimpClientsView({
+  async function getDatabaseClientsAPI(req) {
+    return databaseManagementServices.getDatabaseClientsView({
       count: req.query?.count,
       offset: req.query?.offset,
     });

@@ -12,7 +12,7 @@ import Footsteps from './components/Footsteps';
 
 import logo from './res/logo.png';
 import { useFetch } from './api/useFetch';
-import { bookingsCacheKey, fetchBookings, createBooking } from './services/bookingService';
+import { bookingsCacheKey, toursCacheKey, fetchPublicData, createBooking } from './services/bookingService';
 
 import WalkingTours from './pages/WalkingTours';
 import PrivateTours from './pages/PrivateTours';
@@ -60,7 +60,12 @@ function App() {
   const location = useLocation();
   const isDatabaseRoute = location.pathname.startsWith('/database');
 
-  const { status, refetch } = useFetch(isDatabaseRoute ? null : bookingsCacheKey, fetchBookings);
+  const { status, refetch } = useFetch(isDatabaseRoute ? null : bookingsCacheKey, fetchPublicData);
+  const { status: toursStatus } = useFetch(isDatabaseRoute ? null : toursCacheKey, fetchPublicData);
+  const toursPayload = toursStatus.kind === 'success' && toursStatus.body.kind === 'json'
+    ? toursStatus.body.json?.tours
+    : undefined;
+  const tours = Array.isArray(toursPayload) ? toursPayload : undefined;
   const result = status.kind === 'success' ? status : status.stale;
   const availability = result?.body.kind === 'json' ? result.body.json?.bookings : undefined;
   const waiting = status.kind === 'idle' || status.kind === 'loading';
@@ -87,11 +92,11 @@ function App() {
             <div className="home-surface">
               <Footsteps />
               <VideoCard />
-              <Carrousel cardData={cardData} />
+              <Carrousel cardData={tours ?? cardData} />
             </div>
           }
         />
-        <Route path="/walking-tours" element={<WalkingTours />} />
+        <Route path="/walking-tours" element={<WalkingTours tours={tours} />} />
         <Route path="/private-tours" element={<PrivateTours />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
@@ -105,7 +110,7 @@ function App() {
           path="/tour/:tourId"
           element={
             <TourPage
-              tours={cardData}
+              tours={tours ?? cardData}
               bookings={availability}
               loading={loading}
               error={error}

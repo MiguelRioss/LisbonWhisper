@@ -26,7 +26,6 @@ async function run() {
   };
 
   console.log('Running booking service email test...');
-  console.log(`Provider: ${process.env.EMAIL_PROVIDER || 'smtp'}`);
   console.log(`Customer email: ${booking.email}`);
   console.log(
     `Admin notice email: ${process.env.ADMIN_NOTICE_EMAIL || 'info@lisbonwhisper.com'}`

@@ -7,7 +7,7 @@ import databaseManagementApi from './http/databaseManagementApi.mjs';
 import onlineData from './repo/dataBase.mjs';
 import localData from './repo/dataBaseLocal.mjs';
 import createDatabaseAdminSessionData from './repo/databaseAdminSessionData.mjs';
-import createMailchimpAudienceData from './repo/mailchimpAudienceData.mjs';
+import createCatalogData from './repo/catalogData.mjs';
 import services from './services/services.mjs';
 import createDatabaseManagementServices from './services/databaseManagementServices.mjs';
 
@@ -19,7 +19,7 @@ import WebhookController from './http/webhook/WebhookController.ts';
 import BookingRepository from './repo/BookingRepository.ts';
 import StripeAdapter from './services/stripe/StripeAdapter.ts';
 
-const PORT = 1904;
+const PORT = Number(process.env.PORT || 1904);
 
 async function startServer() {
   console.log('Start setting up server');
@@ -41,9 +41,13 @@ async function startServer() {
   }
 
   const app = express();
+  const catalog = await createCatalogData();
+  const whisperServices = services(dataInit, catalog);
   const bookings = new BookingRepository(dataInit);
   const checkout = new CheckoutController(new CheckoutService(bookings, stripeAdapter.client, process.env.WEBSITE_URL));
-  const webhook = new WebhookController(new WebhookService(bookings, services(dataInit), stripeAdapter.client, stripeAdapter.webhookSecret, stripeAdapter.mode));
+  const webhook = new WebhookController(new WebhookService(
+    bookings, whisperServices, stripeAdapter.client, stripeAdapter.webhookSecret, stripeAdapter.mode, catalog
+  ));
 
   const allowedOrigins = [
     'http://localhost:5173',
@@ -74,14 +78,12 @@ async function startServer() {
     res.status(result.status).json(result.body);
   });
 
-  const whisperServices = services(dataInit);
   const whispers_API = api(whisperServices);
 
   const databaseAdminSessionData = createDatabaseAdminSessionData();
-  const mailchimpAudienceData = createMailchimpAudienceData();
   const databaseManagementServices = createDatabaseManagementServices({
     bookingsData: dataInit,
-    mailchimpData: mailchimpAudienceData,
+    catalog,
     adminSessionData: databaseAdminSessionData,
   });
   const databaseManagement_API = databaseManagementApi(databaseManagementServices);
@@ -102,12 +104,33 @@ async function startServer() {
     databaseManagement_API.getDatabaseBookings
   );
   app.get(
-    '/database/mailchimp/clients',
+    '/database/clients',
     databaseManagement_API.requireDatabaseAuth,
-    databaseManagement_API.getMailchimpClients
+    databaseManagement_API.getDatabaseClients
   );
 
   app.get('/bookings', whispers_API.getBookings);
+  app.route('/database/promo-codes')
+    .get(databaseManagement_API.requireDatabaseAuth, databaseManagement_API.getPromoCodes)
+    .post(databaseManagement_API.requireDatabaseAuth, databaseManagement_API.createPromoCode);
+  app.get('/tours', async (_req, res) => {
+    try {
+      res.json({ tours: await catalog.getTours() });
+    } catch (error) {
+      console.error('Unable to load tours', error);
+      res.status(500).json({ message: 'Unable to load tours' });
+    }
+  });
+  app.get('/tours/:id', async (req, res) => {
+    try {
+      const tour = await catalog.getTourById(req.params.id);
+      if (!tour) return res.status(404).json({ message: 'Tour not found' });
+      return res.json({ tour });
+    } catch (error) {
+      console.error('Unable to load tour', error);
+      return res.status(500).json({ message: 'Unable to load tour' });
+    }
+  });
 
   app.post('/contact-form', whispers_API.sendContactForm);
 

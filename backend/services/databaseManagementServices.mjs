@@ -45,7 +45,7 @@ function normalizeBookingsPayload(bookingsResponse) {
 
 export default function createDatabaseManagementServices({
   bookingsData,
-  mailchimpData,
+  catalog,
   adminSessionData,
 }) {
   return {
@@ -53,8 +53,30 @@ export default function createDatabaseManagementServices({
     validateSessionToken,
     getDatabaseHomeData,
     getBookingsView,
-    getMailchimpClientsView,
+    getDatabaseClientsView,
+    getPromoCodes,
+    createPromoCode,
   };
+
+  async function getPromoCodes() {
+    return { promoCodes: await catalog.getPromoCodes() };
+  }
+
+  async function createPromoCode(input) {
+    const code = typeof input?.code === 'string' ? input.code.trim().toUpperCase() : '';
+    const discountPercent = input?.discountPercent;
+    if (!/^[A-Z0-9][A-Z0-9_-]{0,31}$/.test(code)) {
+      throw { status: 400, message: 'Enter a code of 1–32 letters, digits, hyphens or underscores, starting with a letter or digit.' };
+    }
+    if (!Number.isInteger(discountPercent) || discountPercent < 1 || discountPercent > 100) {
+      throw { status: 400, message: 'Enter a whole percentage from 1 to 100.' };
+    }
+    const promoCode = { code, discountPercent, createdAt: new Date().toISOString() };
+    if (!(await catalog.createPromoCode(promoCode))) {
+      throw { status: 409, message: 'That promo code already exists.' };
+    }
+    return { promoCode };
+  }
 
   function authenticateAdmin({ username, password }) {
     const isValid = adminSessionData.verifyCredentials(username, password);
@@ -112,29 +134,18 @@ export default function createDatabaseManagementServices({
     const upcomingBookings = bookings.filter((booking) => isDateInFuture(booking?.date)).length;
     const weekBookings = bookings.filter((booking) => isDateWithinNextDays(booking?.date, 7)).length;
 
-    let mailchimpTotalClients = null;
-    let mailchimpStatus = 'unavailable';
-
-    try {
-      const mailchimpResponse = await mailchimpData.getAudienceMembers({ count: 1, offset: 0 });
-      mailchimpTotalClients = mailchimpResponse.totalItems;
-      mailchimpStatus = 'connected';
-    } catch (mailchimpError) {
-      console.warn('Mailchimp clients unavailable for /database/home', {
-        message: mailchimpError?.message || String(mailchimpError),
-      });
-    }
+    const [totalClients, tours] = await Promise.all([catalog.countClients(), catalog.getTours()]);
 
     return {
       title: 'Lisbon Whisper Database',
       subtitle: 'Database admin home',
       generatedAt: new Date().toISOString(),
+      tours,
       stats: {
         totalBookings: bookings.length,
         upcomingBookings,
         next7DaysBookings: weekBookings,
-        mailchimpTotalClients,
-        mailchimpStatus,
+        totalClients,
       },
     };
   }
@@ -161,29 +172,14 @@ export default function createDatabaseManagementServices({
     };
   }
 
-  async function getMailchimpClientsView({ count, offset }) {
+  async function getDatabaseClientsView({ count, offset }) {
     const safeCount = parseNumber(count, 200, 1, 1000);
     const safeOffset = parseNumber(offset, 0, 0, 100000);
 
-    try {
-      const clientsResponse = await mailchimpData.getAudienceMembers({
-        count: safeCount,
-        offset: safeOffset,
-      });
-
-      return {
-        total: clientsResponse.totalItems,
-        count: clientsResponse.count,
-        audienceId: clientsResponse.audienceId,
-        clients: clientsResponse.members,
-      };
-    } catch (error) {
-      throw {
-        status: 502,
-        message:
-          'Failed to load Mailchimp clients. Check MAILCHIMP_API_KEY, MAILCHIMP_SERVER_PREFIX and MAILCHIMP_AUDIENCE_ID.',
-        details: error?.message || String(error),
-      };
-    }
+    const [clients, total] = await Promise.all([
+      catalog.getClients({ count: safeCount, offset: safeOffset }),
+      catalog.countClients(),
+    ]);
+    return { clients, total, count: clients.length };
   }
 }

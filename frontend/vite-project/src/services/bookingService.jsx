@@ -1,8 +1,10 @@
-const API_BASE = 'https://lisbonwhisper.onrender.com';
+import { API_BASE } from './apiBase';
 
 export const bookingsCacheKey = `${API_BASE}/bookings`;
+export const toursCacheKey = `${API_BASE}/tours`;
+export const tourCacheKey = (id) => `${toursCacheKey}/${encodeURIComponent(id)}`;
 
-export const fetchBookings = (signal, url) => fetch(url, { signal });
+export const fetchPublicData = (signal, url) => fetch(url, { signal });
 
 // POST: Create a new booking
 export const createBooking = async (bookingData) => {

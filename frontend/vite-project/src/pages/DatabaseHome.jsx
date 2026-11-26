@@ -3,10 +3,52 @@ import {
   authenticateDatabaseAdmin,
   fetchDatabaseBookings,
   fetchDatabaseHome,
-  fetchMailchimpClients,
+  requestPromoCodes,
+  fetchDatabaseClients,
 } from '../services/databaseService';
+import { Button, DatabaseShell, DataTable, Field } from '../database-generic/index.js';
+import { useFetch } from '../api/useFetch';
+import { fetchPublicData, toursCacheKey } from '../services/bookingService';
 import './DatabaseHome.css';
 
+const sections = [
+  { id: 'bookings', title: 'Bookings', description: 'Tour reservations' },
+  { id: 'clients', title: 'Clients', description: 'Customer and enquiry records' },
+  { id: 'tours', title: 'Tours', description: 'Tour catalogue' },
+  { id: 'promoCodes', title: 'Promo Codes', description: 'Discount codes' },
+];
+
+const bookingColumns = [
+  { key: 'name', label: 'Name' },
+  { key: 'email', label: 'Email' },
+  { key: 'tourName', label: 'Tour' },
+  { key: 'date', label: 'Date' },
+  { key: 'time', label: 'Time' },
+  { key: 'persons', label: 'Persons' },
+  { key: 'totalPrice', label: 'Total', render: (price, row) => price == null ? '—' : `${price} ${row.currency || 'EUR'}` },
+  { key: 'createdAt', label: 'Created', render: formatDate },
+];
+
+const clientColumns = [
+  { key: 'email', label: 'Email' },
+  { key: 'name', label: 'Name' },
+  { key: 'phone', label: 'Phone' },
+  { key: 'sources', label: 'Sources', render: (sources) => sources?.join(', ') || '—' },
+  { key: 'createdAt', label: 'First seen', render: formatDate },
+  { key: 'lastSeenAt', label: 'Last seen', render: formatDate },
+];
+
+const tourColumns = [
+  { key: 'title', label: 'Tour' },
+  { key: 'slug', label: 'URL slug' },
+  { key: 'description', label: 'Description' },
+];
+
+const promoCodeColumns = [
+  { key: 'code', label: 'Code' },
+  { key: 'discountPercent', label: 'Discount', render: (percentage) => `${percentage}%` },
+  { key: 'createdAt', label: 'Created', render: formatDate },
+];
 const TOKEN_STORAGE_KEY = 'lisbonWhisperDatabaseBearerToken';
 
 function formatDate(isoDate) {
@@ -23,41 +65,58 @@ function formatDate(isoDate) {
 }
 
 function DatabaseHome() {
+  const [section, setSection] = useState('bookings');
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_STORAGE_KEY) || '');
+  const { status: toursStatus, refetch: refetchTours } = useFetch(token ? toursCacheKey : null, fetchPublicData);
+  const tourResult = toursStatus.kind === 'success' ? toursStatus : toursStatus.stale;
+  const tours = tourResult?.body.kind === 'json' ? tourResult.body.json?.tours : undefined;
+  const toursLoading = toursStatus.kind === 'idle' || toursStatus.kind === 'loading';
+  const toursError = !toursLoading && (toursStatus.kind !== 'success' || !Array.isArray(tours))
+    ? 'Unable to load tours from the API.'
+    : '';
   const [dashboard, setDashboard] = useState(null);
   const [bookings, setBookings] = useState([]);
-  const [mailchimpClients, setMailchimpClients] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [promoCodes, setPromoCodes] = useState([]);
+  const [promoCodesError, setPromoCodesError] = useState('');
+  const [savingPromoCode, setSavingPromoCode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [bookingsError, setBookingsError] = useState('');
-  const [mailchimpError, setMailchimpError] = useState('');
+  const [clientsError, setClientsError] = useState('');
   const [lastRefresh, setLastRefresh] = useState('');
 
   const clearSession = useCallback(() => {
     sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken('');
+    setSection('bookings');
+    setLastRefresh('');
     setDashboard(null);
     setBookings([]);
-    setMailchimpClients([]);
+    setClients([]);
+    setPromoCodes([]);
+    setPromoCodesError('');
     setPassword('');
     setError('');
     setBookingsError('');
-    setMailchimpError('');
+    setClientsError('');
   }, []);
 
   const loadDashboard = useCallback(async (tokenValue) => {
     setLoading(true);
     setError('');
     setBookingsError('');
-    setMailchimpError('');
+    setClientsError('');
 
     try {
-      const [homeResult, bookingsResult, clientsResult] = await Promise.allSettled([
+      setPromoCodesError('');
+      const [homeResult, bookingsResult, clientsResult, promoCodesResult] = await Promise.allSettled([
         fetchDatabaseHome(tokenValue),
         fetchDatabaseBookings(tokenValue, { limit: 300 }),
-        fetchMailchimpClients(tokenValue, { count: 300, offset: 0 }),
+        fetchDatabaseClients(tokenValue, { count: 300, offset: 0 }),
+        requestPromoCodes(tokenValue),
       ]);
 
       let authExpired = false;
@@ -85,14 +144,20 @@ function DatabaseHome() {
       }
 
       if (clientsResult.status === 'fulfilled') {
-        setMailchimpClients(Array.isArray(clientsResult.value?.clients) ? clientsResult.value.clients : []);
+        setClients(Array.isArray(clientsResult.value?.clients) ? clientsResult.value.clients : []);
       } else {
-        const clientsMessage = clientsResult.reason?.message || 'Unable to load Mailchimp clients';
+        const clientsMessage = clientsResult.reason?.message || 'Unable to load clients';
         if (clientsMessage.toLowerCase().includes('invalid or expired bearer token')) {
           authExpired = true;
         }
-        setMailchimpError(clientsMessage);
-        setMailchimpClients([]);
+        setClientsError(clientsMessage);
+        setClients([]);
+      }
+
+      if (promoCodesResult.status === 'fulfilled') {
+        setPromoCodes(promoCodesResult.value?.promoCodes || []);
+      } else {
+        setPromoCodesError(promoCodesResult.reason?.message || 'Unable to load promo codes');
       }
 
       if (authExpired) {
@@ -141,198 +206,115 @@ function DatabaseHome() {
     }
   };
 
-  const handleLogout = () => clearSession();
+  const activeSection = sections.find(({ id }) => id === section);
+
+  async function handleCreatePromoCode(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const fields = new FormData(form);
+    setPromoCodesError('');
+    setSavingPromoCode(true);
+    try {
+      const { promoCode } = await requestPromoCodes(token, {
+        code: fields.get('code'),
+        discountPercent: Number(fields.get('discountPercent')),
+      });
+      setPromoCodes((current) => [...current, promoCode].sort((a, b) => a.code.localeCompare(b.code)));
+      form.reset();
+    } catch (err) {
+      setPromoCodesError(err.message);
+    } finally {
+      setSavingPromoCode(false);
+    }
+  }
+
+  const table = {
+    bookings: {
+      rows: bookings,
+      columns: bookingColumns,
+      getRowId: (row) => row.id || `${row.email}-${row.date}-${row.time}`,
+      error: bookingsError,
+    },
+    clients: { rows: clients, columns: clientColumns, getRowId: (row) => row._id || row.email, error: clientsError },
+    tours: { rows: Array.isArray(tours) ? tours : [], columns: tourColumns, getRowId: (row) => row.slug, error: toursError },
+    promoCodes: { rows: promoCodes, columns: promoCodeColumns, getRowId: (row) => row.code },
+  }[section];
 
   return (
-    <main className="database-page">
-      <section className="database-shell">
-        <header className="database-header">
-          <p className="database-kicker">Lisbon Whisper</p>
-          <h1 className="database-title">Database Management</h1>
-          <p className="database-subtitle">Clients from Mailchimp and all booking records in one place.</p>
-        </header>
-
+    <div className="lisbon-database">
+      <DatabaseShell
+        as="div"
+        title="Database Management"
+        description={token ? 'Tour reservations, clients and tour information.' : undefined}
+        brand={<span>Lisbon Whisper</span>}
+        sections={token ? sections : undefined}
+        selected={section}
+        onSelect={setSection}
+        headerActions={token && (
+          <div className="db-actions">
+            <Button onClick={() => { loadDashboard(token); refetchTours(); }} disabled={loading || savingPromoCode}>Refresh</Button>
+            <Button onClick={clearSession} disabled={savingPromoCode}>Sign out</Button>
+          </div>
+        )}
+      >
         {!token ? (
-          <section className="database-login-card">
-            <h2>Admin Access</h2>
-            <p>Sign in to open the database management panel.</p>
-
-            <form className="database-login-form" onSubmit={handleLogin}>
-              <label htmlFor="db-admin-username">Username</label>
-              <input
-                id="db-admin-username"
-                type="text"
-                autoComplete="username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                required
-              />
-
-              <label htmlFor="db-admin-password">Password</label>
-              <input
-                id="db-admin-password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-              />
-
-              <button type="submit" disabled={loading}>
-                {loading ? 'Authenticating...' : 'Authenticate'}
-              </button>
+          <section className="db-card lisbon-database-login">
+            <h2>Administrator sign in</h2>
+            <form className="db-form" onSubmit={handleLogin}>
+              <Field label="Username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required />
+              <Field label="Password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+              <div className="db-actions">
+                <Button type="submit" variant="primary" disabled={loading}>
+                  {loading ? 'Signing in…' : 'Sign in'}
+                </Button>
+              </div>
             </form>
           </section>
         ) : (
-          <section className="database-dashboard">
-            <div className="database-toolbar">
+          <>
+            <dl className="lisbon-database-stats">
+              {[
+                ['Total Bookings', dashboard?.stats?.totalBookings],
+                ['Upcoming Bookings', dashboard?.stats?.upcomingBookings],
+                ['Next 7 Days', dashboard?.stats?.next7DaysBookings],
+                ['Clients', dashboard?.stats?.totalClients],
+              ].map(([label, value]) => (
+                <div className="db-card" key={label}><dt>{label}</dt><dd>{value ?? '—'}</dd></div>
+              ))}
+            </dl>
+
+            <div className="db-toolbar">
               <div>
-                <p className="toolbar-label">Admin Session</p>
-                <p className="toolbar-value">Active</p>
+                <h2>{activeSection.title}</h2>
+                <p className="db-muted">{table.rows.length} records loaded</p>
               </div>
-              <div className="toolbar-actions">
-                <button type="button" onClick={() => loadDashboard(token)} disabled={loading}>
-                  Refresh
-                </button>
-                <button type="button" className="logout-button" onClick={handleLogout}>
-                  Logout
-                </button>
-              </div>
-            </div>
-
-            <div className="database-stats-grid">
-              <article className="database-stat-card">
-                <p className="stat-label">Total Bookings</p>
-                <p className="stat-value">{dashboard?.stats?.totalBookings ?? '-'}</p>
-              </article>
-
-              <article className="database-stat-card">
-                <p className="stat-label">Upcoming Bookings</p>
-                <p className="stat-value">{dashboard?.stats?.upcomingBookings ?? '-'}</p>
-              </article>
-
-              <article className="database-stat-card">
-                <p className="stat-label">Next 7 Days</p>
-                <p className="stat-value">{dashboard?.stats?.next7DaysBookings ?? '-'}</p>
-              </article>
-
-              <article className="database-stat-card">
-                <p className="stat-label">Mailchimp Clients</p>
-                <p className="stat-value">{dashboard?.stats?.mailchimpTotalClients ?? '-'}</p>
-              </article>
-            </div>
-
-            <div className="database-meta">
-              <p>
-                <strong>Authenticated as:</strong> {dashboard?.authenticatedAs || 'admin'}
-              </p>
-              <p>
-                <strong>Last refresh:</strong> {formatDate(lastRefresh || dashboard?.generatedAt)}
+              <p className="db-muted">
+                Signed in as {dashboard?.authenticatedAs || username} · Last refresh {formatDate(lastRefresh || dashboard?.generatedAt)}
               </p>
             </div>
 
-            <section className="database-table-section">
-              <div className="table-heading">
-                <h2>Bookings View</h2>
-                <p>{bookings.length} records loaded</p>
-              </div>
-              {bookingsError && <p className="database-error">{bookingsError}</p>}
-              {!bookingsError && (
-                <div className="table-shell">
-                  <table className="database-table">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Tour</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Persons</th>
-                        <th>Total</th>
-                        <th>Created</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {bookings.length === 0 ? (
-                        <tr>
-                          <td colSpan={8}>No bookings found.</td>
-                        </tr>
-                      ) : (
-                        bookings.map((booking) => (
-                          <tr key={booking.id || `${booking.email}-${booking.date}-${booking.time}`}>
-                            <td>{booking.name || '-'}</td>
-                            <td>{booking.email || '-'}</td>
-                            <td>{booking.tourName || '-'}</td>
-                            <td>{booking.date || '-'}</td>
-                            <td>{booking.time || '-'}</td>
-                            <td>{booking.persons || '-'}</td>
-                            <td>
-                              {booking.totalPrice || booking.totalPrice === 0
-                                ? `${booking.totalPrice} ${booking.currency || 'EUR'}`
-                                : '-'}
-                            </td>
-                            <td>{formatDate(booking.createdAt)}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+            {section === 'promoCodes' && (
+              <form className="db-form db-card lisbon-database-promo-form" onSubmit={handleCreatePromoCode}>
+                <Field label="Code" name="code" maxLength={32} pattern="[A-Za-z0-9][A-Za-z0-9_\\-]{0,31}" required />
+                <Field label="Discount (%)" name="discountPercent" type="number" min={1} max={100} step={1} required />
+                <div className="db-actions">
+                  <Button type="submit" variant="primary" disabled={loading || savingPromoCode}>
+                    {savingPromoCode ? 'Saving…' : 'Create code'}
+                  </Button>
                 </div>
-              )}
-            </section>
-
-            <section className="database-table-section">
-              <div className="table-heading">
-                <h2>Mailchimp Clients</h2>
-                <p>{mailchimpClients.length} records loaded</p>
-              </div>
-              {mailchimpError && <p className="database-error">{mailchimpError}</p>}
-              {!mailchimpError && (
-                <div className="table-shell">
-                  <table className="database-table">
-                    <thead>
-                      <tr>
-                        <th>Email</th>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Source</th>
-                        <th>Rating</th>
-                        <th>Last Changed</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mailchimpClients.length === 0 ? (
-                        <tr>
-                          <td colSpan={6}>No clients found.</td>
-                        </tr>
-                      ) : (
-                        mailchimpClients.map((client) => (
-                          <tr key={client.id || client.email}>
-                            <td>{client.email || '-'}</td>
-                            <td>
-                              {client.fullName ||
-                                [client.firstName, client.lastName].filter(Boolean).join(' ') ||
-                                '-'}
-                            </td>
-                            <td>{client.status || '-'}</td>
-                            <td>{client.source || '-'}</td>
-                            <td>{client.memberRating ?? '-'}</td>
-                            <td>{formatDate(client.lastChanged)}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </section>
-          </section>
+                {promoCodesError && <p role="alert">{promoCodesError}</p>}
+              </form>
+            )}
+            <DataTable
+              {...table}
+              loading={(section === 'tours' ? toursLoading : loading) && table.rows.length === 0}
+              caption={activeSection.title}
+            />
+          </>
         )}
-
-        {loading && <p className="database-status">Loading...</p>}
-        {error && <p className="database-error database-error--global">{error}</p>}
-      </section>
-    </main>
+        {error && <p role="alert">{error}</p>}
+      </DatabaseShell>
+    </div>
   );
 }
 

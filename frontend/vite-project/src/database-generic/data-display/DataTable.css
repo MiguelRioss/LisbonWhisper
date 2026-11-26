@@ -1,0 +1,51 @@
+.database-ui .db-card {
+  background: var(--db-panel);
+  border: 1px solid var(--db-line);
+  border-radius: 14px;
+  box-shadow: 0 12px 28px #f9924d22;
+}
+.database-ui .db-table-wrap {
+  overflow-x: auto;
+}
+.database-ui .db-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+.database-ui .db-table th {
+  padding: 14px 16px;
+  background: #fff1e0;
+  color: var(--db-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.database-ui .db-table td {
+  padding: 14px 16px;
+  border-top: 1px solid var(--db-line);
+  vertical-align: middle;
+}
+.database-ui .db-table tbody tr:hover {
+  background: #fff7eb;
+}
+.database-ui .db-sort {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.database-ui .db-button.db-sort {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-transform: inherit;
+  color: inherit;
+  border-radius: 0;
+}

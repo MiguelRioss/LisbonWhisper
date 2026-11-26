@@ -1,0 +1,4 @@
+.database-ui .db-form {
+  display: grid;
+  gap: 18px;
+}

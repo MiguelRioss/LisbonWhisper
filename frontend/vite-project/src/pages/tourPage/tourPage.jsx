@@ -6,6 +6,8 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import GenericCarousel from '../../components/GenericCarrousel';
 import TourInfoContainer from './TourInfoContainer';
 import WeeklyGrid from '../../components/calendarTool/WeeklyGrid';
+import { useFetch } from '../../api/useFetch';
+import { fetchPublicData, tourCacheKey } from '../../services/bookingService';
 
 import img1 from '../../res/pexels-hillaryfox-1615815.jpg';
 import img2 from '../../res/pexels-pixabay-461936.jpg';
@@ -16,8 +18,12 @@ import { useLocation, useParams } from 'react-router-dom';
 function TourPage({ tours, bookings, loading, error, createBookingHandler }) {
   const location = useLocation();
   const { tourId } = useParams();
-  const routeTour = tours.find((tour) => tour.title.replace(/\s+/g, '-').toLowerCase() === tourId);
-  const tourData = { ...routeTour, ...location.state };
+  const { status: tourStatus } = useFetch(tourCacheKey(tourId), fetchPublicData);
+  const fetchedTour = tourStatus.kind === 'success' && tourStatus.body.kind === 'json'
+    ? tourStatus.body.json?.tour
+    : undefined;
+  const routeTour = tours.find((tour) => (tour.slug || tour.title.replace(/\s+/g, '-').toLowerCase()) === tourId);
+  const tourData = { ...routeTour, ...location.state, ...fetchedTour };
   const tourName =
     tourData.title?.trim() ||
     tourData.name?.trim() ||
@@ -43,6 +49,10 @@ function TourPage({ tours, bookings, loading, error, createBookingHandler }) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }, [hash]);
+
+  if (tourStatus.kind === 'non-success' && tourStatus.response.status === 404 && !routeTour) {
+    return <p role="alert">Tour not found.</p>;
+  }
 
   return (
     <div className="home-surface">

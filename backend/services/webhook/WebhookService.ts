@@ -9,6 +9,10 @@ interface BookingEmails {
   sendBookingEmails(booking: BookingRecord): Promise<void>;
 }
 
+interface ClientStore {
+  saveClient(client: { email: string; name: string; source: 'booking' }): Promise<void>;
+}
+
 export default class WebhookService {
   constructor(
     private readonly bookings: BookingRepository,
@@ -16,6 +20,7 @@ export default class WebhookService {
     private readonly stripe: Stripe | null,
     private readonly webhookSecret: string | undefined,
     private readonly mode: StripeMode = 'test',
+    private readonly clients?: ClientStore,
   ) {}
 
   async handle(payload: Buffer, signature: string | string[] | undefined): Promise<void> {
@@ -29,6 +34,7 @@ export default class WebhookService {
     if (session.payment_status !== 'paid' || !session.client_reference_id) return;
     const booking = await this.bookings.findById(session.client_reference_id);
     if (!booking || booking.paymentStatus === 'paid' || booking.stripeSessionId !== session.id || session.amount_total !== booking.persons * TOUR_PRICE_CENTS || session.currency !== 'eur') return;
+    await this.clients?.saveClient({ email: booking.email, name: booking.name, source: 'booking' });
     await this.bookings.updatePayment(session.client_reference_id, { paymentStatus: 'paid', stripePaymentIntentId: session.payment_intent });
     await this.bookingEmails.sendBookingEmails(booking);
   }

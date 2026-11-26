@@ -1,4 +1,20 @@
-const API_BASE = 'https://lisbonwhisper.onrender.com';
+import { API_BASE } from './apiBase';
+
+export async function requestPromoCodes(token, promoCode) {
+  const response = await fetch(`${API_BASE}/database/promo-codes`, {
+    method: promoCode ? 'POST' : 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(promoCode && { 'Content-Type': 'application/json' }),
+    },
+    body: promoCode ? JSON.stringify(promoCode) : undefined,
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(buildErrorMessage('Promo codes', payload, response.statusText));
+  }
+  return payload;
+}
 
 function buildErrorMessage(prefix, payload, fallbackStatusText = '') {
   if (payload?.message) {
@@ -60,13 +76,13 @@ export const fetchDatabaseBookings = async (token, { limit = 200 } = {}) => {
   return payload;
 };
 
-export const fetchMailchimpClients = async (token, { count = 200, offset = 0 } = {}) => {
+export const fetchDatabaseClients = async (token, { count = 200, offset = 0 } = {}) => {
   const query = new URLSearchParams({
     count: String(count),
     offset: String(offset),
   });
 
-  const response = await fetch(`${API_BASE}/database/mailchimp/clients?${query.toString()}`, {
+  const response = await fetch(`${API_BASE}/database/clients?${query.toString()}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -75,7 +91,7 @@ export const fetchMailchimpClients = async (token, { count = 200, offset = 0 } =
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(buildErrorMessage('Failed to load Mailchimp clients', payload, response.statusText));
+    throw new Error(buildErrorMessage('Failed to load clients', payload, response.statusText));
   }
 
   return payload;

@@ -1,4 +1,4 @@
-const API_BASE = 'https://lisbonwhisper.onrender.com';
+import { API_BASE } from './apiBase';
 
 export const sendContactForm = async (contact) => {
   const response = await fetch(`${API_BASE}/contact-form`, {

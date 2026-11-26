@@ -1,0 +1,28 @@
+.database-ui .db-page {
+  min-height: 100vh;
+  padding: 40px clamp(16px, 4vw, 64px);
+  background:
+    radial-gradient(ellipse at top left, #ffe3bf, transparent 65%), var(--db-bg);
+}
+.database-ui .db-toolbar,
+.database-ui .db-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.database-ui .db-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.database-ui .db-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}

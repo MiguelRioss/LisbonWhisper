@@ -9,7 +9,6 @@
     "typecheck": "tsc --noEmit",
     "test:checkout": "node --import tsx --test tests/stripeFlow.test.ts",
     "smtp:test": "node scripts/testSmtpConnection.mjs",
-    "smtp:test:mailchimp": "node scripts/testMailchimpConnection.mjs",
     "booking:test-email": "node scripts/testBookingServiceEmail.mjs"
   },
   "author": "",

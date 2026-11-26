@@ -4,7 +4,7 @@ const PRICE_PER_PERSON_EUR = 49;
 
 //Este modulo Esta responsavel de recolher a data dos parametros/body etc para depois o services
 // usar sem ter que se preocupar com isso
-export default function (data) {
+export default function (data, catalog) {
   return {
     getBookingAndProcessServices,
     createBookingServices,
@@ -65,7 +65,6 @@ export default function (data) {
         },
         replyTo: process.env.REPLY_EMAIL || 'info@lisbonwhisper.com',
         from: process.env.EMAIL_FROM || 'Lisbon Whisper <info@lisbonwhisper.com>',
-        provider: process.env.EMAIL_PROVIDER || '',
       });
     } catch (err) {
       console.error('Booking confirmation email failed', {
@@ -93,7 +92,6 @@ export default function (data) {
         },
         replyTo: process.env.REPLY_EMAIL || 'info@lisbonwhisper.com',
         from: process.env.EMAIL_FROM || 'Lisbon Whisper <info@lisbonwhisper.com>',
-        provider: process.env.EMAIL_PROVIDER || '',
       });
     } catch (err) {
       console.error('Booking admin notice email failed', {
@@ -111,6 +109,10 @@ export default function (data) {
     if (!name || !email || !message) {
       throw { status: 400, message: 'name, email and message are required' };
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw { status: 400, message: 'A valid email is required' };
+    }
+    await catalog?.saveClient({ name, email, phone: String(contactObject?.phone || '').trim(), source: 'contact' });
 
     const response = await sendEmailTemplate({
       to: process.env.ADMIN_NOTICE_EMAIL || 'info@lisbonwhisper.com',
@@ -126,7 +128,6 @@ export default function (data) {
       },
       replyTo: contactObject?.email || process.env.REPLY_EMAIL || 'info@lisbonwhisper.com',
       from: process.env.EMAIL_FROM || 'Lisbon Whisper <info@lisbonwhisper.com>',
-      provider: process.env.EMAIL_PROVIDER || '',
     });
     return {
       status: 'Contact form sent',

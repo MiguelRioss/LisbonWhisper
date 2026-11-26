@@ -1,0 +1,47 @@
+.database-ui .db-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--db-line);
+  background: linear-gradient(180deg, #fff6e9, #ffd7a8);
+  color: var(--db-text);
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+.database-ui .db-button--small {
+  padding: 5px 9px;
+  font-size: 12px;
+}
+.database-ui .db-button--large {
+  padding: 13px 20px;
+}
+.database-ui .db-button--full {
+  width: 100%;
+}
+.database-ui .db-button--align-start {
+  justify-content: flex-start;
+}
+.database-ui .db-button--align-center {
+  justify-content: center;
+}
+.database-ui .db-button--align-end {
+  justify-content: flex-end;
+}
+.database-ui .db-button--danger {
+  background: #fff1ef;
+  color: #a33426;
+  border-color: #edc6bf;
+}
+.database-ui .db-button--ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.database-ui .db-button--primary {
+  background: var(--db-accent);
+  color: #181008;
+}

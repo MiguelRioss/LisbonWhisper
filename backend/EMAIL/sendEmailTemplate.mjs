@@ -9,7 +9,6 @@ async function sendEmailTemplate({
   variables = {},
   replyTo,
   from,
-  provider,
 }) {
   if (!template) {
     throw new Error('Missing template');
@@ -27,7 +26,6 @@ async function sendEmailTemplate({
     html,
     replyTo,
     from,
-    provider,
   });
 }
 

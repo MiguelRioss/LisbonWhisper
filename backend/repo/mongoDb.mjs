@@ -4,7 +4,7 @@ import { MongoClient } from 'mongodb';
 
 let client;
 
-let bookingsCollection;
+let database;
 
 export async function connectToMongo() {
   const uri = String(process.env.MONGO_URI || '').trim();
@@ -23,14 +23,17 @@ export async function connectToMongo() {
 
   await client.connect();
 
-  const db = client.db('bookingApp'); // your DB name
-  bookingsCollection = db.collection('bookings');
+  database = client.db('bookingApp');
+}
+
+export function getMongoDatabase() {
+  return database;
 }
 
 export function getBookingsCollection() {
-  if (!bookingsCollection) {
+  if (!database) {
     throw new Error('MongoDB not connected. Call connectToMongo() first.');
   }
 
-  return bookingsCollection;
+  return database.collection('bookings');
 }

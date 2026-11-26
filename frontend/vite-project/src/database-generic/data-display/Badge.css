@@ -1,0 +1,25 @@
+.database-ui .db-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #fff4e4;
+  color: #735636;
+  border: 1px solid var(--db-line);
+}
+.database-ui .db-badge--success {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #6ee7b7;
+}
+.database-ui .db-badge--warning {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+.database-ui .db-badge--danger {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}

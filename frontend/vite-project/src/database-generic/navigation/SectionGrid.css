@@ -1,0 +1,42 @@
+.database-ui .db-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 24px 0 32px;
+}
+.database-ui .db-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fffefc, #ffe3bf);
+  border: 1px solid var(--db-line);
+  min-height: 110px;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+.database-ui .db-tile--active {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px #f973162e;
+  border-color: var(--db-accent);
+}
+.database-ui .db-tile__icon {
+  font-size: 28px;
+}
+.database-ui .db-tile__title {
+  display: block;
+  font-size: 16px;
+}
+.database-ui .db-tile__subtitle {
+  display: block;
+  font-size: 13px;
+  color: #8b6b49;
+  margin-top: 6px;
+}
+
+.database-ui .db-button.db-tile {
+  justify-content: flex-start;
+  font-weight: normal;
+}
