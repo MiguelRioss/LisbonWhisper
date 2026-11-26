@@ -10,10 +10,41 @@ const SMALL_SCREEN_BREAKPOINT = 600;
 const MOBILE_VISIBLE_DAYS = 3;
 const DESKTOP_VISIBLE_DAYS = 7;
 
-const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
+function DayTimePicker({ days, bookings, onSelect }) {
+  const [date, setDate] = useState(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return (days.find((day) => day.date === today) ?? days[0]).date;
+  });
+
+  return (
+    <div className="day-time-picker">
+      <div className="day-time-dates" role="group" aria-label="Tour dates">
+        {days.map((day) => (
+          <button key={day.date} type="button" aria-label={`${day.day}, ${day.date}`} aria-pressed={date === day.date} onClick={() => setDate(day.date)}>
+            <span>{day.day.slice(0, 3)}</span>
+            <strong>{Number(day.date.slice(-2))}</strong>
+          </button>
+        ))}
+      </div>
+      <div className="day-time-slots" key={date} role="group" aria-label={`Times for ${date}`}>
+        {timeSlots.map((time) => {
+          const soldOut = bookings.some((booking) => booking.date === date && booking.time === time);
+          return (
+            <button key={time} type="button" disabled={soldOut} onClick={() => onSelect(`${date}|${time}`)}>
+              <span>{time.replace('-', '–')}</span>
+              {soldOut ? <small>Sold out</small> : <span aria-hidden="true">↗</span>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const WeeklyGrid = ({ createBookingHandler, tourData, bookings, dateStrip = false }) => {
   const { title, descriptions } = tourData;
   const [currentMonday, setCurrentMonday] = useState(() =>
-    typeof window !== 'undefined' && window.innerWidth <= SMALL_SCREEN_BREAKPOINT
+    !dateStrip && typeof window !== 'undefined' && window.innerWidth <= SMALL_SCREEN_BREAKPOINT
       ? new Date()
       : getMonday(new Date())
   );
@@ -57,7 +88,7 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
     return weekDates;
   };
 
-  const visibleDays = viewportWidth <= SMALL_SCREEN_BREAKPOINT ? 1 : viewportWidth <= MOBILE_BREAKPOINT ? MOBILE_VISIBLE_DAYS : DESKTOP_VISIBLE_DAYS;
+  const visibleDays = dateStrip ? DESKTOP_VISIBLE_DAYS : viewportWidth <= SMALL_SCREEN_BREAKPOINT ? 1 : viewportWidth <= MOBILE_BREAKPOINT ? MOBILE_VISIBLE_DAYS : DESKTOP_VISIBLE_DAYS;
   const navigationLabel = visibleDays === 1 ? 'Day' : visibleDays === 3 ? '3 Days' : 'Week';
   const weekDates = generateDates(currentMonday, visibleDays);
   const navigationStep = visibleDays;
@@ -116,7 +147,10 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
         </button>
 
         <h3 className="grid-nav-range">
-          {weekDates[0].date} - {weekDates[weekDates.length - 1].date}
+          {dateStrip
+            ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+              .formatRange(new Date(weekDates[0].date), new Date(weekDates.at(-1).date))
+            : `${weekDates[0].date} - ${weekDates.at(-1).date}`}
         </h3>
 
         <button onClick={handleNextWeek} className="grid-nav-button" type="button" disabled={!fadeTransition}>
@@ -128,7 +162,9 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
       </div>
 
       {/* Weekly Grid */}
-      <div
+      {dateStrip ? (
+        <DayTimePicker key={weekDates[0].date} days={weekDates} bookings={bookings} onSelect={setExpandedSlot} />
+      ) : <div
         key={`${weekDates[0].date}-${visibleDays}`}
         className={`grid-container ${fadeTransition ? '' : 'grid-container-changing'} ${hasChangedWeek ? 'grid-container-rebuild' : ''}`}
         style={{ gridTemplateColumns: `repeat(${weekDates.length}, minmax(0, 1fr))` }}
@@ -160,7 +196,7 @@ const WeeklyGrid = ({ createBookingHandler, tourData, bookings }) => {
             );
           })
         )}
-      </div>
+      </div>}
 
       {/* Booking Popup rendered outside the grid */}
       {expandedSlot && createPortal(

@@ -162,6 +162,7 @@ function DatabaseHome() {
   const [promoCodesError, setPromoCodesError] = useState('');
   const [savingPromoCode, setSavingPromoCode] = useState(false);
   const [promoterError, setPromoterError] = useState('');
+  const [promoterNotice, setPromoterNotice] = useState('');
   const [savingPromoter, setSavingPromoter] = useState(false);
   const [creatingPromoterCode, setCreatingPromoterCode] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
@@ -178,6 +179,7 @@ function DatabaseHome() {
     setMediaNotice('');
     setPromoCodesError('');
     setPromoterError('');
+    setPromoterNotice('');
     setPassword('');
     setLoginError('');
   }, []);
@@ -250,9 +252,11 @@ function DatabaseHome() {
     const form = event.currentTarget;
     const fields = Object.fromEntries(new FormData(form));
     setPromoterError('');
+    setPromoterNotice('');
     setSavingPromoter(true);
     try {
-      await createPromoter(token, fields);
+      const { promoter } = await createPromoter(token, fields);
+      setPromoterNotice(`${promoterLabel(promoter)} added to Promoters.`);
       invalidateSection('promoters');
       invalidateSection('bookings');
       if (fields.promoCode) invalidateSection('promoCodes');
@@ -392,6 +396,7 @@ function DatabaseHome() {
                   </Button>
                 </div>
                 {promoterError && <p role="alert">{promoterError}</p>}
+                {promoterNotice && <p role="status">{promoterNotice}</p>}
               </form>
             )}
             <div className="lisbon-database-table-controls">

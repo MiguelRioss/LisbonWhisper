@@ -66,7 +66,7 @@ function Carrousel({ cardData }) {
               descriptions={data.descriptions}
               videoSrc={data.videoSrc}
               image={data.image || data.backgroundImage}
-              handleShowMoreWithParams={() => navigate(`/tour/${data.slug}`)}
+              handleShowMoreWithParams={() => navigate(`/tour/${data.slug}#time-slots`)}
             />
           );
         })}

@@ -1,12 +1,7 @@
 import { Link } from 'react-router-dom';
 import logo from '../res/logo.png';
+import { causes } from '../components/SocialCauses';
 import './Giveaway.css';
-
-const causes = [
-  { name: 'Ginjinha', purpose: 'Um teto para quem vive na rua', symbol: '01', tone: 'warm' },
-  { name: 'Sousa Martins', purpose: 'Saúde para os mais pequenos', symbol: '02', tone: 'blue' },
-  { name: 'Amália · Fado', purpose: 'Companhia para os avós', symbol: '03', tone: 'coral' },
-];
 
 const steps = [
   'Segue a nossa página',
@@ -45,7 +40,7 @@ export default function Giveaway() {
               <div className={`giveaway-cause giveaway-cause--${cause.tone}`} key={cause.name}>
                 <span className="giveaway-coin" aria-hidden="true">{cause.symbol}</span>
                 <h3>{cause.name}</h3>
-                <p>{cause.purpose}</p>
+                <p>{cause.purposePt}</p>
               </div>
             ))}
           </div>

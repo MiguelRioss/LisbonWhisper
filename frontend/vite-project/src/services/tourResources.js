@@ -11,7 +11,7 @@ export function useTourCatalog(enabled = true) {
 }
 
 export function useTourDetails(id) {
-  return useJsonResource(tourCacheKey(id), fetchPublicData, { maxAgeMs: TOUR_CACHE_AGE_MS });
+  return useJsonResource(id ? tourCacheKey(id) : null, fetchPublicData, { maxAgeMs: TOUR_CACHE_AGE_MS });
 }
 
 export function useTourAvailability(enabled) {

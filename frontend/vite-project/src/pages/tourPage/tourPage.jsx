@@ -4,11 +4,9 @@ import React, { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import GenericCarousel from '../../components/GenericCarrousel';
-import TourInfoContainer from './TourInfoContainer';
-import WeeklyGrid from '../../components/calendarTool/WeeklyGrid';
+import TourBookingSections from './TourBookingSections';
 import TourLoadStatus from '../../components/TourLoadStatus';
-import { createBooking } from '../../services/bookingService';
-import { useTourAvailability, useTourDetails } from '../../services/tourResources';
+import { useTourDetails } from '../../services/tourResources';
 
 import { useLocation, useParams } from 'react-router-dom';
 
@@ -17,11 +15,6 @@ function TourPage() {
   const { tourId } = useParams();
   const detail = useTourDetails(tourId);
   const tour = detail.data?.tour;
-  const hasBookingInfo = Boolean(tour?.title) &&
-    Number.isInteger(tour.priceCents) && tour.priceCents > 0 &&
-    Number.isInteger(tour.maxPersons) && tour.maxPersons > 0;
-  const availability = useTourAvailability(hasBookingInfo);
-
   useEffect(() => {
     if (!hash || !tour) return;
     const target = document.getElementById(hash.slice(1));
@@ -47,23 +40,7 @@ function TourPage() {
           .map((imgSrc) => ({ imgSrc }))}
       />
 
-      <TourInfoContainer tourData={tour} />
-
-      <div id="time-slots" className="section-background pt-16 pb-10 py-10 px-4">
-        <h2 className="text-5xl font-bold text-white mb-10 text-center">Select a Time Slot</h2>
-
-        {!hasBookingInfo ? (
-          <TourLoadStatus message="Online booking is currently unavailable for this tour." />
-        ) : !availability.loading && !availability.bookings ? (
-          <TourLoadStatus message="Unable to load availability." onRetry={availability.refetch} />
-        ) : (
-          <WeeklyGrid
-            tourData={tour}
-            createBookingHandler={createBooking}
-            bookings={availability.bookings ?? null}
-          />
-        )}
-      </div>
+      <TourBookingSections key={tourId} tour={tour} />
     </div>
   );
 }

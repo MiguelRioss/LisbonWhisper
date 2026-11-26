@@ -1,4 +1,5 @@
 import Footsteps from '../components/Footsteps';
+import SocialCauses from '../components/SocialCauses';
 import VideoCard from '../components/backGroundVideo/videoCardContainer';
 import Carrousel from '../components/tourCardCarrousell/Carrousell';
 import { TourCatalogStatus } from '../components/TourLoadStatus';
@@ -14,6 +15,7 @@ export default function Home() {
       {catalog.tours?.length
         ? <Carrousel cardData={catalog.tours} />
         : <section id="tours"><TourCatalogStatus catalog={catalog} /></section>}
+      <SocialCauses />
     </div>
   );
 }

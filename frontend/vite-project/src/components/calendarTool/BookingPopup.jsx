@@ -129,58 +129,6 @@ const BookingPopup = ({
               <p>{Array.isArray(tourDescriptions) ? tourDescriptions[0] : tourDescriptions}</p>
             </div>
 
-            <div className="booking-side-section">
-              <h4>Booking Information</h4>
-              <div className="persons-counter">
-                <label>Persons:</label>
-                <div className="counter-controls">
-                  <button
-                    type="button"
-                    onClick={() => handlePersonsChange(-1)}
-                    disabled={busy || persons <= 1}
-                  >
-                    -
-                  </button>
-                  <span>{persons}</span>
-                  <button
-                    type="button"
-                    onClick={() => handlePersonsChange(1)}
-                    disabled={busy || persons >= maxPersons}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-              <div className="booking-price-summary" aria-live="polite">
-                <p>
-                  <strong>Price per person:</strong>{' '}
-                  <span className="booking-current-price">{euro.format((quote ? quote.subtotalCents / persons : priceCents) / 100)}</span>
-                </p>
-                {quote ? (
-                  <>
-                    <p><strong>Subtotal:</strong> {euro.format(quote.subtotalCents / 100)}</p>
-                    <p><strong>Discount ({quote.discountPercent}%):</strong> −{euro.format(quote.discountCents / 100)}</p>
-                    <p><strong>Total after discount:</strong> {euro.format(quote.totalPriceCents / 100)}</p>
-                  </>
-                ) : (
-                  <p><strong>{isApplyingPromo ? 'Subtotal before discount:' : 'Estimated total:'}</strong> {euro.format(estimatedTotal)}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="persons-contact">
-              <p>Need more persons or a private tour?</p>
-              <button
-                type="button"
-                className="contact-button"
-                disabled={isSubmitting}
-                onClick={() => {
-                  window.location.href = '/contact-us';
-                }}
-              >
-                Contact Us
-              </button>
-            </div>
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -249,12 +197,65 @@ const BookingPopup = ({
               </small>
             </div>
 
+            <div className="booking-side-section">
+              <h4>Booking Information</h4>
+              <div className="persons-counter">
+                <label>Persons:</label>
+                <div className="counter-controls">
+                  <button
+                    type="button"
+                    onClick={() => handlePersonsChange(-1)}
+                    disabled={busy || persons <= 1}
+                  >
+                    -
+                  </button>
+                  <span>{persons}</span>
+                  <button
+                    type="button"
+                    onClick={() => handlePersonsChange(1)}
+                    disabled={busy || persons >= maxPersons}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div className="booking-price-summary" aria-live="polite">
+                <p>
+                  <strong>Price per person:</strong>{' '}
+                  <span className="booking-current-price">{euro.format((quote ? quote.subtotalCents / persons : priceCents) / 100)}</span>
+                </p>
+                {quote ? (
+                  <>
+                    <p><strong>Subtotal:</strong> {euro.format(quote.subtotalCents / 100)}</p>
+                    <p><strong>Discount ({quote.discountPercent}%):</strong> −{euro.format(quote.discountCents / 100)}</p>
+                    <p><strong>Total after discount:</strong> {euro.format(quote.totalPriceCents / 100)}</p>
+                  </>
+                ) : (
+                  <p><strong>{isApplyingPromo ? 'Subtotal before discount:' : 'Estimated total:'}</strong> {euro.format(estimatedTotal)}</p>
+                )}
+              </div>
+            </div>
+
             <div className="popup-actions">
               <button type="submit" disabled={busy}>
                 {isSubmitting ? 'Submitting...' : 'Confirm booking'}
               </button>
               <button type="button" onClick={onCollapse} disabled={isSubmitting}>
                 Cancel
+              </button>
+            </div>
+
+            <div className="persons-contact">
+              <p>Need more persons or a private tour?</p>
+              <button
+                type="button"
+                className="contact-button"
+                disabled={isSubmitting}
+                onClick={() => {
+                  window.location.href = '/contact-us';
+                }}
+              >
+                Contact Us
               </button>
             </div>
           </form>

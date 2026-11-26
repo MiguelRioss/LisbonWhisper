@@ -1,125 +1,95 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { TourCatalogStatus } from '../components/TourLoadStatus';
-import { useTourCatalog } from '../services/tourResources';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import CoinExpansionGrid from '../components/CoinExpansionGrid';
+import TourLoadStatus, { TourCatalogStatus } from '../components/TourLoadStatus';
+import { useTourCatalog, useTourDetails } from '../services/tourResources';
+import { TourCalendar } from './tourPage/TourBookingSections';
+import TourInfoContainer from './tourPage/TourInfoContainer';
+import logo from '../res/logo.png';
+
+function AnimatedTourTitle({ title }) {
+  const displayTitle = title.replace(/\bWhispers$/i, 'Whisper');
+  return (
+    <>
+      <span className="sr-only">{displayTitle}</span>
+      {displayTitle.split(/\s+/).map((word, wordIndex) => (
+        <span key={wordIndex} className="social-causes-title-word walking-choice-word" aria-hidden="true">
+          {Array.from(word, (letter, index) => (
+            <span key={index} style={{ '--letter-delay': `${(wordIndex * 7 + index) * 36}ms` }}>{letter}</span>
+          ))}
+        </span>
+      ))}
+    </>
+  );
+}
+
+function SelectedTour({ detail }) {
+  const tour = detail.data?.tour;
+
+  if (tour?.title) {
+    return (
+      <TourInfoContainer
+        tourData={tour}
+        showImages={false}
+        availability={
+          <div className="walking-calendar-reveal walking-calendar-inline">
+            <TourCalendar tour={tour} dateStrip />
+          </div>
+        }
+      />
+    );
+  }
+  if (detail.loading) return <TourLoadStatus message="Loading tour…" />;
+  if (detail.statusCode === 404) return <TourLoadStatus message="Tour not found." />;
+  return <TourLoadStatus message="Unable to load this tour." onRetry={detail.refetch} />;
+}
 
 export default function WalkingTours() {
-  const navigate = useNavigate();
+  const { hash, key } = useLocation();
+  const tourSelection = useRef(null);
+  const [selectedTour, setSelectedTour] = useState(null);
+  const [bookingTour, setBookingTour] = useState(null);
+  const detail = useTourDetails(bookingTour);
+
+  function handleTourSelection(slug) {
+    setSelectedTour(slug);
+    if (slug) setBookingTour(slug);
+  }
+
+  useEffect(() => {
+    if (hash !== '#choose-a-tour') return;
+    const frame = requestAnimationFrame(() => tourSelection.current?.scrollIntoView());
+    return () => cancelAnimationFrame(frame);
+  }, [hash, key]);
+
   const catalog = useTourCatalog();
   const tours = catalog.tours ?? [];
-  const groupSizes = tours.map(({ maxPersons }) => maxPersons).filter((size) => Number.isInteger(size) && size > 0);
-  const handleNavigateToTourPage = (tour) => {
-    navigate(`/tour/${tour.slug}`);
-  };
-
-  const handleCardKeyDown = (event, tour) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleNavigateToTourPage(tour);
-    }
-  };
+  const tourChoices = tours.map((tour) => ({
+    id: tour.slug,
+    name: tour.title,
+    displayName: <AnimatedTourTitle title={tour.title} />,
+    artwork: tour.image && <img className="walking-choice-image" src={tour.image} alt="" />,
+    details: bookingTour === tour.slug ? <SelectedTour detail={detail} /> : null,
+  }));
 
   return (
     <div className="about-page walking-page">
-      <section className="about-hero-full">
-        <div className="about-hero-media">
-          <img
-            className="about-hero-image"
-            src="/res/9bfee964e2a50ec45dc449890ec9ed42.jpg"
-            alt="Lisbon streets"
-          />
-        </div>
-        <div className="about-hero-overlay">
-          <p className="about-hero-kicker">Lisbon Whisper</p>
-          <h1 className="about-hero-title">Walking Tours</h1>
-          <p className="about-hero-description">
-            Discover Lisbon on foot with curated routes that highlight viewpoints, history, and
-            the city&#39;s most atmospheric neighborhoods.
-          </p>
-        </div>
-      </section>
-
-      <section className="walking-intro">
-        <div className="walking-intro-inner">
-          <div className="walking-intro-copy">
-            <h2 className="walking-intro-title">Walk Slow, See More</h2>
-            <p className="walking-intro-text">
-              Our walking tours are crafted for travelers who want to feel the rhythm of Lisbon.
-              We keep groups small, mix iconic sights with hidden alleys, and leave room for
-              spontaneous moments.
-            </p>
-          </div>
-          <div className="walking-stats">
-            <div className="walking-stat">
-              <span className="walking-stat-value">2-3h</span>
-              <span className="walking-stat-label">Typical length</span>
-            </div>
-            <div className="walking-stat">
-              <span className="walking-stat-value">{groupSizes.length ? Math.max(...groupSizes) : '—'}</span>
-              <span className="walking-stat-label">Guests max</span>
-            </div>
-            <div className="walking-stat">
-              <span className="walking-stat-value">Daily</span>
-              <span className="walking-stat-label">Tours available</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="walking-routes">
+      <section className="walking-routes" id="choose-a-tour" ref={tourSelection} style={{ scrollMarginTop: 100 }}>
         <div className="walking-routes-inner">
-          <h2 className="walking-section-title">Signature routes</h2>
-          {tours.length ? <div className="walking-route-grid walking-route-grid--two">
-            {tours.map((tour) => (
-              <div
-                key={tour.slug}
-                className="walking-route-card"
-                style={{ backgroundImage: `url('${tour.image}')` }}
-                role="button"
-                tabIndex={0}
-                onClick={() => handleNavigateToTourPage(tour)}
-                onKeyDown={(event) => handleCardKeyDown(event, tour)}
-                aria-label={`Open ${tour.title} tour`}
-              >
-                <div className="walking-route-overlay">
-                  <span className="walking-tag">{tour.tag}</span>
-                  <h3>{tour.title}</h3>
-                  <p>{tour.description}</p>
-                </div>
-              </div>
-            ))}
-          </div> : <TourCatalogStatus catalog={catalog} />}
-        </div>
-      </section>
-
-      <section className="walking-steps">
-        <div className="walking-steps-inner">
-          <div className="walking-step-card">
-            <h3>1. Pick your style</h3>
-            <p>
-              Tell us if you want history, photography, or neighborhood food. We will match you
-              with the right guide.
+          <div className="about-hero-overlay walking-selection-overlay" data-tour-selected={Boolean(selectedTour) || undefined}>
+            <img className="walking-selection-logo" src={logo} alt="Lisbon Whisper" width="48" height="48" />
+            <h1 className="about-hero-title">Walking Tours</h1>
+            <p className="about-hero-description">
+              Discover Lisbon on foot with curated routes that highlight viewpoints, history, and
+              the city&#39;s most atmospheric neighborhoods.
             </p>
+            <p className="walking-selection-hint">Select a tour photo to see the route and available times.</p>
           </div>
-          <div className="walking-step-card">
-            <h3>2. Meet your guide</h3>
-            <p>
-              We keep start points central and easy to reach. Your guide brings the city to life
-              with stories and local tips.
-            </p>
-          </div>
-          <div className="walking-step-card">
-            <h3>3. Keep exploring</h3>
-            <p>
-              End with a curated list of cafes, viewpoints, and hidden corners to keep discovering
-              Lisbon on your own.
-            </p>
-          </div>
-        </div>
-        <div className="walking-cta">
-          <p>Want a private version or a custom route?</p>
-          <Link className="private-cta" to="/contact-us">
-            Contact us
-          </Link>
+          {tourChoices.length ? (
+            <div className="walking-tour-choices">
+              <CoinExpansionGrid items={tourChoices} backLabel="← All tours" onSelectionChange={handleTourSelection} showDetailsHeading={false} />
+            </div>
+          ) : <TourCatalogStatus catalog={catalog} />}
         </div>
       </section>
     </div>

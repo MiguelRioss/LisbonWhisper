@@ -61,18 +61,14 @@ function VideoCard() {
   }, []);
 
   return (
-      <div
-  className="hero-layer relative w-full h-[calc(100svh-85px)] overflow-hidden"
-  ref={containerRef}
->
-      <div className="absolute inset-0 z-10 mt-10">
+    <div className="hero-layer relative w-full overflow-hidden" ref={containerRef}>
+      <div className="hero-intro-overlay absolute inset-0 z-10 mt-10">
         <IntroCardComponent />
       </div>
       <a className="hero-scroll-cta hero-scroll-cta--bottom" href="#tours">
         <span className="hero-scroll-arrow">↓</span>
         <span className="hero-scroll-text">See Our Tours</span>
       </a>
- «
       <img className="hero-video-poster" src={posterSrc} alt="" aria-hidden="true" />
       <video
         className={`hero-video video-fade ${isPlaying ? 'is-playing' : ''}`}

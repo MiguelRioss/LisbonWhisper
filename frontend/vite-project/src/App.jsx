@@ -5,6 +5,7 @@ import Navbar from './components/navbar/NavBar';
 import Footer from './components/footer/footer';
 import ScrollToTop from './ScrollTop';
 import TourPage from './pages/tourPage/tourPage';
+import SocialCauses from './components/SocialCauses';
 
 import logo from './res/logo.png';
 
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'About Us', href: '/about-us', current: false },
   { name: 'Walking Tours', href: '/walking-tours', current: false },
   { name: 'Private Tours', href: '/private-tours', current: false },
+  { name: 'Social Causes', href: '/social-causes', current: false },
   { name: 'Contact Us', href: '/contact-us', current: false },
 ];
 
@@ -31,13 +33,14 @@ function App() {
 
   return (
     <>
-      {!isDatabaseRoute && <Navbar navigation={navigation} logo={logo} />}
+      {!isDatabaseRoute && <Navbar navigation={navigation} logo={logo} compactOnScroll={location.pathname !== '/walking-tours'} />}
       <ScrollToTop />
       <main className="page-transition" key={location.pathname}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/walking-tours" element={<WalkingTours />} />
         <Route path="/private-tours" element={<PrivateTours />} />
+        <Route path="/social-causes" element={<div className="home-surface social-causes-page"><SocialCauses standalone /></div>} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/booking/success" element={<BookingSuccess />} />

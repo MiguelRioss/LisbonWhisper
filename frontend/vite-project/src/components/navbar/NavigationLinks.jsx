@@ -2,7 +2,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function NavigationLinks({ navigation, mobile = false }) {
+export default function NavigationLinks({ navigation, mobile = false, onNavigate }) {
   return (
     <div className={mobile ? 'space-y-1 px-2 pb-3 pt-2' : 'hidden sm:ml-6 sm:block'}>
       <div className={mobile ? '' : 'flex space-x-4'}>
@@ -10,6 +10,7 @@ export default function NavigationLinks({ navigation, mobile = false }) {
           <Link
             key={item.name}
             to={item.href}
+            onClick={onNavigate}
             aria-current={item.current ? 'page' : undefined}
             className={classNames(
               item.current

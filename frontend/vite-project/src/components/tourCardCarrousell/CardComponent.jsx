@@ -92,9 +92,9 @@
           </div>
         ) : null}
 
-        <button onClick={onExplore} className="tour-tile-cta tour-tile-cta--corner">
-          <span className="tour-cta-icon">→</span>
-          <span className="tour-cta-text">Explorar</span>
+        <button type="button" onClick={onExplore} className="tour-tile-cta tour-tile-cta--corner" aria-label={`Book now: ${title}`}>
+          <span className="tour-cta-icon" aria-hidden="true">→</span>
+          <span className="tour-cta-text">Book now</span>
         </button>
       </div>
     );

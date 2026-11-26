@@ -16,6 +16,7 @@ export default function PromoterCodeField({ resource, token, value = '', disable
   const options = created && !codes.some(({ code }) => code === created.code) ? [...codes, created] : codes;
   const hint = resource.loading ? 'Loading promo codes…'
     : !Array.isArray(resource.data?.promoCodes) ? 'Unable to load existing promo codes.'
+    : created && value === '' ? 'Finish with Add promoter to save the company contact.'
     : options.length === 0 ? 'Create your first promo code here.' : '';
 
   useEffect(() => {

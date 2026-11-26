@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-function TourInfoContainer({ tourData }) {
+function TourInfoContainer({ tourData, showImages = true, availability }) {
   const { title, descriptions } = tourData;
 
   const safeDescriptions = Array.isArray(descriptions) ? descriptions : [];
@@ -28,25 +28,25 @@ function TourInfoContainer({ tourData }) {
             ))}
           </div>
 
-          <div className="about-two-column-image">
+          {showImages && <div className="about-two-column-image">
             <img
               className="about-image"
               src={mainImage}
               alt={title || 'Tour'}
             />
-          </div>
+          </div>}
         </div>
       </section>
 
       <section className="about-two-column about-two-column--left">
         <div className="about-two-column-inner">
-          <div className="about-two-column-image">
+          {showImages && <div className="about-two-column-image">
             <img
               className="about-image"
               src={contactImage}
               alt="Lisbon"
             />
-          </div>
+          </div>}
 
           <div className="about-two-column-content">
             <h2 className="tour-detail-title">Check Availability</h2>
@@ -68,9 +68,11 @@ function TourInfoContainer({ tourData }) {
               </li>
             </ul>
 
-            <a className="private-cta" href="#time-slots">
-              Check availability
-            </a>
+            {availability ?? (
+              <a className="private-cta" href="#time-slots">
+                Check availability
+              </a>
+            )}
           </div>
         </div>
       </section>
