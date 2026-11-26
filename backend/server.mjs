@@ -115,6 +115,14 @@ async function startServer() {
   app.route('/database/promo-codes')
     .get(databaseManagement_API.requireDatabaseAuth, databaseManagement_API.getPromoCodes)
     .post(databaseManagement_API.requireDatabaseAuth, databaseManagement_API.createPromoCode);
+  app.route('/database/promoters')
+    .get(databaseManagement_API.requireDatabaseAuth, databaseManagement_API.getPromoters)
+    .post(databaseManagement_API.requireDatabaseAuth, databaseManagement_API.createPromoter);
+  app.put(
+    '/database/promoters/:id/promo-code',
+    databaseManagement_API.requireDatabaseAuth,
+    databaseManagement_API.updatePromoterPromoCode
+  );
   app.get('/tours', async (_req, res) => {
     try {
       res.json({ tours: await catalog.getTours() });

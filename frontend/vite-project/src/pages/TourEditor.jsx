@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button, Field, Modal } from '../database-generic/index.js';
-import { tourBookingInfo } from '../services/bookingService';
 import { saveTour } from '../services/databaseService';
 
 const images = [
@@ -91,9 +90,9 @@ function DetailsFields({ tour, saving }) {
         <textarea id="tour-additional-details" name="additionalDetails" defaultValue={(tour.descriptions || []).slice(1).join('\n\n')} rows={5} aria-describedby="tour-paragraph-hint" disabled={saving} />
         <small id="tour-paragraph-hint" className="db-muted">Separate paragraphs with a blank line.</small>
       </div>
-      <Field label="Starting point" name="startingPoint" defaultValue={tour.startingPoint ?? tourBookingInfo.startingPoint} maxLength={200} required disabled={saving} />
-      <Field label="Price per person (€)" name="price" type="number" min={1} max={10000} step={0.01} defaultValue={(tour.priceCents ?? tourBookingInfo.priceCents) / 100} required disabled={saving} />
-      <Field label="Maximum group size" name="maxPersons" type="number" min={1} max={20} step={1} defaultValue={tour.maxPersons ?? tourBookingInfo.maxPersons} required disabled={saving} />
+      <Field label="Starting point" name="startingPoint" defaultValue={tour.startingPoint ?? ''} maxLength={200} required disabled={saving} />
+      <Field label="Price per person (€)" name="price" type="number" min={1} max={10000} step={0.01} defaultValue={Number.isInteger(tour.priceCents) ? tour.priceCents / 100 : ''} required disabled={saving} />
+      <Field label="Maximum group size" name="maxPersons" type="number" min={1} max={20} step={1} defaultValue={tour.maxPersons ?? ''} required disabled={saving} />
     </>
   );
 }

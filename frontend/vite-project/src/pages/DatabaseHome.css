@@ -10,9 +10,20 @@
 .lisbon-database .lisbon-database-login h2 {
   margin-bottom: 16px;
 }
-.lisbon-database .lisbon-database-promo-form {
+.lisbon-database .lisbon-database-entry-form {
   padding: 16px;
   margin-bottom: 16px;
+}
+.lisbon-promo-code-draft {
+  margin-top: 4px;
+  border: 1px solid var(--db-line);
+  border-radius: 8px;
+  padding: 12px;
+}
+.lisbon-promo-promoters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 .lisbon-tour-media-form {
   display: grid;

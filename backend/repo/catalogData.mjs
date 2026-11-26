@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { getMongoDatabase } from './mongoDb.mjs';
 import toursSeed from './tours.seed.json' with { type: 'json' };
 
@@ -17,8 +18,10 @@ export default async function createCatalogData(database = getMongoDatabase()) {
   const tours = database?.collection('tours');
   const clients = database?.collection('clients');
   const promoCodes = database?.collection('promoCodes');
+  const promoters = database?.collection('promoters');
   const localClients = new Map();
   const localPromoCodes = new Map();
+  const localPromoters = [];
   const localTours = toursSeed.map((tour) => ({
     startingPoint: 'Hard Rock Cafe, Restauradores', priceCents: 4900, maxPersons: 8,
     ...tour, carouselImages,
@@ -50,9 +53,58 @@ export default async function createCatalogData(database = getMongoDatabase()) {
   }
 
   return {
+    async getPromoters() {
+      if (promoters) return promoters.find({}).sort({ companyName: 1, lastName: 1, _id: 1 }).toArray();
+      return [...localPromoters].sort((a, b) =>
+        a.companyName.localeCompare(b.companyName) || a.lastName.localeCompare(b.lastName) || a._id.localeCompare(b._id));
+    },
+    async createPromoter(fields) {
+      const promoter = { _id: randomUUID(), ...fields };
+      if (promoters) await promoters.insertOne(promoter);
+      else localPromoters.push(promoter);
+      return promoter;
+    },
+    async updatePromoterPromoCode(id, promoCode) {
+      if (promoters) {
+        const update = promoCode ? { $set: { promoCode } } : { $unset: { promoCode: '' } };
+        return promoters.findOneAndUpdate({ _id: id }, update, { returnDocument: 'after' });
+      }
+      const promoter = localPromoters.find((entry) => entry._id === id);
+      if (!promoter) return null;
+      if (promoCode) promoter.promoCode = promoCode;
+      else delete promoter.promoCode;
+      return promoter;
+    },
+    async getPromoCode(code) {
+      return promoCodes ? promoCodes.findOne({ _id: code }) : localPromoCodes.get(code);
+    },
     async getPromoCodes() {
-      if (promoCodes) return promoCodes.find({}).sort({ _id: 1 }).toArray();
-      return [...localPromoCodes.values()].sort((a, b) => a.code.localeCompare(b.code));
+      if (promoCodes) {
+        return promoCodes.aggregate([
+          { $sort: { _id: 1 } },
+          {
+            $lookup: {
+              from: 'promoters',
+              localField: '_id',
+              foreignField: 'promoCode',
+              pipeline: [
+                { $sort: { companyName: 1, lastName: 1, _id: 1 } },
+                { $project: { companyName: 1, firstName: 1, lastName: 1 } },
+              ],
+              as: 'promoters',
+            },
+          },
+        ]).toArray();
+      }
+      const assignments = new Map();
+      for (const { _id, companyName, firstName, lastName, promoCode } of localPromoters) {
+        if (!promoCode) continue;
+        if (!assignments.has(promoCode)) assignments.set(promoCode, []);
+        assignments.get(promoCode).push({ _id, companyName, firstName, lastName });
+      }
+      return [...localPromoCodes.values()]
+        .sort((a, b) => a.code.localeCompare(b.code))
+        .map((promoCode) => ({ ...promoCode, promoters: assignments.get(promoCode.code) ?? [] }));
     },
     async createPromoCode(promoCode) {
       if (!promoCodes) {

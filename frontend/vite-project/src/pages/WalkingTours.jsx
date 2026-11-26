@@ -1,43 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { TourCatalogStatus } from '../components/TourLoadStatus';
+import { useTourCatalog } from '../services/tourResources';
 
-const fallbackTours = [
-  {
-    title: 'The Moorish Whispers',
-    description: "Discover Lisbon's hidden secrets from the Torel viewpoint to Rua Augusta.",
-    descriptions: [
-      "Discover Lisbon's hidden secrets from the Torel viewpoint to Rua Augusta.",
-      'A journey that will make us travel back in time through the stories of this mysterious Lisbon.',
-      'Through alleys, churches, centuries-old buildings, and lively conversations with locals. The route takes you uphill across six viewpoints and ends in Rua Augusta.',
-    ],
-    image: '/res/f03ef0dcb35a8e63d746cfa4741a4f96.jpg',
-    videoSrc: '/res/Free_videoLisbon_AI_GENERATED.mp4',
-    tag: 'Moorish',
-  },
-  {
-    title: 'The West Whispers',
-    description:
-      'This tour takes you to a part of Lisbon marked by its art deco and art noveau palaces.',
-    descriptions: [
-      'This tour takes you to a part of Lisbon marked by its art deco and art noveau palaces.',
-      'Starting from Rossio train station, you reach the first of three viewpoints with the best view of Sao Jorge Castle.',
-      'Then wander through the Bairro Alto down to a bohemian riverside Lisbon, ending the tour in the pink street.',
-    ],
-    image: '/res/9bfee964e2a50ec45dc449890ec9ed42.jpg',
-    videoSrc: '/res/LisbonDownTown.mp4',
-    tag: 'West',
-  },
-];
-
-export default function WalkingTours({ tours = fallbackTours }) {
+export default function WalkingTours() {
   const navigate = useNavigate();
+  const catalog = useTourCatalog();
+  const tours = catalog.tours ?? [];
+  const groupSizes = tours.map(({ maxPersons }) => maxPersons).filter((size) => Number.isInteger(size) && size > 0);
   const handleNavigateToTourPage = (tour) => {
-    navigate(`/tour/${tour.slug || tour.title.replace(/\s+/g, '-').toLowerCase()}`, {
-      state: {
-        title: tour.title,
-        descriptions: tour.descriptions,
-        videoSrc: tour.videoSrc,
-      },
-    });
+    navigate(`/tour/${tour.slug}`);
   };
 
   const handleCardKeyDown = (event, tour) => {
@@ -83,7 +54,7 @@ export default function WalkingTours({ tours = fallbackTours }) {
               <span className="walking-stat-label">Typical length</span>
             </div>
             <div className="walking-stat">
-              <span className="walking-stat-value">8</span>
+              <span className="walking-stat-value">{groupSizes.length ? Math.max(...groupSizes) : '—'}</span>
               <span className="walking-stat-label">Guests max</span>
             </div>
             <div className="walking-stat">
@@ -97,10 +68,10 @@ export default function WalkingTours({ tours = fallbackTours }) {
       <section className="walking-routes">
         <div className="walking-routes-inner">
           <h2 className="walking-section-title">Signature routes</h2>
-          <div className="walking-route-grid walking-route-grid--two">
+          {tours.length ? <div className="walking-route-grid walking-route-grid--two">
             {tours.map((tour) => (
               <div
-                key={tour.title}
+                key={tour.slug}
                 className="walking-route-card"
                 style={{ backgroundImage: `url('${tour.image}')` }}
                 role="button"
@@ -116,7 +87,7 @@ export default function WalkingTours({ tours = fallbackTours }) {
                 </div>
               </div>
             ))}
-          </div>
+          </div> : <TourCatalogStatus catalog={catalog} />}
         </div>
       </section>
 

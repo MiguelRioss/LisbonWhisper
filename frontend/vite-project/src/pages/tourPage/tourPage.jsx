@@ -6,75 +6,61 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import GenericCarousel from '../../components/GenericCarrousel';
 import TourInfoContainer from './TourInfoContainer';
 import WeeklyGrid from '../../components/calendarTool/WeeklyGrid';
-import { useFetch } from '../../api/useFetch';
-import { fetchPublicData, tourCacheKey } from '../../services/bookingService';
-
-import img1 from '../../res/pexels-hillaryfox-1615815.jpg';
-import img2 from '../../res/pexels-pixabay-461936.jpg';
-import img3 from '../../res/pexels-fotios-photos-1599497.jpg';
+import TourLoadStatus from '../../components/TourLoadStatus';
+import { createBooking } from '../../services/bookingService';
+import { useTourAvailability, useTourDetails } from '../../services/tourResources';
 
 import { useLocation, useParams } from 'react-router-dom';
 
-function TourPage({ tours, bookings, loading, error, createBookingHandler }) {
-  const location = useLocation();
+function TourPage() {
+  const { hash } = useLocation();
   const { tourId } = useParams();
-  const { status: tourStatus } = useFetch(tourCacheKey(tourId), fetchPublicData);
-  const fetchedTour = tourStatus.kind === 'success' && tourStatus.body.kind === 'json'
-    ? tourStatus.body.json?.tour
-    : undefined;
-  const routeTour = tours.find((tour) => (tour.slug || tour.title.replace(/\s+/g, '-').toLowerCase()) === tourId);
-  const tourData = { ...routeTour, ...location.state, ...fetchedTour };
-  const tourName =
-    tourData.title?.trim() ||
-    tourData.name?.trim() ||
-    routeTour?.title ||
-    tourId.replace(/-/g, ' ');
-  const resolvedTourData = { ...tourData, slug: tourData.slug || tourId, title: tourName };
-  const { hash } = location;  
-
-  const handleCreateBooking = async (bookingData) => {
-    try {
-      const response = await createBookingHandler(bookingData); // API call
-      return response;
-    } catch (err) {
-      throw err;
-    }
-  };
+  const detail = useTourDetails(tourId);
+  const tour = detail.data?.tour;
+  const hasBookingInfo = Boolean(tour?.title) &&
+    Number.isInteger(tour.priceCents) && tour.priceCents > 0 &&
+    Number.isInteger(tour.maxPersons) && tour.maxPersons > 0;
+  const availability = useTourAvailability(hasBookingInfo);
 
   useEffect(() => {
-    if (!hash) return;
-    const target = document.querySelector(hash);
+    if (!hash || !tour) return;
+    const target = document.getElementById(hash.slice(1));
     if (!target) return;
-    requestAnimationFrame(() => {
+    const frame = requestAnimationFrame(() => {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-  }, [hash]);
+    return () => cancelAnimationFrame(frame);
+  }, [hash, tour]);
 
-  if (tourStatus.kind === 'non-success' && tourStatus.response.status === 404 && !routeTour) {
-    return <p role="alert">Tour not found.</p>;
+  if (!tour?.title) {
+    if (detail.loading) return <TourLoadStatus message="Loading tour…" />;
+    if (detail.statusCode === 404) return <TourLoadStatus message="Tour not found." />;
+    return <TourLoadStatus message="Unable to load this tour." onRetry={detail.refetch} />;
   }
 
   return (
     <div className="home-surface">
       <GenericCarousel
         key={tourId}
-        title={tourName}
-        items={(tourData.carouselImages?.length ? tourData.carouselImages : [img1, img2, img3])
+        title={tour.title}
+        items={(tour.carouselImages?.length ? tour.carouselImages : [tour.image].filter(Boolean))
           .map((imgSrc) => ({ imgSrc }))}
       />
 
-      <TourInfoContainer tourData={resolvedTourData} />
+      <TourInfoContainer tourData={tour} />
 
       <div id="time-slots" className="section-background pt-16 pb-10 py-10 px-4">
         <h2 className="text-5xl font-bold text-white mb-10 text-center">Select a Time Slot</h2>
 
-        {error ? (
-          <div className="text-danger text-center">{error}</div>
+        {!hasBookingInfo ? (
+          <TourLoadStatus message="Online booking is currently unavailable for this tour." />
+        ) : !availability.loading && !availability.bookings ? (
+          <TourLoadStatus message="Unable to load availability." onRetry={availability.refetch} />
         ) : (
           <WeeklyGrid
-            tourData={resolvedTourData}
-            createBookingHandler={handleCreateBooking}
-            bookings={loading ? null : bookings}
+            tourData={tour}
+            createBookingHandler={createBooking}
+            bookings={availability.bookings ?? null}
           />
         )}
       </div>

@@ -54,6 +54,8 @@ export type UseFetchOptions = {
   enabled?: boolean;
   /** Keep mutation responses out of the successful-response cache. */
   cacheSuccess?: boolean;
+  /** Revalidate a cached response older than this when a consumer mounts. */
+  maxAgeMs?: number;
 };
 
 type CacheEvent =
@@ -62,6 +64,7 @@ type CacheEvent =
 
 class FetchCache {
   private readonly successes = new Map<string, FetchSuccess>();
+  private readonly savedAt = new Map<string, number>();
   private readonly invalidated = new Set<string>();
   private readonly listeners = new Map<string, Set<(event: CacheEvent) => void>>();
 
@@ -73,12 +76,23 @@ class FetchCache {
     return this.invalidated.has(key);
   }
 
+  isFresh(key: string, maxAgeMs: number): boolean {
+    return !this.isInvalidated(key) && Date.now() - (this.savedAt.get(key) ?? 0) < maxAgeMs;
+  }
+
+  evict(key: string): void {
+    this.successes.delete(key);
+    this.savedAt.delete(key);
+    this.invalidated.delete(key);
+  }
+
   markInvalidated(key: string): void {
     this.invalidated.add(key);
   }
 
   set(key: string, success: FetchSuccess): void {
     this.successes.set(key, success);
+    this.savedAt.set(key, Date.now());
     this.invalidated.delete(key);
     this.emit(key, { kind: "success", success });
   }
@@ -120,20 +134,24 @@ export function FetchCacheProvider({
 }
 
 /** Invalidates a cache key and refreshes any mounted hook using that key. */
-export function useFetchCache(): { invalidate: (key: string) => void } {
+export function useFetchCache(): { invalidate: (key: string) => void; evict: (key: string) => void } {
   const cache = useFetchCacheContext();
   const invalidate = useCallback((key: string) => cache.invalidate(key), [cache]);
-  return { invalidate };
+  const evict = useCallback((key: string) => cache.evict(key), [cache]);
+  return { invalidate, evict };
 }
 
 /** Fetches a keyed resource and exposes idle, loading, success, and error states. */
 export function useFetch(
   key: string | null,
   fetcher: Fetcher,
-  { enabled = true, cacheSuccess = true }: UseFetchOptions = {},
+  { enabled = true, cacheSuccess = true, maxAgeMs = Infinity }: UseFetchOptions = {},
 ): UseFetchResult {
   const cache = useFetchCacheContext();
-  const [status, setStatus] = useState<FetchStatus>({ kind: "idle" });
+  const [snapshot, setSnapshot] = useState<{ key: string | null; status: FetchStatus }>({
+    key: null, status: { kind: "idle" },
+  });
+  const setStatus = useCallback((status: FetchStatus) => setSnapshot({ key, status }), [key]);
   const fetcherRef = useRef(fetcher);
   const controllerRef = useRef<AbortController | null>(null);
   const sequenceRef = useRef(0);
@@ -180,7 +198,7 @@ export function useFetch(
         if (controllerRef.current === controller) controllerRef.current = null;
       }
     },
-    [cache, key, cacheSuccess],
+    [cache, key, cacheSuccess, setStatus],
   );
 
   useEffect(() => {
@@ -198,7 +216,7 @@ export function useFetch(
     });
 
     const cached = cache.get(key);
-    if (cached && !cache.isInvalidated(key)) setStatus(cached);
+    if (cached && cache.isFresh(key, maxAgeMs)) setStatus(cached);
     else void execute(cached);
 
     return () => {
@@ -207,13 +225,16 @@ export function useFetch(
       controllerRef.current?.abort();
       controllerRef.current = null;
     };
-  }, [cache, execute, enabled, key]);
+  }, [cache, execute, enabled, key, maxAgeMs, setStatus]);
 
   const refetch = useCallback(() => {
-    if (key === null) return;
+    if (!enabled || key === null) return;
     void execute(cache.get(key));
-  }, [cache, execute, key]);
+  }, [cache, execute, enabled, key]);
 
+  const status: FetchStatus = enabled && key !== null
+    ? snapshot.key === key ? snapshot.status : cache.get(key) ?? { kind: "idle" }
+    : { kind: "idle" };
   return { status, refetch };
 }
 

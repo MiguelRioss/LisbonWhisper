@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { tourBookingInfo } from '../../services/bookingService';
 
 function TourInfoContainer({ tourData }) {
   const { title, descriptions } = tourData;
@@ -11,14 +10,7 @@ function TourInfoContainer({ tourData }) {
     return accumulator.concat(currentArray);
   }, []);
 
-  const normalizedTitle = (title ?? '').toLowerCase();
-
-  const mainImage =
-    tourData.image || tourData.backgroundImage || (normalizedTitle.includes('moorish')
-      ? '/res/f03ef0dcb35a8e63d746cfa4741a4f96.jpg'
-      : normalizedTitle.includes('west')
-      ? '/res/9bfee964e2a50ec45dc449890ec9ed42.jpg'
-      : '/res/pexels-fotios-photos-1599497.jpg');
+  const mainImage = tourData.image || tourData.backgroundImage || '/res/pexels-fotios-photos-1599497.jpg';
 
   const contactImage = tourData.availabilityImage || '/res/pexels-fotios-photos-1599497.jpg';
 
@@ -66,13 +58,13 @@ function TourInfoContainer({ tourData }) {
 
             <ul className="tour-detail-list">
               <li>
-                <strong>Starting point:</strong> {tourData.startingPoint ?? tourBookingInfo.startingPoint}
+                <strong>Starting point:</strong> {tourData.startingPoint || '—'}
               </li>
               <li>
-                <strong>Price:</strong> €{(tourData.priceCents ?? tourBookingInfo.priceCents) / 100}
+                <strong>Price:</strong> {Number.isInteger(tourData.priceCents) ? `€${tourData.priceCents / 100}` : '—'}
               </li>
               <li>
-                <strong>Group size:</strong> 1–{tourData.maxPersons ?? tourBookingInfo.maxPersons} pax
+                <strong>Group size:</strong> {Number.isInteger(tourData.maxPersons) ? `1–${tourData.maxPersons} pax` : '—'}
               </li>
             </ul>
 

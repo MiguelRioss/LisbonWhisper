@@ -15,22 +15,35 @@ export async function saveTour(token, id, changes, { media = false } = {}) {
   }
   return payload;
 }
-export async function requestPromoCodes(token, promoCode) {
-  const response = await fetch(`${API_BASE}/database/promo-codes`, {
-    method: promoCode ? 'POST' : 'GET',
+async function createRecord(token, section, record, errorMessage) {
+  const response = await fetch(`${API_BASE}/database/${section}`, {
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
-      ...(promoCode && { 'Content-Type': 'application/json' }),
+      'Content-Type': 'application/json',
     },
-    body: promoCode ? JSON.stringify(promoCode) : undefined,
+    body: JSON.stringify(record),
   });
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(buildErrorMessage('Promo codes', payload, response.statusText));
+    throw new Error(buildErrorMessage(errorMessage, payload, response.statusText || `HTTP ${response.status}`));
   }
   return payload;
 }
 
+export const createPromoCode = (token, record) => createRecord(token, 'promo-codes', record, 'Promo codes');
+export const createPromoter = (token, record) => createRecord(token, 'promoters', record, 'Unable to add promoter');
+
+export async function savePromoterPromoCode(token, id, promoCode) {
+  const response = await fetch(`${API_BASE}/database/promoters/${encodeURIComponent(id)}/promo-code`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ promoCode }),
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(buildErrorMessage('Unable to assign promo code', payload, response.statusText));
+  return payload;
+}
 function buildErrorMessage(prefix, payload, fallbackStatusText = '') {
   if (payload?.message) {
     return `${prefix}: ${payload.message}`;
@@ -54,59 +67,6 @@ export const authenticateDatabaseAdmin = async ({ username, password }) => {
 
   if (!response.ok) {
     throw new Error(buildErrorMessage('Authentication failed', payload, response.statusText));
-  }
-
-  return payload;
-};
-
-export const fetchDatabaseHome = async (token) => {
-  const response = await fetch(`${API_BASE}/database/home`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(buildErrorMessage('Failed to load database home', payload, response.statusText));
-  }
-
-  return payload;
-};
-
-export const fetchDatabaseBookings = async (token, { limit = 200 } = {}) => {
-  const response = await fetch(`${API_BASE}/database/bookings?limit=${encodeURIComponent(limit)}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(buildErrorMessage('Failed to load bookings', payload, response.statusText));
-  }
-
-  return payload;
-};
-
-export const fetchDatabaseClients = async (token, { count = 200, offset = 0 } = {}) => {
-  const query = new URLSearchParams({
-    count: String(count),
-    offset: String(offset),
-  });
-
-  const response = await fetch(`${API_BASE}/database/clients?${query.toString()}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(buildErrorMessage('Failed to load clients', payload, response.statusText));
   }
 
   return payload;

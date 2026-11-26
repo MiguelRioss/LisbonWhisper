@@ -8,12 +8,6 @@ function Carrousel({ cardData }) {
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  const handleNavigateToTourPage = (tour) => {
-    const { title, descriptions, videoSrc, slug } = tour;
-    navigate(`/tour/${slug || title.replace(/\s+/g, '-').toLowerCase()}`, {
-      state: { title, descriptions, videoSrc },
-    });
-  };
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -67,12 +61,12 @@ function Carrousel({ cardData }) {
 
           return (
             <RowComponent
-              key={data.slug || data.title}
+              key={data.slug}
               title={data.title}
               descriptions={data.descriptions}
               videoSrc={data.videoSrc}
               image={data.image || data.backgroundImage}
-              handleShowMoreWithParams={() => handleNavigateToTourPage(data)}
+              handleShowMoreWithParams={() => navigate(`/tour/${data.slug}`)}
             />
           );
         })}

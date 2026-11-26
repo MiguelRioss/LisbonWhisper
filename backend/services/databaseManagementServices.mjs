@@ -56,10 +56,60 @@ export default function createDatabaseManagementServices({
     getDatabaseClientsView,
     getPromoCodes,
     createPromoCode,
+    getPromoters,
+    createPromoter,
+    updatePromoterPromoCode,
     updateTourMedia,
     updateTourDetails,
   };
 
+  async function getPromoters() {
+    return { promoters: await catalog.getPromoters() };
+  }
+
+  async function createPromoter(input) {
+    function field(key, label, maxLength, required = true) {
+      const value = input?.[key];
+      if (value == null && !required) return '';
+      const trimmed = typeof value === 'string' ? value.trim() : '';
+      if (typeof value !== 'string' || (required && !trimmed) || trimmed.length > maxLength) {
+        throw { status: 400, message: `Enter a valid ${label} (up to ${maxLength} characters).` };
+      }
+      return trimmed;
+    }
+    const companyName = field('companyName', 'company name', 160);
+    const firstName = field('firstName', 'first name', 80);
+    const lastName = field('lastName', 'last name', 80);
+    const email = field('email', 'email address', 254);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw { status: 400, message: 'Enter a valid email address.' };
+    }
+    const phone = field('phone', 'phone number', 40, false);
+    const promoCode = await resolvePromoterPromoCode(input.promoCode);
+    const promoter = await catalog.createPromoter({
+      companyName, firstName, lastName, email, ...(phone && { phone }), ...(promoCode && { promoCode }),
+    });
+    return { promoter };
+  }
+
+  async function resolvePromoterPromoCode(value) {
+    if (value == null || value === '') return null;
+    const code = typeof value === 'string' ? value.trim().toUpperCase() : '';
+    if (!/^[A-Z0-9][A-Z0-9_-]{0,31}$/.test(code) || !(await catalog.getPromoCode(code))) {
+      throw { status: 400, message: 'Choose a discount code created in Promo Codes.' };
+    }
+    return code;
+  }
+
+  async function updatePromoterPromoCode(id, input) {
+    if (!input || !Object.hasOwn(input, 'promoCode')) {
+      throw { status: 400, message: 'A promo code or an explicit empty selection is required.' };
+    }
+    const promoCode = await resolvePromoterPromoCode(input.promoCode);
+    const promoter = await catalog.updatePromoterPromoCode(id, promoCode);
+    if (!promoter) throw { status: 404, message: 'Promoter not found.' };
+    return { promoter };
+  }
   function mediaUrl(value, label) {
     const url = typeof value === 'string' ? value.trim() : '';
     if (url.length <= 2048 && !/[\s\\\u0000-\u001f\u007f]/.test(url)) {
@@ -197,13 +247,12 @@ export default function createDatabaseManagementServices({
     const upcomingBookings = bookings.filter((booking) => isDateInFuture(booking?.date)).length;
     const weekBookings = bookings.filter((booking) => isDateWithinNextDays(booking?.date, 7)).length;
 
-    const [totalClients, tours] = await Promise.all([catalog.countClients(), catalog.getTours()]);
+    const totalClients = await catalog.countClients();
 
     return {
       title: 'Lisbon Whisper Database',
       subtitle: 'Database admin home',
       generatedAt: new Date().toISOString(),
-      tours,
       stats: {
         totalBookings: bookings.length,
         upcomingBookings,
