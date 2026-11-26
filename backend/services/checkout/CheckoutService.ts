@@ -84,6 +84,7 @@ export default class CheckoutService {
       pricePerPerson: unitPriceCents / 100,
       totalPrice: totalPriceCents / 100,
       totalPriceCents,
+      createdAt: new Date().toISOString(),
       ...(promoCode && { promoCode, discountPercent, discountCents }),
       currency: 'EUR',
     });

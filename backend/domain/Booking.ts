@@ -21,6 +21,7 @@ export interface BookingRecord {
   pricePerPerson?: number;
   totalPrice?: number;
   totalPriceCents?: number;
+  createdAt?: string;
   promoCode?: string;
   discountPercent?: number;
   discountCents?: number;

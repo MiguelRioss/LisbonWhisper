@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { authenticateDatabaseAdmin, createPromoCode, createPromoter, savePromoterPromoCode } from '../services/databaseService';
-import { Button, DatabaseShell, DataTable, Field, Modal } from '../database-generic/index.js';
+import { Badge, Button, DatabaseShell, DataTable, Field, Modal } from '../database-generic/index.js';
 import { useFetchCache } from '../api/useFetch';
 import { tourCacheKey, toursCacheKey } from '../services/bookingService';
 import { useDatabaseResources } from '../services/databaseResources';
@@ -10,12 +10,19 @@ import PromoterCodeField from './PromoterCodeField';
 import './DatabaseHome.css';
 
 const sections = [
-  { id: 'bookings', title: 'Bookings', description: 'Tour reservations' },
+  { id: 'bookings', title: 'Bookings', description: 'Reservations and checkout attempts' },
   { id: 'clients', title: 'Clients', description: 'Customer and enquiry records' },
   { id: 'tours', title: 'Tours', description: 'Tour catalogue' },
   { id: 'promoCodes', title: 'Promo Codes', description: 'Discount codes' },
   { id: 'promoters', title: 'Promoters', description: 'Company contacts' },
 ];
+
+function BookingPaymentStatus({ status, total }) {
+  if (status === 'paid') return <Badge tone="success">{total === 0 ? 'Confirmed · free' : 'Paid'}</Badge>;
+  if (status === 'pending') return <Badge tone="warning">Awaiting payment</Badge>;
+  if (status === 'checkout_failed') return <Badge tone="danger">Checkout failed</Badge>;
+  return <Badge>Payment unverified</Badge>;
+}
 
 const bookingColumns = [
   { key: 'name', label: 'Name' },
@@ -25,6 +32,7 @@ const bookingColumns = [
   { key: 'time', label: 'Time' },
   { key: 'persons', label: 'Persons' },
   { key: 'totalPrice', label: 'Total', render: (price, row) => price == null ? '—' : `${price} ${row.currency || 'EUR'}` },
+  { key: 'paymentStatus', label: 'Payment', render: (status, row) => <BookingPaymentStatus status={status} total={row.totalPrice} /> },
   { key: 'promoCode', label: 'Promo code', render: (code) => code || '—' },
   { key: 'createdAt', label: 'Created', render: formatDate },
 ];
@@ -283,9 +291,10 @@ function DatabaseHome() {
           <>
             <dl className="lisbon-database-stats">
               {[
-                ['Total Bookings', dashboard?.stats?.totalBookings],
-                ['Upcoming Bookings', dashboard?.stats?.upcomingBookings],
-                ['Next 7 Days', dashboard?.stats?.next7DaysBookings],
+                ['Confirmed Bookings', dashboard?.stats?.confirmedBookings],
+                ['Pending Checkouts', dashboard?.stats?.pendingCheckouts],
+                ['Upcoming Confirmed', dashboard?.stats?.upcomingBookings],
+                ['Confirmed Next 7 Days', dashboard?.stats?.next7DaysBookings],
                 ['Clients', dashboard?.stats?.totalClients],
               ].map(([label, value]) => (
                 <div className="db-card" key={label}><dt>{label}</dt><dd>{value ?? '—'}</dd></div>

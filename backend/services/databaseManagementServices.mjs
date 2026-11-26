@@ -35,12 +35,13 @@ function normalizeBookingsPayload(bookingsResponse) {
     date: booking?.date || '',
     time: booking?.time || '',
     persons: booking?.persons ?? '',
-    totalPrice: booking?.totalPrice ?? '',
+    totalPrice: booking?.totalPrice ?? null,
     promoCode: booking?.promoCode || '',
+    paymentStatus: booking?.paymentStatus || 'unknown',
     currency: booking?.currency || 'EUR',
     tourName: booking?.tourName || '',
     message: booking?.message || '',
-    createdAt: booking?.createdAt || '',
+    createdAt: booking?.createdAt || booking?._id?.getTimestamp?.().toISOString() || '',
   }));
 }
 
@@ -244,9 +245,10 @@ export default function createDatabaseManagementServices({
   async function getDatabaseHomeData() {
     const bookingsResponse = await bookingsData.getBookings();
     const bookings = normalizeBookingsPayload(bookingsResponse);
+    const confirmedBookings = bookings.filter(({ paymentStatus }) => paymentStatus === 'paid');
 
-    const upcomingBookings = bookings.filter((booking) => isDateInFuture(booking?.date)).length;
-    const weekBookings = bookings.filter((booking) => isDateWithinNextDays(booking?.date, 7)).length;
+    const upcomingBookings = confirmedBookings.filter(({ date }) => isDateInFuture(date)).length;
+    const weekBookings = confirmedBookings.filter(({ date }) => isDateWithinNextDays(date, 7)).length;
 
     const totalClients = await catalog.countClients();
 
@@ -256,6 +258,8 @@ export default function createDatabaseManagementServices({
       generatedAt: new Date().toISOString(),
       stats: {
         totalBookings: bookings.length,
+        confirmedBookings: confirmedBookings.length,
+        pendingCheckouts: bookings.filter(({ paymentStatus }) => paymentStatus === 'pending').length,
         upcomingBookings,
         next7DaysBookings: weekBookings,
         totalClients,
