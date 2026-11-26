@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { sendViaMailchimpMarketing } from './mailchimpMarketing.mjs';
 
 let transporter;
 
@@ -53,6 +54,12 @@ async function sendEmail({
   }
   if (!html) {
     throw new Error('Missing "html"');
+  }
+
+  const provider = String(process.env.EMAIL_PROVIDER || 'smtp').trim().toLowerCase();
+  if (provider === 'mailchimp' || provider === 'mailchimp_marketing') {
+    if (attachments?.length) throw new Error('Mailchimp Marketing does not support email attachments');
+    return sendViaMailchimpMarketing({ to: [to, cc].flat().filter(Boolean).join(','), subject, html });
   }
 
   const mailer = getTransporter();
