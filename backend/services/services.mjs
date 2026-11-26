@@ -40,6 +40,13 @@ export default function (data, catalog) {
   }
 
   async function sendBookingEmails(createdBooking) {
+    const pricePerPerson = createdBooking?.pricePerPerson ?? PRICE_PER_PERSON_EUR;
+    const totalPrice = createdBooking?.totalPrice ?? pricePerPerson * (createdBooking?.persons || 1);
+    const discountLabel = createdBooking?.discountPercent ? ` (${createdBooking.discountPercent}% off)` : '';
+    const priceFields = {
+      PricePerPerson: escapeHtml(`${pricePerPerson} EUR`),
+      TotalPrice: escapeHtml(`${totalPrice} EUR${discountLabel}`),
+    };
     try {
       await sendEmailTemplate({
         to: String(createdBooking?.email || '').trim(),
@@ -53,8 +60,7 @@ export default function (data, catalog) {
           BookingDate: escapeHtml(formatBookingDate(createdBooking?.date)),
           BookingTime: escapeHtml(createdBooking?.time || 'TBD'),
           Persons: escapeHtml(createdBooking?.persons || '1'),
-          PricePerPerson: escapeHtml(`${createdBooking?.pricePerPerson || PRICE_PER_PERSON_EUR} EUR`),
-          TotalPrice: escapeHtml(`${createdBooking?.totalPrice || PRICE_PER_PERSON_EUR} EUR`),
+          ...priceFields,
           CustomerEmail: escapeHtml(createdBooking?.email || ''),
           CustomerMessage: escapeHtml(
             createdBooking?.message ? String(createdBooking.message) : 'No additional notes.'
@@ -84,8 +90,7 @@ export default function (data, catalog) {
           BookingTime: escapeHtml(createdBooking?.time || ''),
           TourName: escapeHtml(createdBooking?.tourName || ''),
           Persons: escapeHtml(createdBooking?.persons || ''),
-          PricePerPerson: escapeHtml(`${createdBooking?.pricePerPerson || PRICE_PER_PERSON_EUR} EUR`),
-          TotalPrice: escapeHtml(`${createdBooking?.totalPrice || PRICE_PER_PERSON_EUR} EUR`),
+          ...priceFields,
           CustomerMessage: escapeHtml(createdBooking?.message || ''),
           WebsiteUrl: process.env.WEBSITE_URL || 'https://www.lisbonwhisper.com',
           ContactEmail: process.env.CONTACT_EMAIL || 'info@lisbonwhisper.com',

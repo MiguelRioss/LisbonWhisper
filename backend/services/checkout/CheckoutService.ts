@@ -5,10 +5,14 @@ import type BookingRepository from '../../repo/BookingRepository.ts';
 import type { CheckoutBookingRequest, CheckoutSuccessResponse } from '../../http/checkout/CheckoutTypes.ts';
 
 type CheckoutTour = { slug: string; title: string; priceCents: number; maxPersons: number };
+type CheckoutPromoCode = { discountPercent: number };
 interface TourCatalog {
   getTourById(id: string): Promise<CheckoutTour | null>;
   getTourByTitle(title: string): Promise<CheckoutTour | null>;
+  getPromoCode(code: string): Promise<CheckoutPromoCode | null | undefined>;
 }
+
+const MINIMUM_EUR_CHARGE_CENTS = 50;
 
 export default class CheckoutService {
   constructor(
@@ -31,6 +35,23 @@ export default class CheckoutService {
     }
     const unitPriceCents = tour?.priceCents ?? TOUR_PRICE_CENTS;
     const tourName = tour?.title ?? booking.details.tourName;
+    const { persons, promoCode } = booking.details;
+    let discountPercent = 0;
+    if (promoCode) {
+      const promo = /^[A-Z0-9][A-Z0-9_-]{0,31}$/.test(promoCode)
+        ? await this.catalog?.getPromoCode(promoCode)
+        : null;
+      if (!promo || !Number.isInteger(promo.discountPercent) || promo.discountPercent < 1 || promo.discountPercent > 100) {
+        throw new CheckoutValidationError('This promo code is invalid.');
+      }
+      discountPercent = promo.discountPercent;
+    }
+    const subtotalCents = unitPriceCents * persons;
+    const discountCents = Math.round(subtotalCents * discountPercent / 100);
+    const totalPriceCents = subtotalCents - discountCents;
+    if (totalPriceCents > 0 && totalPriceCents < MINIMUM_EUR_CHARGE_CENTS) {
+      throw new CheckoutValidationError('The discounted total is below the minimum payment of €0.50. Add more guests or remove the code.');
+    }
     const baseUrl = this.siteUrl.replace(/\/$/, '');
     const created = await this.bookings.create({
       ...booking.details,
@@ -38,13 +59,19 @@ export default class CheckoutService {
       ...(tour && { tourId: tour.slug }),
       unitPriceCents,
       pricePerPerson: unitPriceCents / 100,
-      totalPrice: unitPriceCents * booking.details.persons / 100,
+      totalPrice: totalPriceCents / 100,
+      totalPriceCents,
+      ...(promoCode && { discountPercent, discountCents }),
       currency: 'EUR',
     });
     const bookingId = String(created._id || created.id);
 
     try {
       const logoUrl = `${baseUrl}/res/logo.png`;
+      const quantity = totalPriceCents % persons === 0 ? persons : 1;
+      const description = promoCode
+        ? `${persons} guest(s) · ${promoCode} (${discountPercent}% off) — ${booking.checkoutDescription}`.slice(0, 500)
+        : booking.checkoutDescription;
       const stripeRequest: Stripe.Checkout.SessionCreateParams = {
         mode: 'payment',
         submit_type: 'book',
@@ -53,14 +80,14 @@ export default class CheckoutService {
         line_items: [{
           price_data: {
             currency: 'eur',
-            unit_amount: unitPriceCents,
+            unit_amount: totalPriceCents / quantity,
             product_data: {
               name: tourName,
-              description: booking.checkoutDescription,
+              description,
               images: [logoUrl],
             },
           },
-          quantity: booking.details.persons,
+          quantity,
         }],
         branding_settings: {
           display_name: 'Lisbon Whisper',
@@ -69,7 +96,7 @@ export default class CheckoutService {
           button_color: '#0a4d8d',
         },
         custom_text: {
-          submit: { message: 'Your booking confirmation will arrive by email after payment.' },
+          submit: { message: totalPriceCents === 0 ? 'Your booking confirmation will arrive by email.' : 'Your booking confirmation will arrive by email after payment.' },
         },
         success_url: `${baseUrl}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/booking/cancel`,

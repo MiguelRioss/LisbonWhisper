@@ -8,7 +8,11 @@ export default function (WhisperServices) {
 
   async function getBookingsAPI(req, rsp) {
     const bookings = await WhisperServices.getBookingAndProcessServices();
-    return { bookings: bookings.bookings.filter((booking) => !booking.paymentStatus || booking.paymentStatus === 'paid') };
+    return {
+      bookings: bookings.bookings
+        .filter((booking) => !booking.paymentStatus || booking.paymentStatus === 'paid')
+        .map(({ promoCode, discountPercent, discountCents, ...booking }) => booking),
+    };
   }
 
   async function getBookingsWithSpecificDayAPI(req, rsp) {

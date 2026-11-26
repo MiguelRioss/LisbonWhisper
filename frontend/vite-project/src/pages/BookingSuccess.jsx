@@ -13,7 +13,7 @@ export default function BookingSuccess() {
         <span className="booking-result-icon booking-result-icon--success" aria-hidden="true">✓</span>
         <p className="booking-result-eyebrow">Lisbon Whisper · Booking</p>
         <h1 id="booking-result-title">Thank you for booking</h1>
-        <p>Your checkout is complete. We’ll send a confirmation email once your payment is verified.</p>
+        <p>Your checkout is complete. We’ll send a confirmation email once your booking is verified.</p>
         <p className="booking-result-note">Please keep the email you used at checkout. If you need help, include your checkout reference when contacting us.</p>
         <div className="booking-result-actions">
           <Link to="/">Return home</Link>

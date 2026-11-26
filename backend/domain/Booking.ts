@@ -4,6 +4,7 @@ export const TOUR_PRICE_CENTS = 4900;
 
 export interface BookingInput {
   tourId?: string;
+  promoCode?: string;
   name: string;
   email: string;
   date: string;
@@ -19,6 +20,10 @@ export interface BookingRecord {
   unitPriceCents?: number;
   pricePerPerson?: number;
   totalPrice?: number;
+  totalPriceCents?: number;
+  promoCode?: string;
+  discountPercent?: number;
+  discountCents?: number;
   currency?: string;
   id?: string | number;
   _id?: unknown;
@@ -60,6 +65,7 @@ export class Booking {
       date,
       time,
       tourName,
+      promoCode: Booking.optionalText(input.promoCode, 'Promo code').toUpperCase() || undefined,
       persons: input.persons,
       message: Booking.optionalText(input.message, 'message'),
       tourDescriptions: Array.isArray(descriptions)

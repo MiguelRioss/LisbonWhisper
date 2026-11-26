@@ -31,9 +31,12 @@ export default class WebhookService {
     }
     if (event.type !== 'checkout.session.completed' && event.type !== 'checkout.session.async_payment_succeeded') return;
     const session = event.data.object;
-    if (session.payment_status !== 'paid' || !session.client_reference_id) return;
+    if (!session.client_reference_id || (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required')) return;
     const booking = await this.bookings.findById(session.client_reference_id);
-    if (!booking || booking.paymentStatus === 'paid' || booking.stripeSessionId !== session.id || session.amount_total !== booking.persons * (booking.unitPriceCents ?? TOUR_PRICE_CENTS) || session.currency !== 'eur') return;
+    if (!booking || booking.paymentStatus === 'paid' || booking.stripeSessionId !== session.id || session.currency !== 'eur') return;
+    const expectedTotal = booking.totalPriceCents ?? booking.persons * (booking.unitPriceCents ?? TOUR_PRICE_CENTS);
+    if (session.amount_total !== expectedTotal) return;
+    if (session.payment_status === 'no_payment_required' && (expectedTotal !== 0 || booking.discountPercent !== 100 || event.type !== 'checkout.session.completed')) return;
     await this.clients?.saveClient({ email: booking.email, name: booking.name, source: 'booking' });
     await this.bookings.updatePayment(session.client_reference_id, { paymentStatus: 'paid', stripePaymentIntentId: session.payment_intent });
     await this.bookingEmails.sendBookingEmails(booking);

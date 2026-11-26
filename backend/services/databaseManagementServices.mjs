@@ -36,6 +36,7 @@ function normalizeBookingsPayload(bookingsResponse) {
     time: booking?.time || '',
     persons: booking?.persons ?? '',
     totalPrice: booking?.totalPrice ?? '',
+    promoCode: booking?.promoCode || '',
     currency: booking?.currency || 'EUR',
     tourName: booking?.tourName || '',
     message: booking?.message || '',

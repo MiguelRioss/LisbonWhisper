@@ -25,6 +25,7 @@ const bookingColumns = [
   { key: 'time', label: 'Time' },
   { key: 'persons', label: 'Persons' },
   { key: 'totalPrice', label: 'Total', render: (price, row) => price == null ? '—' : `${price} ${row.currency || 'EUR'}` },
+  { key: 'promoCode', label: 'Promo code', render: (code) => code || '—' },
   { key: 'createdAt', label: 'Created', render: formatDate },
 ];
 

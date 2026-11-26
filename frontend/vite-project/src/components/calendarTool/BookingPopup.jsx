@@ -12,7 +12,7 @@ const BookingPopup = ({
   maxPersons,
   priceCents,
 }) => {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', message: '', promoCode: '' });
   const [persons, setPersons] = useState(1);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -126,7 +126,7 @@ const BookingPopup = ({
                   <span className="booking-current-price">{`\u20AC${priceCents / 100}`}</span>{' '}
                 </p>
                 <p>
-                  <strong>Estimated total:</strong> {`\u20AC${estimatedTotal}`}
+                  <strong>{formData.promoCode.trim() ? 'Subtotal before discount:' : 'Estimated total:'}</strong> {`\u20AC${estimatedTotal}`}
                 </p>
               </div>
             </div>
@@ -148,7 +148,7 @@ const BookingPopup = ({
 
           <form onSubmit={handleSubmit}>
             <h3 className="contact-details-title">Contact Details</h3>
-            {error && <div className="form-error">{error}</div>}
+            {error && <div className="form-error" role="alert">{error}</div>}
 
             <div className="popup-form-fields">
               <label htmlFor="booking-name">Name</label>
@@ -182,6 +182,20 @@ const BookingPopup = ({
                 onChange={handleChange}
                 disabled={isSubmitting}
               />
+              <label htmlFor="booking-promo-code">Promo code <span>(optional)</span></label>
+              <input
+                id="booking-promo-code"
+                name="promoCode"
+                type="text"
+                value={formData.promoCode}
+                onChange={handleChange}
+                maxLength={32}
+                autoCapitalize="characters"
+                spellCheck={false}
+                aria-describedby="booking-promo-hint"
+                disabled={isSubmitting}
+              />
+              <small id="booking-promo-hint">Your discounted total will appear on the payment page.</small>
             </div>
 
             <div className="popup-actions">

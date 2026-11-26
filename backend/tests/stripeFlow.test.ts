@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import Stripe from 'stripe';
-import { Booking } from '../domain/Booking.ts';
+import { Booking, type BookingRecord } from '../domain/Booking.ts';
 import { CheckoutValidationError } from '../domain/CheckoutError.ts';
 import BookingRepository from '../repo/BookingRepository.ts';
 import CheckoutService from '../services/checkout/CheckoutService.ts';
@@ -28,7 +28,7 @@ test('booking rejects missing required fields and formats tour details', () => {
 test('signed paid webhook updates booking and sends email only once', async () => {
   const stripe = new Stripe('sk_test_example');
   const secret = 'whsec_example';
-  const booking = { id: 7, name: 'Guest', email: 'guest@example.com', date: '2026-12-01', time: '10:00', tourName: 'Tour', persons: 2, unitPriceCents: 5250, message: '', tourDescriptions: '', paymentStatus: 'pending', stripeSessionId: 'cs_test_example' };
+  const booking: BookingRecord = { id: 7, name: 'Guest', email: 'guest@example.com', date: '2026-12-01', time: '10:00', tourName: 'Tour', persons: 2, unitPriceCents: 5250, totalPriceCents: 7350, discountPercent: 30, message: '', tourDescriptions: '', paymentStatus: 'pending', stripeSessionId: 'cs_test_example' };
   let emailsSent = 0;
   const repository = new BookingRepository({
     async createBooking() { return booking; },
@@ -36,20 +36,32 @@ test('signed paid webhook updates booking and sends email only once', async () =
     async updateBookingPayment(_id, fields) { Object.assign(booking, fields); },
   });
   const service = new WebhookService(repository, { async sendBookingEmails() { emailsSent += 1; } }, stripe, secret);
-  const payload = JSON.stringify({
+  const completeCheckout = async (payment_status: string, amount_total: number) => {
+    const payload = JSON.stringify({
     id: 'evt_test_example',
     type: 'checkout.session.completed',
     livemode: false,
-    data: { object: { id: 'cs_test_example', client_reference_id: '7', payment_status: 'paid', amount_total: 10500, currency: 'eur', payment_intent: 'pi_test_example' } },
-  });
-  const signature = stripe.webhooks.generateTestHeaderString({ payload, secret });
+      data: { object: { id: 'cs_test_example', client_reference_id: '7', payment_status, amount_total, currency: 'eur', payment_intent: 'pi_test_example' } },
+    });
+    const signature = stripe.webhooks.generateTestHeaderString({ payload, secret });
+    await service.handle(Buffer.from(payload), signature);
+    return { payload, signature };
+  };
 
-  await service.handle(Buffer.from(payload), signature);
-  await service.handle(Buffer.from(payload), signature);
+  await completeCheckout('paid', 10500);
+  await completeCheckout('no_payment_required', 0);
+  assert.equal(booking.paymentStatus, 'pending');
+  const { payload, signature } = await completeCheckout('paid', 7350);
+  await completeCheckout('paid', 7350);
   await assert.rejects(() => new WebhookService(repository, { async sendBookingEmails() {} }, stripe, secret, 'live').handle(Buffer.from(payload), signature), /Stripe webhook mode mismatch/);
 
   assert.equal(booking.paymentStatus, 'paid');
   assert.equal(emailsSent, 1);
+
+  Object.assign(booking, { paymentStatus: 'pending', totalPriceCents: 0, discountPercent: 100 });
+  await completeCheckout('no_payment_required', 0);
+  assert.equal(booking.paymentStatus, 'paid');
+  assert.equal(emailsSent, 2);
 });
 
 test('Stripe adapter keeps test and live credentials separate', () => {
@@ -80,7 +92,7 @@ test('Stripe adapter keeps test and live credentials separate', () => {
 
 test('checkout sends tour details and company logo to Stripe', async () => {
   let parameters: Stripe.Checkout.SessionCreateParams | undefined;
-  let storedPrice: number | undefined;
+  let storedBooking: BookingRecord | undefined;
   const stripe = {
     checkout: {
       sessions: {
@@ -92,7 +104,7 @@ test('checkout sends tour details and company logo to Stripe', async () => {
     },
   } as unknown as Stripe;
   const repository = new BookingRepository({
-    async createBooking(booking) { storedPrice = booking.unitPriceCents; return { ...booking, id: 7 }; },
+    async createBooking(booking) { storedBooking = booking; return { ...booking, id: 7 }; },
     async getBookingById() { return null; },
     async updateBookingPayment() {},
   });
@@ -103,20 +115,45 @@ test('checkout sends tour details and company logo to Stripe', async () => {
         : null;
     },
     async getTourByTitle() { return null; },
+    async getPromoCode(code) {
+      if (code === 'PARTNER30') return { discountPercent: 30 };
+      if (code === 'PARTNER25') return { discountPercent: 25 };
+      if (code === 'FREE100') return { discountPercent: 100 };
+      return null;
+    },
   });
   const input = {
     name: 'Guest', email: 'guest@example.com', date: '2026-12-01', time: '10:00-12:00',
     tourId: 'the-moorish-whispers', tourName: 'The Moorish Whispers', persons: 2, tourDescriptions: ['Hidden streets'],
   };
   await assert.rejects(service.createSession({ ...input, persons: 4 }), /up to 3 people/);
+  await assert.rejects(service.createSession({ ...input, promoCode: 'INVALID' }), /promo code is invalid/i);
+  assert.equal(Boolean(storedBooking), false);
+  assert.equal(Boolean(parameters), false);
   const response = await service.createSession(input);
 
   assert.equal(response.sessionId, 'cs_test_example');
   assert.equal(parameters?.line_items?.[0]?.quantity, 2);
-  assert.equal(storedPrice, 5250);
+  assert.equal(storedBooking?.unitPriceCents, 5250);
   assert.equal(parameters?.line_items?.[0]?.price_data?.unit_amount, 5250);
   assert.equal(parameters?.line_items?.[0]?.price_data?.product_data?.name, 'Updated Moorish Tour');
   assert.equal(parameters?.line_items?.[0]?.price_data?.product_data?.description, '2026-12-01 · 10:00-12:00 — Hidden streets');
   assert.deepEqual(parameters?.line_items?.[0]?.price_data?.product_data?.images, ['https://www.lisbonwhisper.com/res/logo.png']);
   assert.deepEqual(parameters?.branding_settings?.logo, { type: 'url', url: 'https://www.lisbonwhisper.com/res/logo.png' });
+
+  await service.createSession({ ...input, promoCode: ' partner30 ' });
+  assert.equal(storedBooking?.promoCode, 'PARTNER30');
+  assert.equal(storedBooking?.discountCents, 3150);
+  assert.equal(storedBooking?.totalPriceCents, 7350);
+  assert.equal(parameters?.line_items?.[0]?.price_data?.unit_amount, 3675);
+  assert.equal(parameters?.line_items?.[0]?.quantity, 2);
+
+  await service.createSession({ ...input, promoCode: 'PARTNER25' });
+  assert.equal(storedBooking?.totalPriceCents, 7875);
+  assert.equal(parameters?.line_items?.[0]?.price_data?.unit_amount, 7875);
+  assert.equal(parameters?.line_items?.[0]?.quantity, 1);
+
+  await service.createSession({ ...input, promoCode: 'FREE100' });
+  assert.equal(storedBooking?.totalPriceCents, 0);
+  assert.equal(parameters?.line_items?.[0]?.price_data?.unit_amount, 0);
 });
